@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Logged Out - TapNex{% endblock %}
+
+{% block content %}
+<style>
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes scaleIn {
+        from {
+            transform: scale(0);
+        }
+        to {
+            transform: scale(1);
+        }
+    }
+    
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+    
+    .animate-scale-in {
+        animation: scaleIn 0.5s ease-out 0.2s both;
+    }
+</style>
+<div class="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
+    <div class="max-w-md w-full animate-fade-in">
+        <div class="card text-center">
+            <!-- Success Icon -->
+            <div class="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-scale-in">
+                <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+
+            <h1 class="text-3xl font-gaming font-bold text-white mb-4">Successfully Logged Out</h1>
+            
+            <p class="text-gray-400 mb-8">
+                Thanks for spending some quality time with TapNex today. We hope to see you again soon!
+            </p>
+
+            <div class="space-y-3">
+                <a href="{% url 'home' %}" class="btn-primary w-full block text-center">
+                    Return to Home
+                </a>
+                
+                <a href="{% url 'authentication:customer_login' %}" class="btn-secondary w-full block text-center">
+                    Log In Again
+                </a>
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-gaming-accent">
+                <p class="text-gray-500 text-sm">
+                    Need help? <a href="{% url 'contact' %}" class="text-gaming-highlight hover:underline">Contact us</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

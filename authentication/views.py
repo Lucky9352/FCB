@@ -48,18 +48,17 @@ class CafeOwnerRegistrationView(CreateView):
 
 
 class CustomLogoutView(LogoutView):
-    """Custom logout view with redirect logic"""
-    next_page = '/'
+    """Custom logout view with custom template"""
+    template_name = 'authentication/logout.html'
     http_method_names = ['get', 'post']  # Allow both GET and POST
     
     def dispatch(self, request, *args, **kwargs):
-        # Perform logout first
-        response = super().dispatch(request, *args, **kwargs)
-        
-        # Add success message after logout
-        messages.success(request, 'You have been successfully logged out.')
-        
-        return response
+        if request.method == 'POST' or request.method == 'GET':
+            # Perform logout
+            logout(request)
+            # Redirect to logout template
+            return render(request, self.template_name)
+        return super().dispatch(request, *args, **kwargs)
 
 
 def customer_login_view(request):
@@ -72,6 +71,35 @@ def customer_login_view(request):
             logout(request)
     
     return render(request, 'authentication/customer_login.html')
+
+
+def customer_email_login_view(request):
+    """Handle traditional email/password login for customers (for testing purposes)"""
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        # Authenticate user
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            # Check if user has customer profile
+            if hasattr(user, 'customer_profile'):
+                login(request, user)
+                messages.success(request, f'Welcome back, {user.get_full_name() or user.username}!')
+                return redirect('authentication:customer_dashboard')
+            else:
+                # Create customer profile if doesn't exist
+                Customer.objects.get_or_create(user=user)
+                login(request, user)
+                messages.success(request, f'Welcome, {user.get_full_name() or user.username}!')
+                return redirect('authentication:customer_dashboard')
+        else:
+            messages.error(request, 'Invalid username or password. Please try again.')
+            return redirect('authentication:customer_login')
+    
+    # If GET request, redirect to login page
+    return redirect('authentication:customer_login')
 
 
 @login_required

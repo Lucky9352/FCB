@@ -79,21 +79,57 @@
                         <div class="w-full border-t border-gaming-accent"></div>
                     </div>
                     <div class="relative flex justify-center text-sm">
-                        <span class="px-4 bg-gaming-secondary text-gray-400">or</span>
+                        <span class="px-4 bg-gaming-secondary text-gray-400">or sign in with email</span>
                     </div>
                 </div>
 
-                <!-- Staff Login Link -->
-                <div class="text-center">
+                <!-- Traditional Email/Password Login Form -->
+                <form method="post" action="{% url 'authentication:customer_email_login' %}" class="space-y-4">
+                    {% csrf_token %}
+                    
+                    <!-- Email/Username Field -->
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-300 mb-2">
+                            Email or Username
+                        </label>
+                        <input type="text" 
+                               id="username" 
+                               name="username" 
+                               required 
+                               class="appearance-none block w-full px-4 py-3 border border-gaming-accent rounded-lg bg-gaming-primary text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gaming-highlight focus:border-transparent transition-colors duration-200"
+                               placeholder="Enter your email or username">
+                    </div>
+
+                    <!-- Password Field -->
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-300 mb-2">
+                            Password
+                        </label>
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               required 
+                               class="appearance-none block w-full px-4 py-3 border border-gaming-accent rounded-lg bg-gaming-primary text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gaming-highlight focus:border-transparent transition-colors duration-200"
+                               placeholder="Enter your password">
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" 
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gaming-highlight hover:bg-gaming-highlight/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gaming-highlight transition-all duration-200">
+                        Sign In
+                    </button>
+                </form>
+
+                <!-- Additional Links -->
+                <div class="flex items-center justify-between text-sm mt-4">
                     <a href="{% url 'authentication:cafe_owner_login' %}" 
-                       class="inline-flex items-center text-sm text-gaming-highlight hover:text-red-400 transition-colors duration-200 font-medium">
-                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd"></path>
-                        </svg>
-                        Staff Login
-                        <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                        </svg>
+                       class="text-gray-400 hover:text-gaming-highlight transition-colors duration-200">
+                        Staff Login →
+                    </a>
+                    <span class="text-gray-500">|</span>
+                    <a href="#" 
+                       class="text-gray-400 hover:text-gaming-highlight transition-colors duration-200">
+                        Forgot Password?
                     </a>
                 </div>
             </div>

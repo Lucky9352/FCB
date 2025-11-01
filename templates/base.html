@@ -91,8 +91,8 @@
                             </div>
                             {% endif %}
                             
-                            {% if user.customer_profile.avatar_url %}
-                                <img src="{{ user.customer_profile.avatar_url }}" alt="Profile" class="w-8 h-8 rounded-full border-2 border-gaming-accent">
+                            {% if user.customer and user.customer.avatar_url %}
+                                <img src="{{ user.customer.avatar_url }}" alt="Profile" class="w-8 h-8 rounded-full border-2 border-gaming-accent">
                             {% else %}
                                 <div class="w-8 h-8 bg-gaming-accent rounded-full flex items-center justify-center">
                                     <span class="text-white text-sm font-medium">
@@ -100,7 +100,13 @@
                                     </span>
                                 </div>
                             {% endif %}
-                            <span class="text-gray-300 text-sm">{{ user.get_full_name|default:user.username }}</span>
+                            <span class="text-gray-300 text-sm">
+                                {% if user.first_name %}
+                                    {{ user.first_name }}
+                                {% else %}
+                                    {{ user.username }}
+                                {% endif %}
+                            </span>
                             <a href="{% url 'authentication:logout' %}" class="btn-secondary text-sm">Logout</a>
                         </div>
                     {% else %}
@@ -138,7 +144,7 @@
                     <!-- Mobile User Info -->
                     <div class="px-3 py-2 border-b border-gaming-accent mb-2">
                         <div class="flex items-center space-x-3">
-                            {% if user.customer.avatar_url %}
+                            {% if user.customer and user.customer.avatar_url %}
                                 <img src="{{ user.customer.avatar_url }}" alt="Profile" class="w-10 h-10 rounded-full border-2 border-gaming-accent">
                             {% else %}
                                 <div class="w-10 h-10 bg-gaming-accent rounded-full flex items-center justify-center">
@@ -148,7 +154,13 @@
                                 </div>
                             {% endif %}
                             <div>
-                                <p class="text-white font-medium">{{ user.get_full_name|default:user.username }}</p>
+                                <p class="text-white font-medium">
+                                    {% if user.first_name %}
+                                        {{ user.first_name }} {{ user.last_name }}
+                                    {% else %}
+                                        {{ user.username }}
+                                    {% endif %}
+                                </p>
                                 <p class="text-gray-400 text-sm">{{ user.email }}</p>
                             </div>
                         </div>

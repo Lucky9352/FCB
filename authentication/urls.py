@@ -8,6 +8,7 @@ app_name = 'authentication'
 urlpatterns = [
     # Customer authentication (Google OAuth handled by allauth)
     path('login/', views.customer_login_view, name='customer_login'),
+    path('login/email/', views.customer_email_login_view, name='customer_email_login'),
     
     # Cafe owner authentication
     path('cafe-owner/login/', views.CafeOwnerLoginView.as_view(), name='cafe_owner_login'),
