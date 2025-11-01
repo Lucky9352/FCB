@@ -40,7 +40,6 @@ venv.bak/
 # Static files
 staticfiles/
 staticfiles_build/
-static/css/output.css
 
 # Node.js
 node_modules/
