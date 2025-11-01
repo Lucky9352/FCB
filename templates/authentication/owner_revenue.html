@@ -1,0 +1,241 @@
+{% extends 'authentication/owner_dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Revenue & Finance{% endblock %}
+{% block page_title %}Revenue & Finance{% endblock %}
+{% block page_subtitle %}Financial tracking and payment management{% endblock %}
+
+{% block content %}
+<!-- Period Filter -->
+<div class="bg-white rounded-xl shadow-md p-6 mb-8">
+    <form method="get" class="flex items-end space-x-4">
+        <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Time Period</label>
+            <select name="period" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="today" {% if period == 'today' %}selected{% endif %}>Today</option>
+                <option value="week" {% if period == 'week' %}selected{% endif %}>This Week</option>
+                <option value="month" {% if period == 'month' %}selected{% endif %}>This Month</option>
+                <option value="year" {% if period == 'year' %}selected{% endif %}>This Year</option>
+            </select>
+        </div>
+        <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200">
+            <i class="fas fa-filter mr-2"></i> Apply
+        </button>
+    </form>
+    <p class="text-sm text-gray-600 mt-2">
+        Showing data from {{ start_date|date:"M d, Y" }} to {{ end_date|date:"M d, Y" }}
+    </p>
+</div>
+
+<!-- Revenue Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
+        <p class="text-sm opacity-90 mb-1">Total Revenue</p>
+        <p class="text-4xl font-bold">₹{{ total_revenue|floatformat:2 }}</p>
+        <p class="text-sm opacity-75 mt-2">Gross earnings for period</p>
+    </div>
+
+    <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg p-6 text-white">
+        <p class="text-sm opacity-90 mb-1">Platform Commission</p>
+        <p class="text-4xl font-bold">₹{{ platform_commission|floatformat:2 }}</p>
+        <p class="text-sm opacity-75 mt-2">{{ commission_rate }}% commission</p>
+    </div>
+
+    <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl shadow-lg p-6 text-white">
+        <p class="text-sm opacity-90 mb-1">Net Revenue</p>
+        <p class="text-4xl font-bold">₹{{ net_revenue|floatformat:2 }}</p>
+        <p class="text-sm opacity-75 mt-2">After commission</p>
+    </div>
+</div>
+
+<!-- Revenue Trend Chart -->
+<div class="bg-white rounded-xl shadow-md p-6 mb-8">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4">Revenue Trend</h3>
+    <canvas id="revenueTrendChart" class="w-full" style="height: 300px;"></canvas>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- Revenue by Payment Method -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Revenue by Payment Method</h3>
+        <div class="space-y-4">
+            {% for method in revenue_by_method %}
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-
+                            {% if method.payment_method == 'RAZORPAY' %}credit-card
+                            {% elif method.payment_method == 'UPI' %}mobile-alt
+                            {% elif method.payment_method == 'CASH' %}money-bill
+                            {% else %}wallet{% endif %} text-indigo-600"></i>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-800">{{ method.payment_method }}</p>
+                        <p class="text-sm text-gray-600">{{ method.count }} transaction(s)</p>
+                    </div>
+                </div>
+                <p class="text-lg font-bold text-green-600">₹{{ method.total|floatformat:2 }}</p>
+            </div>
+            {% empty %}
+            <p class="text-gray-500 text-center py-4">No transactions yet</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Revenue by Game -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Top Revenue Games</h3>
+        <div class="space-y-3">
+            {% for game in revenue_by_game %}
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-1">
+                        <p class="text-sm font-semibold text-gray-800">{{ game.game__name }}</p>
+                        <p class="text-sm font-bold text-green-600">₹{{ game.total|floatformat:2 }}</p>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-indigo-600 h-2 rounded-full" style="width: 75%"></div>
+                    </div>
+                    <p class="text-xs text-gray-600 mt-1">{{ game.count }} booking(s)</p>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-gray-500 text-center py-4">No game revenue yet</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Payment Management -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Pending Payments -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="px-6 py-4 bg-yellow-50 border-b border-yellow-200">
+            <h3 class="text-lg font-semibold text-gray-800">
+                <i class="fas fa-clock text-yellow-600 mr-2"></i>
+                Pending Payments ({{ pending_payments.count }})
+            </h3>
+        </div>
+        <div class="p-6 max-h-96 overflow-y-auto">
+            <div class="space-y-3">
+                {% for booking in pending_payments %}
+                <div class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-semibold text-sm text-gray-800">{{ booking.game.name }}</span>
+                        <span class="text-sm font-bold text-yellow-600">₹{{ booking.total_amount }}</span>
+                    </div>
+                    <p class="text-xs text-gray-600">
+                        {{ booking.customer.user.get_full_name|default:booking.customer.user.username }}
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        {{ booking.start_time|date:"M d, Y h:i A" }}
+                    </p>
+                    <div class="mt-2 flex space-x-2">
+                        <button class="flex-1 text-xs px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
+                            Mark Paid
+                        </button>
+                        <button class="flex-1 text-xs px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 text-center py-4">
+                    <i class="fas fa-check-circle text-4xl mb-2 text-green-500"></i><br>
+                    No pending payments
+                </p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Failed Payments -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="px-6 py-4 bg-red-50 border-b border-red-200">
+            <h3 class="text-lg font-semibold text-gray-800">
+                <i class="fas fa-exclamation-circle text-red-600 mr-2"></i>
+                Failed Payments ({{ failed_payments.count }})
+            </h3>
+        </div>
+        <div class="p-6 max-h-96 overflow-y-auto">
+            <div class="space-y-3">
+                {% for booking in failed_payments %}
+                <div class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-semibold text-sm text-gray-800">{{ booking.game.name }}</span>
+                        <span class="text-sm font-bold text-red-600">₹{{ booking.total_amount }}</span>
+                    </div>
+                    <p class="text-xs text-gray-600">
+                        {{ booking.customer.user.get_full_name|default:booking.customer.user.username }}
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        {{ booking.start_time|date:"M d, Y h:i A" }}
+                    </p>
+                    <div class="mt-2 flex space-x-2">
+                        <button class="flex-1 text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">
+                            Retry Payment
+                        </button>
+                        <button class="flex-1 text-xs px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700">
+                            Contact Customer
+                        </button>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 text-center py-4">
+                    <i class="fas fa-check-circle text-4xl mb-2 text-green-500"></i><br>
+                    No failed payments
+                </p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Revenue Trend Chart
+    const ctx = document.getElementById('revenueTrendChart').getContext('2d');
+    const revenueDataRaw = '{{ revenue_trend|escapejs }}';
+    const revenueData = JSON.parse(revenueDataRaw.replace(/'/g, '"'));
+    
+    const labels = revenueData.map(item => {
+        const date = new Date(item.date);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    });
+    
+    const data = revenueData.map(item => parseFloat(item.revenue));
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Revenue (₹)',
+                data: data,
+                borderColor: 'rgb(79, 70, 229)',
+                backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value;
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

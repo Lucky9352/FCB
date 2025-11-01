@@ -1,0 +1,255 @@
+{% extends 'authentication/owner_dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Games & Stations{% endblock %}
+{% block page_title %}Games & Stations{% endblock %}
+{% block page_subtitle %}Manage gaming resources and equipment{% endblock %}
+
+{% block content %}
+<!-- Quick Stats -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600">Total Games</p>
+                <p class="text-3xl font-bold text-gray-800">{{ total_games }}</p>
+            </div>
+            <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-gamepad text-indigo-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600">Active Games</p>
+                <p class="text-3xl font-bold text-green-600">{{ active_games_count }}</p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-check-circle text-green-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600">Under Maintenance</p>
+                <p class="text-3xl font-bold text-yellow-600">{{ inactive_games_count }}</p>
+            </div>
+            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-wrench text-yellow-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600">Most Popular</p>
+                <p class="text-lg font-bold text-purple-600">{{ most_popular_game.game__name|default:"N/A" }}</p>
+                <p class="text-xs text-gray-500">{{ most_popular_game.count|default:0 }} bookings today</p>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-star text-purple-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Game Button -->
+<div class="mb-6">
+    <a href="{% url 'booking:game_management:game_create' %}" class="inline-flex items-center space-x-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200">
+        <i class="fas fa-plus"></i>
+        <span>Add New Game</span>
+    </a>
+</div>
+
+<!-- Games Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    {% for game in games %}
+    <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200">
+        <!-- Game Image -->
+        <div class="h-48 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center relative">
+            {% if game.image %}
+            <img src="{{ game.image.url }}" alt="{{ game.name }}" class="w-full h-full object-cover">
+            {% else %}
+            <i class="fas fa-gamepad text-white text-6xl"></i>
+            {% endif %}
+            
+            <!-- Status Badge -->
+            <div class="absolute top-4 right-4">
+                {% if game.is_active %}
+                <span class="px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full">Active</span>
+                {% else %}
+                <span class="px-3 py-1 bg-yellow-500 text-white text-xs font-semibold rounded-full">Maintenance</span>
+                {% endif %}
+            </div>
+
+            <!-- Occupied Badge -->
+            {% if game.is_occupied %}
+            <div class="absolute top-4 left-4">
+                <span class="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-full">
+                    <i class="fas fa-circle animate-pulse"></i> Occupied
+                </span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Game Details -->
+        <div class="p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">{{ game.name }}</h3>
+            <p class="text-sm text-gray-600 mb-4 line-clamp-2">{{ game.description|truncatewords:15 }}</p>
+
+            <!-- Game Info -->
+            <div class="space-y-2 mb-4">
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-600">Capacity:</span>
+                    <span class="font-semibold">{{ game.capacity }} player(s)</span>
+                </div>
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-600">Type:</span>
+                    <span class="font-semibold">{{ game.get_booking_type_display }}</span>
+                </div>
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-600">Private Price:</span>
+                    <span class="font-semibold text-green-600">₹{{ game.private_price }}</span>
+                </div>
+                {% if game.shared_price %}
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-600">Shared Price:</span>
+                    <span class="font-semibold text-blue-600">₹{{ game.shared_price }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Today's Stats -->
+            <div class="grid grid-cols-2 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
+                <div class="text-center">
+                    <p class="text-xs text-gray-600">Today's Bookings</p>
+                    <p class="text-lg font-bold text-indigo-600">{{ game.todays_bookings }}</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-xs text-gray-600">Today's Revenue</p>
+                    <p class="text-lg font-bold text-green-600">₹{{ game.todays_revenue|floatformat:0 }}</p>
+                </div>
+            </div>
+
+            <!-- Schedule Info -->
+            <div class="mb-4 p-3 bg-blue-50 rounded-lg">
+                <p class="text-xs text-gray-600 mb-1">Schedule</p>
+                <p class="text-sm font-semibold text-gray-800">
+                    {{ game.opening_time|date:"h:i A" }} - {{ game.closing_time|date:"h:i A" }}
+                </p>
+                <p class="text-xs text-gray-600 mt-1">{{ game.slot_duration_minutes }} min slots</p>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex space-x-2">
+                <a href="{% url 'booking:game_management:game_update' game.id %}" class="flex-1 text-center px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                    <i class="fas fa-edit mr-1"></i> Edit
+                </a>
+                <button data-game-id="{{ game.id }}" data-is-active="{% if game.is_active %}true{% else %}false{% endif %}" onclick="toggleGameStatus(this)" 
+                        class="flex-1 text-center px-4 py-2 {% if game.is_active %}bg-yellow-600 hover:bg-yellow-700{% else %}bg-green-600 hover:bg-green-700{% endif %} text-white text-sm rounded-lg transition-colors duration-200">
+                    <i class="fas fa-{% if game.is_active %}wrench{% else %}check{% endif %} mr-1"></i> 
+                    {% if game.is_active %}Maintenance{% else %}Activate{% endif %}
+                </button>
+                <button data-game-id="{{ game.id }}" onclick="viewGameAnalytics(this)" class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-300 transition-colors duration-200">
+                    <i class="fas fa-chart-bar"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full text-center py-12">
+        <i class="fas fa-gamepad text-6xl text-gray-300 mb-4"></i>
+        <p class="text-gray-500 mb-4">No games available yet</p>
+        <a href="{% url 'booking:game_management:game_create' %}" class="inline-flex items-center space-x-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+            <i class="fas fa-plus"></i>
+            <span>Add Your First Game</span>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Station Status Board -->
+<div class="bg-white rounded-xl shadow-md p-6">
+    <h3 class="text-lg font-semibold text-gray-800 mb-6">Real-Time Station Status</h3>
+    
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        {% for game in games %}
+        <div class="p-4 border-2 rounded-lg text-center transition-all duration-200
+            {% if not game.is_active %}border-yellow-300 bg-yellow-50
+            {% elif game.is_occupied %}border-red-300 bg-red-50
+            {% else %}border-green-300 bg-green-50{% endif %}">
+            <div class="w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center
+                {% if not game.is_active %}bg-yellow-200
+                {% elif game.is_occupied %}bg-red-200
+                {% else %}bg-green-200{% endif %}">
+                <i class="fas fa-gamepad 
+                    {% if not game.is_active %}text-yellow-700
+                    {% elif game.is_occupied %}text-red-700
+                    {% else %}text-green-700{% endif %}"></i>
+            </div>
+            <p class="text-sm font-semibold text-gray-800 truncate">{{ game.name }}</p>
+            <p class="text-xs mt-1
+                {% if not game.is_active %}text-yellow-700
+                {% elif game.is_occupied %}text-red-700
+                {% else %}text-green-700{% endif %}">
+                {% if not game.is_active %}
+                    Maintenance
+                {% elif game.is_occupied %}
+                    Occupied
+                {% else %}
+                    Available
+                {% endif %}
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Legend -->
+    <div class="flex flex-wrap gap-4 mt-6 pt-6 border-t border-gray-200">
+        <div class="flex items-center space-x-2">
+            <div class="w-4 h-4 bg-green-200 border-2 border-green-300 rounded"></div>
+            <span class="text-sm text-gray-600">Available</span>
+        </div>
+        <div class="flex items-center space-x-2">
+            <div class="w-4 h-4 bg-red-200 border-2 border-red-300 rounded"></div>
+            <span class="text-sm text-gray-600">Occupied</span>
+        </div>
+        <div class="flex items-center space-x-2">
+            <div class="w-4 h-4 bg-yellow-200 border-2 border-yellow-300 rounded"></div>
+            <span class="text-sm text-gray-600">Maintenance</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleGameStatus(button) {
+        const gameId = button.dataset.gameId;
+        const isActive = button.dataset.isActive === 'true';
+        const action = isActive ? 'maintenance' : 'activate';
+        const message = isActive ? 
+            'Mark this game as under maintenance? It will be unavailable for bookings.' :
+            'Activate this game? It will be available for bookings.';
+        
+        if (confirm(message)) {
+            // In real implementation, this would make an AJAX call to update the game status
+            alert(`Game ${action} feature will be implemented soon!`);
+        }
+    }
+
+    function viewGameAnalytics(button) {
+        const gameId = button.dataset.gameId;
+        alert('Game analytics feature coming soon!');
+    }
+
+    // Auto-refresh station status every 30 seconds
+    setInterval(() => {
+        // In real implementation, this would fetch updated status via AJAX
+        console.log('Refreshing station status...');
+    }, 30000);
+</script>
+{% endblock %}

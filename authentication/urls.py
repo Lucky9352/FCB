@@ -23,6 +23,14 @@ urlpatterns = [
     path('customer/dashboard/', dashboard_views.customer_dashboard, name='customer_dashboard'),
     path('owner/dashboard/', dashboard_views.cafe_owner_dashboard, name='cafe_owner_dashboard'),
     
+    # Owner Dashboard Sections
+    path('owner/overview/', dashboard_views.owner_overview, name='owner_overview'),
+    path('owner/bookings/', dashboard_views.owner_bookings, name='owner_bookings'),
+    path('owner/games/', dashboard_views.owner_games, name='owner_games'),
+    path('owner/customers/', dashboard_views.owner_customers, name='owner_customers'),
+    path('owner/revenue/', dashboard_views.owner_revenue, name='owner_revenue'),
+    path('owner/reports/', dashboard_views.owner_reports, name='owner_reports'),
+    
     # TapNex Superuser Dashboard (Main Custom Admin)
     path('tapnex/dashboard/', superuser_views.superuser_dashboard, name='tapnex_dashboard'),
     

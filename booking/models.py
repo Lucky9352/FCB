@@ -94,9 +94,9 @@ class Game(models.Model):
         is_new = self.pk is None
         super().save(*args, **kwargs)
         
-        # Generate slots for the next 30 days after saving
+        # Generate slots for the next 7 days after saving (reduced from 30 for performance)
         if is_new or 'update_slots' in kwargs:
-            self.generate_slots()
+            self.generate_slots(days_ahead=7)
     
     def generate_slots(self, days_ahead=30):
         """Generate time slots for this game based on schedule settings"""

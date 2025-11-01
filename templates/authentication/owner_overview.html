@@ -1,0 +1,198 @@
+{% extends 'authentication/owner_dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Overview{% endblock %}
+{% block page_title %}Overview{% endblock %}
+{% block page_subtitle %}Welcome back, {{ user.get_full_name|default:user.username }}!{% endblock %}
+
+{% block content %}
+<!-- Quick Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
+    <!-- Today's Revenue -->
+    <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 mb-1">Today's Revenue</p>
+                <h3 class="text-2xl font-bold text-gray-800">₹{{ todays_revenue|floatformat:2 }}</h3>
+                <p class="text-xs mt-1 {% if revenue_change >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                    <i class="fas fa-{% if revenue_change >= 0 %}arrow-up{% else %}arrow-down{% endif %}"></i>
+                    {{ revenue_change|floatformat:1 }}% vs yesterday
+                </p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Sessions -->
+    <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 mb-1">Active Sessions</p>
+                <h3 class="text-2xl font-bold text-gray-800">{{ active_sessions }}</h3>
+                <p class="text-xs mt-1 text-gray-500">Currently playing</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-gamepad text-blue-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Bookings Today -->
+    <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 mb-1">Today's Bookings</p>
+                <h3 class="text-2xl font-bold text-gray-800">{{ total_bookings_today }}</h3>
+                <p class="text-xs mt-1 text-gray-500">Total bookings</p>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-calendar-check text-purple-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Stations -->
+    <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 mb-1">Available Stations</p>
+                <h3 class="text-2xl font-bold text-gray-800">{{ available_stations }}</h3>
+                <p class="text-xs mt-1 text-gray-500">Ready to book</p>
+            </div>
+            <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-desktop text-indigo-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Payments -->
+    <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 mb-1">Pending Payments</p>
+                <h3 class="text-2xl font-bold text-gray-800">{{ pending_payments }}</h3>
+                <p class="text-xs mt-1 text-gray-500">Awaiting payment</p>
+            </div>
+            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-clock text-yellow-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customers Today -->
+    <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 mb-1">Customers Today</p>
+                <h3 class="text-2xl font-bold text-gray-800">{{ customers_today }}</h3>
+                <p class="text-xs mt-1 text-gray-500">Unique visitors</p>
+            </div>
+            <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-users text-pink-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+    <!-- Today's Timeline -->
+    <div class="lg:col-span-2 bg-white rounded-xl shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Today's Timeline</h3>
+        <div class="space-y-2 max-h-96 overflow-y-auto">
+            {% for hour_data in timeline_data %}
+                {% if hour_data.bookings %}
+                <div class="border-l-4 border-indigo-500 pl-4 py-2 hover:bg-gray-50 transition-colors duration-200">
+                    <p class="text-sm font-semibold text-gray-700">{{ hour_data.time }}</p>
+                    {% for booking in hour_data.bookings %}
+                    <div class="mt-1 flex items-center space-x-2 text-xs">
+                        <span class="px-2 py-1 rounded-full 
+                            {% if booking.status == 'CONFIRMED' %}bg-green-100 text-green-800
+                            {% elif booking.status == 'IN_PROGRESS' %}bg-blue-100 text-blue-800
+                            {% elif booking.status == 'COMPLETED' %}bg-gray-100 text-gray-800
+                            {% elif booking.status == 'CANCELLED' %}bg-red-100 text-red-800
+                            {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                            {{ booking.status }}
+                        </span>
+                        <span class="text-gray-600">{{ booking.game__name }} - {{ booking.customer__user__first_name }} {{ booking.customer__user__last_name }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Alerts & Upcoming Bookings -->
+    <div class="space-y-6">
+        <!-- Alerts Panel -->
+        <div class="bg-white rounded-xl shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Alerts & Notifications</h3>
+            <div class="space-y-3">
+                {% if alerts %}
+                    {% for alert in alerts %}
+                    <div class="flex items-start space-x-3 p-3 rounded-lg 
+                        {% if alert.type == 'danger' %}bg-red-50
+                        {% elif alert.type == 'warning' %}bg-yellow-50
+                        {% else %}bg-blue-50{% endif %}">
+                        <i class="fas {{ alert.icon }} 
+                            {% if alert.type == 'danger' %}text-red-600
+                            {% elif alert.type == 'warning' %}text-yellow-600
+                            {% else %}text-blue-600{% endif %} mt-1"></i>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-800">{{ alert.message }}</p>
+                            <p class="text-xs text-gray-600 mt-1">{{ alert.time }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-sm text-gray-500 text-center py-4">No alerts at the moment</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Upcoming Bookings -->
+        <div class="bg-white rounded-xl shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Upcoming Bookings</h3>
+            <div class="space-y-3">
+                {% if upcoming_bookings %}
+                    {% for booking in upcoming_bookings %}
+                    <div class="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-semibold text-sm text-gray-800">{{ booking.game.name }}</span>
+                            <span class="text-xs text-gray-600">{{ booking.start_time|date:"h:i A" }}</span>
+                        </div>
+                        <p class="text-xs text-gray-600">
+                            {{ booking.customer.user.get_full_name|default:booking.customer.user.username }}
+                        </p>
+                        <p class="text-xs text-gray-500 mt-1">
+                            {{ booking.start_time|date:"M d, Y" }}
+                        </p>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-sm text-gray-500 text-center py-4">No upcoming bookings</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function sendAnnouncement() {
+        alert('Announcement feature coming soon!');
+    }
+
+    function emergencyShutdown() {
+        if (confirm('Are you sure you want to perform an emergency shutdown? This will disable all new bookings.')) {
+            alert('Emergency shutdown feature coming soon!');
+        }
+    }
+
+    // Auto-refresh data every 30 seconds
+    function refreshDashboardData() {
+        location.reload();
+    }
+</script>
+{% endblock %}

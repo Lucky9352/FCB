@@ -14,7 +14,7 @@ class GameCreationForm(forms.ModelForm):
     available_days = forms.MultipleChoiceField(
         choices=Game.WEEKDAYS,
         widget=forms.CheckboxSelectMultiple(attrs={
-            'class': 'grid grid-cols-2 gap-2'
+            'class': 'checkbox-input'
         }),
         required=True,
         help_text="Select the days when this game is available"
@@ -25,7 +25,7 @@ class GameCreationForm(forms.ModelForm):
         fields = [
             'name', 'description', 'capacity', 'booking_type',
             'opening_time', 'closing_time', 'slot_duration_minutes',
-            'available_days', 'private_price', 'shared_price', 'image'
+            'available_days', 'private_price', 'shared_price'
         ]
         widgets = {
             'name': forms.TextInput(attrs={
@@ -75,10 +75,6 @@ class GameCreationForm(forms.ModelForm):
                 'placeholder': 'Price per spot for shared booking',
                 'min': 0.01,
                 'step': 0.01
-            }),
-            'image': forms.FileInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'accept': 'image/*'
             })
         }
     
@@ -95,7 +91,6 @@ class GameCreationForm(forms.ModelForm):
         self.fields['slot_duration_minutes'].label = 'Slot Duration (minutes)'
         self.fields['private_price'].label = 'Private Booking Price (₹)'
         self.fields['shared_price'].label = 'Shared Booking Price per Person (₹)'
-        self.fields['image'].label = 'Game Photo'
         
         # Set help texts
         self.fields['capacity'].help_text = 'Maximum number of players that can use this game simultaneously'
@@ -189,7 +184,7 @@ class GameCreationForm(forms.ModelForm):
             # Private price should generally be less than shared_price * capacity
             # (to incentivize private bookings), but this is just a warning
             total_shared_price = shared_price * capacity
-            if private_price > total_shared_price * 1.2:  # 20% tolerance
+            if private_price > total_shared_price * Decimal('1.2'):  # 20% tolerance
                 self.add_error('private_price', 
                     f"Private price (₹{private_price}) seems high compared to shared pricing "
                     f"(₹{shared_price} × {capacity} = ₹{total_shared_price}). Consider adjusting."
@@ -202,8 +197,9 @@ class GameCreationForm(forms.ModelForm):
         instance = super().save(commit=commit)
         
         if commit:
-            # Generate initial slots for the next 30 days
-            instance.generate_slots()
+            # Generate initial slots for the next 7 days (reduced from 30 for faster creation)
+            # More slots can be generated later via management command or scheduled task
+            instance.generate_slots(days_ahead=7)
         
         return instance
 

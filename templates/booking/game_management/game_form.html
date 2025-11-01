@@ -30,19 +30,19 @@
     }
     
     .checkbox-group {
-        @apply grid grid-cols-2 gap-3;
+        @apply grid grid-cols-2 gap-4;
     }
     
     .checkbox-item {
-        @apply flex items-center;
+        @apply flex items-center p-3 bg-white rounded-lg border-2 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all duration-200;
     }
     
     .checkbox-input {
-        @apply h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded;
+        @apply h-6 w-6 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer;
     }
     
     .checkbox-label {
-        @apply ml-2 text-sm text-gray-700;
+        @apply ml-3 text-base font-medium text-gray-700 cursor-pointer;
     }
     
     .preview-section {
@@ -75,7 +75,7 @@
             </div>
         </div>
 
-        <form method="post" enctype="multipart/form-data" id="gameForm">
+        <form method="post" id="gameForm">
             {% csrf_token %}
             
             <!-- Basic Information Section -->
@@ -114,17 +114,6 @@
                     {% endif %}
                     {% if form.description.errors %}
                         <div class="form-error">{{ form.description.errors.0 }}</div>
-                    {% endif %}
-                </div>
-                
-                <div class="form-group">
-                    <label for="{{ form.image.id_for_label }}" class="form-label">{{ form.image.label }}</label>
-                    {{ form.image }}
-                    {% if form.image.help_text %}
-                        <p class="form-help">{{ form.image.help_text }}</p>
-                    {% endif %}
-                    {% if form.image.errors %}
-                        <div class="form-error">{{ form.image.errors.0 }}</div>
                     {% endif %}
                 </div>
             </div>
@@ -194,6 +183,18 @@
                 
                 <div class="form-group">
                     <label class="form-label">{{ form.available_days.label }}</label>
+                    
+                    <!-- Select All Days Checkbox -->
+                    <div class="mb-4 p-4 bg-indigo-50 rounded-lg border-2 border-indigo-200">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="selectAllDays" 
+                                   class="h-6 w-6 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer">
+                            <label for="selectAllDays" class="ml-3 text-base font-semibold text-indigo-900 cursor-pointer">
+                                <i class="fas fa-calendar-week mr-2"></i>Select All Days (Open 7 Days a Week)
+                            </label>
+                        </div>
+                    </div>
+                    
                     <div class="checkbox-group">
                         {% for choice in form.available_days %}
                             <div class="checkbox-item">
@@ -463,11 +464,36 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Available days checkboxes
-    document.querySelectorAll('input[name="{{ form.available_days.html_name }}"]').forEach(checkbox => {
+    const dayCheckboxes = document.querySelectorAll('input[name="{{ form.available_days.html_name }}"]');
+    const selectAllCheckbox = document.getElementById('selectAllDays');
+    
+    // Select All Days functionality
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            dayCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            setTimeout(generatePreview, 500);
+        });
+    }
+    
+    // Update Select All checkbox state when individual days change
+    dayCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', function() {
+            // Check if all day checkboxes are checked
+            const allChecked = Array.from(dayCheckboxes).every(cb => cb.checked);
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = allChecked;
+            }
             setTimeout(generatePreview, 500);
         });
     });
+    
+    // Initialize Select All checkbox state on page load
+    if (selectAllCheckbox) {
+        const allChecked = Array.from(dayCheckboxes).every(cb => cb.checked);
+        selectAllCheckbox.checked = allChecked;
+    }
 });
 </script>
 {% endblock %}
