@@ -1,12 +1,33 @@
+import os
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from authentication.models import CafeOwner, TapNexSuperuser
 
 
 class Command(BaseCommand):
-    help = 'Create test users for the system (owner and superuser)'
+    help = 'Create test users for the system (owner and superuser) - DEVELOPMENT ONLY'
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--password',
+            type=str,
+            default='TestUser@2024',
+            help='Password for test users (default: TestUser@2024)',
+        )
 
     def handle(self, *args, **kwargs):
+        # Security check - don't allow in production
+        debug_mode = os.environ.get('DEBUG', 'False').lower() == 'true'
+        if not debug_mode:
+            self.stdout.write(
+                self.style.ERROR(
+                    '⚠️  This command is disabled in production for security reasons.\n'
+                    'Test users should only be created in development environments.'
+                )
+            )
+            return
+
+        password = kwargs.get('password')
         self.stdout.write('Creating test users...\n')
 
         # Create Cafe Owner
@@ -18,7 +39,7 @@ class Command(BaseCommand):
             else:
                 owner_user = User.objects.create_user(
                     username='owner',
-                    password='aadijain',
+                    password=password,
                     email='owner@gamingcafe.com',
                     first_name='Cafe',
                     last_name='Owner'
@@ -60,7 +81,7 @@ class Command(BaseCommand):
             else:
                 superuser_user = User.objects.create_superuser(
                     username='prabhav',
-                    password='aadijain',
+                    password=password,
                     email='prabhav@tapnex.com',
                     first_name='Prabhav',
                     last_name='Admin'
@@ -94,10 +115,10 @@ class Command(BaseCommand):
         self.stdout.write('\nLogin Credentials:')
         self.stdout.write('\n1. CAFE OWNER:')
         self.stdout.write('   Username: owner')
-        self.stdout.write('   Password: aadijain')
+        self.stdout.write(f'   Password: {password}')
         self.stdout.write('   Login URL: /accounts/cafe-owner/login/')
         self.stdout.write('\n2. TAPNEX SUPERUSER:')
         self.stdout.write('   Username: prabhav')
-        self.stdout.write('   Password: aadijain')
+        self.stdout.write(f'   Password: {password}')
         self.stdout.write('   Login URL: /accounts/cafe-owner/login/ (or /admin/)')
         self.stdout.write('\n' + '=' * 60 + '\n')

@@ -1,3 +1,4 @@
+import os
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from authentication.models import Customer
@@ -6,13 +7,21 @@ from authentication.models import Customer
 class Command(BaseCommand):
     help = 'Create a test customer account for Razorpay domain verification'
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--password',
+            type=str,
+            default='Razorpay@Test2024',
+            help='Password for Razorpay test account',
+        )
+
     def handle(self, *args, **kwargs):
         self.stdout.write('Creating Razorpay test customer account...\n')
 
         # Test account credentials
         username = 'razorpay_test'
         email = 'razorpay.test@tapnex.tech'
-        password = 'Razorpay@Test2024'
+        password = kwargs.get('password')
         
         try:
             # Check if test user already exists
