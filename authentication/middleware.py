@@ -43,31 +43,28 @@ class SessionTimeoutMiddleware(MiddlewareMixin):
 
 class AdminAccessMiddleware(MiddlewareMixin):
     """
-    Middleware to restrict Django admin access to superusers only.
-    Redirects non-superuser attempts to appropriate dashboards.
+    Middleware to block Django admin access completely.
+    All users (including superusers) are redirected to custom dashboard.
     """
     
     def process_request(self, request):
-        # Check if this is an admin URL
+        # Check if this is an admin URL - block completely
         if request.path.startswith('/admin/'):
-            # Allow login page and static files
-            if request.path in ['/admin/login/', '/admin/logout/'] or request.path.startswith('/admin/jsi18n/'):
-                return None
+            messages.warning(request, 'Django admin is disabled. Please use the TapNex custom dashboard.')
             
-            # Check authentication and superuser status
-            if not request.user.is_authenticated:
-                return redirect('authentication:cafe_owner_login')
+            # Redirect authenticated superusers to custom dashboard
+            if request.user.is_authenticated and request.user.is_superuser:
+                return redirect('authentication:tapnex_dashboard')
             
-            if not request.user.is_superuser:
-                messages.warning(request, 'Django admin access is restricted to system administrators.')
-                
-                # Redirect to appropriate dashboard based on user role
+            # Redirect to appropriate area based on user role
+            if request.user.is_authenticated:
                 if hasattr(request.user, 'cafe_owner_profile'):
                     return redirect('authentication:cafe_owner_dashboard')
                 elif hasattr(request.user, 'customer_profile'):
                     return redirect('authentication:customer_dashboard')
-                else:
-                    return redirect('authentication:customer_login')
+            
+            # Not authenticated - redirect to staff login
+            return redirect('authentication:cafe_owner_login')
         
         return None
 

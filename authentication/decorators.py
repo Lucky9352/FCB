@@ -22,7 +22,7 @@ def customer_required(view_func):
                 if hasattr(request.user, 'cafe_owner_profile'):
                     return redirect('authentication:cafe_owner_dashboard')
                 elif request.user.is_superuser:
-                    return redirect('/admin/')
+                    return redirect('authentication:tapnex_dashboard')
                 else:
                     return redirect('authentication:customer_login')
             else:
@@ -47,7 +47,7 @@ def cafe_owner_required(view_func):
                 if hasattr(request.user, 'customer_profile'):
                     return redirect('authentication:customer_dashboard')
                 elif request.user.is_superuser:
-                    return redirect('/admin/')
+                    return redirect('authentication:tapnex_dashboard')
                 else:
                     return redirect('authentication:cafe_owner_login')
             else:
@@ -133,7 +133,7 @@ class RoleBasedAccessMixin:
     def _redirect_based_on_role(self, request):
         """Redirect user to appropriate dashboard based on their role"""
         if request.user.is_superuser:
-            return redirect('/admin/')
+            return redirect('authentication:tapnex_dashboard')
         elif hasattr(request.user, 'cafe_owner_profile'):
             return redirect('authentication:cafe_owner_dashboard')
         elif hasattr(request.user, 'customer_profile'):

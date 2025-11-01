@@ -35,8 +35,8 @@
                     {% if user.is_authenticated %}
                         <!-- Role-based navigation -->
                         {% if user.is_superuser %}
-                            <a href="/admin/" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200">
-                                Admin Panel
+                            <a href="{% url 'authentication:tapnex_dashboard' %}" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200">
+                                Superuser Dashboard
                             </a>
                         {% endif %}
                         
@@ -168,8 +168,8 @@
 
                     <!-- Role-based mobile navigation -->
                     {% if user.is_superuser %}
-                        <a href="/admin/" class="block px-3 py-2 text-gray-300 hover:text-gaming-highlight hover:bg-gaming-accent/20 rounded-md transition-colors duration-200">
-                            Admin Panel
+                        <a href="{% url 'authentication:tapnex_dashboard' %}" class="block px-3 py-2 text-gray-300 hover:text-gaming-highlight hover:bg-gaming-accent/20 rounded-md transition-colors duration-200">
+                            Superuser Dashboard
                         </a>
                     {% endif %}
                     
