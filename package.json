@@ -5,7 +5,8 @@
   "scripts": {
     "build-css": "tailwindcss -i ./static/css/input.css -o ./static/css/output.css --watch",
     "build-css-prod": "tailwindcss -i ./static/css/input.css -o ./static/css/output.css --minify",
-    "build": "npm run build-css-prod && pip3 install -r requirements.txt && python3 manage.py collectstatic --noinput --clear"
+    "build": "npm run build-css-prod && pip3 install -r requirements.txt && python3 manage.py collectstatic --noinput --clear",
+    "vercel-build": "npm run build-css-prod && python3.9 -m pip install -r requirements.txt && python3.9 manage.py collectstatic --noinput --clear"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.0.0-alpha.30",
