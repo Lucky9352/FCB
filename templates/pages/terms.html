@@ -137,7 +137,7 @@
                         <div>
                             <h2 class="text-2xl font-bold text-base-content mb-4">Cancellations and Refunds</h2>
                             <p class="text-base-content/80 leading-relaxed mb-4">
-                                All bookings are final and non-refundable once payment is confirmed. For detailed refund policies, please refer to our <a href="{% url 'core:refund_policy' %}" class="text-primary hover:underline">Cancellation and Refund Policy</a>.
+                                All bookings are final and non-refundable once payment is confirmed. For detailed refund policies, please refer to our <a href="{% url 'refund_policy' %}" class="text-primary hover:underline">Cancellation and Refund Policy</a>.
                             </p>
                         </div>
                     </div>
@@ -260,13 +260,13 @@
                     </div>
                     
                     <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        <a href="{% url 'core:contact' %}" 
+                        <a href="{% url 'contact' %}" 
                            class="btn btn-accent btn-lg font-semibold shadow-glow hover:shadow-glow-green transition-all duration-300 group">
                             <i class="bi bi-envelope text-xl group-hover:scale-110 transition-transform duration-300"></i>
                             Contact Us
                         </a>
                         
-                        <a href="{% url 'core:privacy' %}" 
+                        <a href="{% url 'privacy' %}" 
                            class="btn btn-outline btn-lg border-2 border-white text-white hover:bg-white hover:text-primary transition-all duration-300 group">
                             <i class="bi bi-shield-check text-xl group-hover:scale-110 transition-transform duration-300"></i>
                             Privacy Policy
