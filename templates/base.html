@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TapNex - Gaming Cafe Booking Platform{% endblock %}</title>
+    
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="min-h-screen bg-gaming-primary flex flex-col">
+    <!-- Navigation -->
+    <nav class="bg-gaming-secondary shadow-lg border-b border-gaming-accent">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo and Brand -->
+                <div class="flex items-center">
+                    <a href="{% url 'home' %}" class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gaming-highlight rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-gaming font-bold text-gaming-highlight">TapNex</span>
+                    </a>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-6">
+                    {% if user.is_authenticated %}
+                        <!-- Role-based navigation -->
+                        {% if user.is_superuser %}
+                            <a href="/admin/" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200">
+                                Admin Panel
+                            </a>
+                        {% endif %}
+                        
+                        {% if user.customer %}
+                            <a href="{% url 'authentication:customer_dashboard' %}" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200">
+                                Dashboard
+                            </a>
+                            <a href="{% url 'booking:game_selection' %}" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200">
+                                Book Games
+                            </a>
+                            <a href="{% url 'booking:my_bookings' %}" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200">
+                                My Bookings
+                            </a>
+                        {% elif user.cafeowner %}
+                            <a href="{% url 'authentication:cafe_owner_dashboard' %}" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200">
+                                Dashboard
+                            </a>
+                            <a href="#" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200">
+                                Manage Bookings
+                            </a>
+                            <a href="#" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200">
+                                Stations
+                            </a>
+                        {% endif %}
+                        
+                        <!-- User Menu -->
+                        <div class="flex items-center space-x-3">
+                            <!-- Notifications Bell (for customers) -->
+                            {% if user.customer_profile %}
+                            <div class="relative">
+                                <button id="notifications-button" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200 relative">
+                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
+                                    </svg>
+                                    <span id="notification-badge" class="absolute -top-1 -right-1 bg-gaming-highlight text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+                                </button>
+                                
+                                <!-- Notifications Dropdown -->
+                                <div id="notifications-dropdown" class="absolute right-0 mt-2 w-80 bg-gaming-secondary border border-gaming-accent rounded-lg shadow-lg z-50 hidden">
+                                    <div class="p-4 border-b border-gaming-accent">
+                                        <h3 class="text-white font-semibold">Notifications</h3>
+                                    </div>
+                                    <div id="notifications-list" class="max-h-64 overflow-y-auto">
+                                        <div class="p-4 text-center text-gray-400">
+                                            <svg class="w-8 h-8 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
+                                            </svg>
+                                            <p class="text-sm">No new notifications</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if user.customer_profile.avatar_url %}
+                                <img src="{{ user.customer_profile.avatar_url }}" alt="Profile" class="w-8 h-8 rounded-full border-2 border-gaming-accent">
+                            {% else %}
+                                <div class="w-8 h-8 bg-gaming-accent rounded-full flex items-center justify-center">
+                                    <span class="text-white text-sm font-medium">
+                                        {{ user.first_name.0|default:user.username.0|upper }}
+                                    </span>
+                                </div>
+                            {% endif %}
+                            <span class="text-gray-300 text-sm">{{ user.get_full_name|default:user.username }}</span>
+                            <a href="{% url 'authentication:logout' %}" class="btn-secondary text-sm">Logout</a>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'authentication:customer_login' %}" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200">
+                            Customer Login
+                        </a>
+                        <a href="{% url 'authentication:cafe_owner_login' %}" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200">
+                            Staff Login
+                        </a>
+                        <a href="{% url 'authentication:customer_login' %}" class="btn-primary">Get Started</a>
+                    {% endif %}
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button type="button" 
+                            class="mobile-menu-button text-gray-300 hover:text-gaming-highlight focus:outline-none focus:text-gaming-highlight transition-colors duration-200"
+                            aria-controls="mobile-menu" 
+                            aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <!-- Hamburger icon -->
+                        <svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <!-- Close icon (hidden by default) -->
+                        <svg class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 bg-gaming-secondary border-t border-gaming-accent">
+                {% if user.is_authenticated %}
+                    <!-- Mobile User Info -->
+                    <div class="px-3 py-2 border-b border-gaming-accent mb-2">
+                        <div class="flex items-center space-x-3">
+                            {% if user.customer.avatar_url %}
+                                <img src="{{ user.customer.avatar_url }}" alt="Profile" class="w-10 h-10 rounded-full border-2 border-gaming-accent">
+                            {% else %}
+                                <div class="w-10 h-10 bg-gaming-accent rounded-full flex items-center justify-center">
+                                    <span class="text-white font-medium">
+                                        {{ user.first_name.0|default:user.username.0|upper }}
+                                    </span>
+                                </div>
+                            {% endif %}
+                            <div>
+                                <p class="text-white font-medium">{{ user.get_full_name|default:user.username }}</p>
+                                <p class="text-gray-400 text-sm">{{ user.email }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Role-based mobile navigation -->
+                    {% if user.is_superuser %}
+                        <a href="/admin/" class="block px-3 py-2 text-gray-300 hover:text-gaming-highlight hover:bg-gaming-accent/20 rounded-md transition-colors duration-200">
+                            Admin Panel
+                        </a>
+                    {% endif %}
+                    
+                    {% if user.customer %}
+                        <a href="{% url 'authentication:customer_dashboard' %}" class="block px-3 py-2 text-gray-300 hover:text-gaming-highlight hover:bg-gaming-accent/20 rounded-md transition-colors duration-200">
+                            Dashboard
+                        </a>
+                        <a href="#" class="block px-3 py-2 text-gray-300 hover:text-gaming-highlight hover:bg-gaming-accent/20 rounded-md transition-colors duration-200">
+                            Book Now
+                        </a>
+                        <a href="#" class="block px-3 py-2 text-gray-300 hover:text-gaming-highlight hover:bg-gaming-accent/20 rounded-md transition-colors duration-200">
+                            My Bookings
+                        </a>
+                    {% elif user.cafeowner %}
+                        <a href="{% url 'authentication:cafe_owner_dashboard' %}" class="block px-3 py-2 text-gray-300 hover:text-gaming-highlight hover:bg-gaming-accent/20 rounded-md transition-colors duration-200">
+                            Dashboard
+                        </a>
+                        <a href="#" class="block px-3 py-2 text-gray-300 hover:text-gaming-highlight hover:bg-gaming-accent/20 rounded-md transition-colors duration-200">
+                            Manage Bookings
+                        </a>
+                        <a href="#" class="block px-3 py-2 text-gray-300 hover:text-gaming-highlight hover:bg-gaming-accent/20 rounded-md transition-colors duration-200">
+                            Stations
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{% url 'authentication:logout' %}" class="block px-3 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-md transition-colors duration-200">
+                        Logout
+                    </a>
+                {% else %}
+                    <a href="{% url 'authentication:customer_login' %}" class="block px-3 py-2 text-gray-300 hover:text-gaming-highlight hover:bg-gaming-accent/20 rounded-md transition-colors duration-200">
+                        Customer Login
+                    </a>
+                    <a href="{% url 'authentication:cafe_owner_login' %}" class="block px-3 py-2 text-gray-300 hover:text-gaming-highlight hover:bg-gaming-accent/20 rounded-md transition-colors duration-200">
+                        Staff Login
+                    </a>
+                    <div class="px-3 py-2">
+                        <a href="{% url 'authentication:customer_login' %}" class="btn-primary w-full text-center block">Get Started</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} bg-gaming-secondary border border-gaming-accent rounded-lg p-4 mb-4">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gaming-secondary mt-auto border-t border-gaming-accent">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Brand Section -->
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-8 h-8 bg-gaming-highlight rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-gaming font-bold text-gaming-highlight">TapNex</span>
+                    </div>
+                    <p class="text-gray-400 text-sm max-w-md mb-3">
+                        Seamless gaming cafe booking platform powered by cutting-edge technology.
+                    </p>
+                    <p class="text-gray-500 text-xs">
+                        TapNex Technologies - A brand of NEXGEN FC
+                    </p>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="text-white font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="{% url 'home' %}" class="text-gray-400 hover:text-gaming-highlight transition-colors duration-200">Home</a></li>
+                        <li><a href="{% url 'about' %}" class="text-gray-400 hover:text-gaming-highlight transition-colors duration-200">About Us</a></li>
+                        <li><a href="{% url 'contact' %}" class="text-gray-400 hover:text-gaming-highlight transition-colors duration-200">Contact</a></li>
+                        {% if user.is_authenticated %}
+                            <li><a href="{% url 'booking:game_selection' %}" class="text-gray-400 hover:text-gaming-highlight transition-colors duration-200">Book Now</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <!-- Legal & Support -->
+                <div>
+                    <h3 class="text-white font-semibold mb-4">Legal & Support</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="{% url 'privacy' %}" class="text-gray-400 hover:text-gaming-highlight transition-colors duration-200">Privacy Policy</a></li>
+                        <li><a href="{% url 'terms' %}" class="text-gray-400 hover:text-gaming-highlight transition-colors duration-200">Terms & Conditions</a></li>
+                        <li><a href="{% url 'refund_policy' %}" class="text-gray-400 hover:text-gaming-highlight transition-colors duration-200">Refund Policy</a></li>
+                        <li class="flex items-center space-x-2">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                            </svg>
+                            <a href="mailto:support@tapnex.tech" class="text-gray-400 hover:text-gaming-highlight transition-colors duration-200">support@tapnex.tech</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom Section -->
+            <div class="border-t border-gaming-accent mt-8 pt-6">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <p class="text-gray-400 text-sm text-center md:text-left">
+                        &copy; 2025 TapNex Technologies | A brand of NEXGEN FC
+                    </p>
+                    <div class="flex space-x-1 mt-2 md:mt-0 text-gray-500 text-xs">
+                        <span>Registered Firm</span>
+                        <span>•</span>
+                        <span>forge.tapnex.tech</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.querySelector('.mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const hamburgerIcon = mobileMenuButton.querySelector('svg:first-child');
+            const closeIcon = mobileMenuButton.querySelector('svg:last-child');
+
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', function() {
+                    const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+                    
+                    // Toggle menu visibility
+                    mobileMenu.classList.toggle('hidden');
+                    
+                    // Toggle icons
+                    hamburgerIcon.classList.toggle('hidden');
+                    closeIcon.classList.toggle('hidden');
+                    
+                    // Update aria-expanded
+                    mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
+                });
+
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!mobileMenuButton.contains(event.target) && !mobileMenu.contains(event.target)) {
+                        mobileMenu.classList.add('hidden');
+                        hamburgerIcon.classList.remove('hidden');
+                        closeIcon.classList.add('hidden');
+                        mobileMenuButton.setAttribute('aria-expanded', 'false');
+                    }
+                });
+
+                // Close mobile menu on window resize to desktop size
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth >= 768) {
+                        mobileMenu.classList.add('hidden');
+                        hamburgerIcon.classList.remove('hidden');
+                        closeIcon.classList.add('hidden');
+                        mobileMenuButton.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+
+            // Notifications System
+            const notificationsButton = document.getElementById('notifications-button');
+            const notificationsDropdown = document.getElementById('notifications-dropdown');
+            const notificationBadge = document.getElementById('notification-badge');
+            const notificationsList = document.getElementById('notifications-list');
+
+            if (notificationsButton) {
+                // Toggle notifications dropdown
+                notificationsButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    notificationsDropdown.classList.toggle('hidden');
+                    if (!notificationsDropdown.classList.contains('hidden')) {
+                        loadNotifications();
+                    }
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!notificationsButton.contains(event.target) && !notificationsDropdown.contains(event.target)) {
+                        notificationsDropdown.classList.add('hidden');
+                    }
+                });
+
+                // Load notifications on page load
+                loadNotifications();
+                
+                // Poll for new notifications every 30 seconds
+                setInterval(loadNotifications, 30000);
+            }
+
+            function loadNotifications() {
+                fetch('/booking/api/notifications/')
+                    .then(response => response.json())
+                    .then(data => {
+                        updateNotificationBadge(data.unread_count);
+                        updateNotificationsList(data.notifications);
+                    })
+                    .catch(error => {
+                        console.error('Error loading notifications:', error);
+                    });
+            }
+
+            function updateNotificationBadge(count) {
+                if (count > 0) {
+                    notificationBadge.textContent = count > 99 ? '99+' : count;
+                    notificationBadge.classList.remove('hidden');
+                } else {
+                    notificationBadge.classList.add('hidden');
+                }
+            }
+
+            function updateNotificationsList(notifications) {
+                if (notifications.length === 0) {
+                    notificationsList.innerHTML = `
+                        <div class="p-4 text-center text-gray-400">
+                            <svg class="w-8 h-8 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
+                            </svg>
+                            <p class="text-sm">No new notifications</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                notifications.forEach(notification => {
+                    const typeColors = {
+                        'success': 'text-green-400',
+                        'warning': 'text-yellow-400',
+                        'error': 'text-red-400',
+                        'info': 'text-blue-400'
+                    };
+                    
+                    const timeAgo = getTimeAgo(new Date(notification.created_at));
+                    
+                    html += `
+                        <div class="p-4 border-b border-gaming-accent hover:bg-white/5 cursor-pointer" onclick="markNotificationRead(${notification.id})">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-2 h-2 ${typeColors[notification.type] || 'text-gray-400'} rounded-full mt-2 flex-shrink-0"></div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-white font-medium text-sm">${notification.title}</p>
+                                    <p class="text-gray-300 text-xs mt-1">${notification.message}</p>
+                                    <p class="text-gray-400 text-xs mt-1">${timeAgo}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                notificationsList.innerHTML = html;
+            }
+
+            function getTimeAgo(date) {
+                const now = new Date();
+                const diffInSeconds = Math.floor((now - date) / 1000);
+                
+                if (diffInSeconds < 60) return 'Just now';
+                if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+                if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+                return `${Math.floor(diffInSeconds / 86400)}d ago`;
+            }
+
+            window.markNotificationRead = function(notificationId) {
+                fetch(`/booking/api/notifications/${notificationId}/read/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value || '{{ csrf_token }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadNotifications();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error marking notification as read:', error);
+                });
+            };
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

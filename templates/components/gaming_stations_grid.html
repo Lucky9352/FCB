@@ -1,0 +1,373 @@
+{% load static %}
+
+<!-- Gaming Stations Grid Component -->
+<div class="gaming-stations-container">
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+        <div>
+            <h2 class="text-3xl font-gaming font-bold text-white mb-2">Gaming Stations</h2>
+            <p class="text-gray-400">Choose your perfect gaming setup</p>
+        </div>
+        
+        <!-- Filter and Sort Controls -->
+        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mt-4 sm:mt-0">
+            <!-- Station Type Filter -->
+            <div class="relative">
+                <select id="station-type-filter" 
+                        class="input-field pr-10 text-sm min-w-[150px]"
+                        onchange="filterStations()">
+                    <option value="">All Types</option>
+                    <option value="PC">Gaming PC</option>
+                    <option value="PS5">PlayStation 5</option>
+                    <option value="XBOX">Xbox Series X</option>
+                    <option value="SWITCH">Nintendo Switch</option>
+                    <option value="VR">VR Gaming</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Availability Filter -->
+            <div class="relative">
+                <select id="availability-filter" 
+                        class="input-field pr-10 text-sm min-w-[150px]"
+                        onchange="filterStations()">
+                    <option value="">All Stations</option>
+                    <option value="available">Available Only</option>
+                    <option value="occupied">Occupied</option>
+                    <option value="maintenance">Maintenance</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Sort Options -->
+            <div class="relative">
+                <select id="sort-options" 
+                        class="input-field pr-10 text-sm min-w-[150px]"
+                        onchange="sortStations()">
+                    <option value="name">Sort by Name</option>
+                    <option value="type">Sort by Type</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="availability">Availability</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-gaming-secondary/50 backdrop-blur-sm rounded-lg p-4 border border-gaming-accent">
+            <div class="flex items-center">
+                <div class="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center mr-3">
+                    <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-white" id="available-count">{{ available_count|default:0 }}</p>
+                    <p class="text-xs text-gray-400">Available</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gaming-secondary/50 backdrop-blur-sm rounded-lg p-4 border border-gaming-accent">
+            <div class="flex items-center">
+                <div class="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center mr-3">
+                    <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-white" id="occupied-count">{{ occupied_count|default:0 }}</p>
+                    <p class="text-xs text-gray-400">Occupied</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gaming-secondary/50 backdrop-blur-sm rounded-lg p-4 border border-gaming-accent">
+            <div class="flex items-center">
+                <div class="w-8 h-8 bg-gaming-highlight/20 rounded-lg flex items-center justify-center mr-3">
+                    <svg class="w-4 h-4 text-gaming-highlight" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-white">{{ total_stations|default:0 }}</p>
+                    <p class="text-xs text-gray-400">Total Stations</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gaming-secondary/50 backdrop-blur-sm rounded-lg p-4 border border-gaming-accent">
+            <div class="flex items-center">
+                <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center mr-3">
+                    <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-white">${{ avg_price|default:"0"|floatformat:0 }}</p>
+                    <p class="text-xs text-gray-400">Avg. Price/hr</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading State -->
+    <div id="loading-stations" class="hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for i in "123456" %}
+                <div class="animate-pulse">
+                    <div class="bg-gaming-secondary rounded-xl overflow-hidden">
+                        <div class="h-48 bg-gaming-accent"></div>
+                        <div class="p-6">
+                            <div class="h-4 bg-gaming-accent rounded mb-2"></div>
+                            <div class="h-3 bg-gaming-accent rounded w-3/4 mb-4"></div>
+                            <div class="space-y-2 mb-4">
+                                <div class="h-2 bg-gaming-accent rounded"></div>
+                                <div class="h-2 bg-gaming-accent rounded w-5/6"></div>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div class="h-6 bg-gaming-accent rounded w-16"></div>
+                                <div class="h-8 bg-gaming-accent rounded w-20"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Stations Grid -->
+    <div id="stations-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {% for station in stations %}
+            <div class="station-card" 
+                 data-type="{{ station.station_type }}" 
+                 data-availability="{% if station.is_available %}available{% elif station.is_maintenance %}maintenance{% else %}occupied{% endif %}"
+                 data-price="{{ station.hourly_rate }}"
+                 data-name="{{ station.name }}">
+                {% include 'components/gaming_station_card.html' with station=station %}
+            </div>
+        {% empty %}
+            <!-- Empty State -->
+            <div class="col-span-full">
+                <div class="text-center py-12">
+                    <div class="w-24 h-24 bg-gaming-accent/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm0 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-300 mb-2">No Gaming Stations Found</h3>
+                    <p class="text-gray-400 mb-6">There are currently no gaming stations available.</p>
+                    {% if user.is_staff %}
+                        <a href="#" class="btn-primary">Add Gaming Station</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- No Results State (Hidden by default) -->
+    <div id="no-results" class="hidden col-span-full">
+        <div class="text-center py-12">
+            <div class="w-24 h-24 bg-gaming-accent/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-300 mb-2">No Stations Match Your Filters</h3>
+            <p class="text-gray-400 mb-6">Try adjusting your filters to see more results.</p>
+            <button onclick="clearFilters()" class="btn-secondary">Clear Filters</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Station filtering and sorting functionality
+function filterStations() {
+    const typeFilter = document.getElementById('station-type-filter').value;
+    const availabilityFilter = document.getElementById('availability-filter').value;
+    const stationCards = document.querySelectorAll('.station-card');
+    const noResults = document.getElementById('no-results');
+    let visibleCount = 0;
+    
+    stationCards.forEach(card => {
+        const cardType = card.dataset.type;
+        const cardAvailability = card.dataset.availability;
+        
+        let showCard = true;
+        
+        // Apply type filter
+        if (typeFilter && cardType !== typeFilter) {
+            showCard = false;
+        }
+        
+        // Apply availability filter
+        if (availabilityFilter && cardAvailability !== availabilityFilter) {
+            showCard = false;
+        }
+        
+        if (showCard) {
+            card.style.display = 'block';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Show/hide no results message
+    if (visibleCount === 0) {
+        noResults.classList.remove('hidden');
+        noResults.classList.add('col-span-full');
+    } else {
+        noResults.classList.add('hidden');
+        noResults.classList.remove('col-span-full');
+    }
+    
+    updateStats();
+}
+
+function sortStations() {
+    const sortBy = document.getElementById('sort-options').value;
+    const stationsGrid = document.getElementById('stations-grid');
+    const stationCards = Array.from(document.querySelectorAll('.station-card'));
+    
+    stationCards.sort((a, b) => {
+        switch (sortBy) {
+            case 'name':
+                return a.dataset.name.localeCompare(b.dataset.name);
+            case 'type':
+                return a.dataset.type.localeCompare(b.dataset.type);
+            case 'price-low':
+                return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+            case 'price-high':
+                return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+            case 'availability':
+                const availabilityOrder = { 'available': 0, 'occupied': 1, 'maintenance': 2 };
+                return availabilityOrder[a.dataset.availability] - availabilityOrder[b.dataset.availability];
+            default:
+                return 0;
+        }
+    });
+    
+    // Re-append sorted cards
+    stationCards.forEach(card => {
+        stationsGrid.appendChild(card);
+    });
+}
+
+function clearFilters() {
+    document.getElementById('station-type-filter').value = '';
+    document.getElementById('availability-filter').value = '';
+    document.getElementById('sort-options').value = 'name';
+    filterStations();
+    sortStations();
+}
+
+function updateStats() {
+    const stationCards = document.querySelectorAll('.station-card:not([style*="display: none"])');
+    let availableCount = 0;
+    let occupiedCount = 0;
+    
+    stationCards.forEach(card => {
+        const availability = card.dataset.availability;
+        if (availability === 'available') {
+            availableCount++;
+        } else if (availability === 'occupied') {
+            occupiedCount++;
+        }
+    });
+    
+    document.getElementById('available-count').textContent = availableCount;
+    document.getElementById('occupied-count').textContent = occupiedCount;
+}
+
+function bookStation(stationId) {
+    // Show loading state
+    const button = event.target;
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.innerHTML = `
+        <svg class="animate-spin h-4 w-4 text-white inline mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Booking...
+    `;
+    
+    // Simulate booking process (replace with actual booking logic)
+    setTimeout(() => {
+        // Redirect to booking page or show booking modal
+        window.location.href = `/booking/station/${stationId}/`;
+    }, 1000);
+}
+
+// Real-time updates (if using WebSocket or polling)
+function updateStationAvailability() {
+    // This would be connected to your real-time system
+    // For now, we'll just refresh the page periodically
+    // In a real implementation, you'd use WebSocket or Server-Sent Events
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up periodic updates (every 30 seconds)
+    setInterval(updateStationAvailability, 30000);
+    
+    // Initialize stats
+    updateStats();
+});
+</script>
+
+<style>
+.gaming-stations-container {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.station-card {
+    transition: all 0.3s ease;
+}
+
+.station-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Custom scrollbar for better aesthetics */
+.gaming-stations-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.gaming-stations-container::-webkit-scrollbar-track {
+    background: var(--color-gaming-secondary);
+}
+
+.gaming-stations-container::-webkit-scrollbar-thumb {
+    background: var(--color-gaming-accent);
+    border-radius: 3px;
+}
+
+.gaming-stations-container::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gaming-highlight);
+}
+</style>

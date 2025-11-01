@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gaming Stations - Forge Gaming Cafe{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Additional styles for gaming stations page */
+    .hero-section {
+        background: linear-gradient(135deg, var(--color-gaming-primary) 0%, var(--color-gaming-secondary) 50%, var(--color-gaming-accent) 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(233,69,96,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        opacity: 0.3;
+    }
+    
+    .floating-elements {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+    }
+    
+    .floating-element {
+        position: absolute;
+        opacity: 0.1;
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    .floating-element:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+    .floating-element:nth-child(2) { top: 20%; right: 15%; animation-delay: 2s; }
+    .floating-element:nth-child(3) { bottom: 20%; left: 20%; animation-delay: 4s; }
+    .floating-element:nth-child(4) { bottom: 10%; right: 10%; animation-delay: 1s; }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(5deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section relative py-16 mb-12">
+    <div class="floating-elements">
+        <svg class="floating-element w-16 h-16 text-gaming-highlight" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M21 2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7l-2 3v1h8v-1l-2-3h7c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 12H3V4h18v10z"/>
+        </svg>
+        <svg class="floating-element w-12 h-12 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12.5 2C6.7 2 2 6.7 2 12.5S6.7 23 12.5 23 23 18.3 23 12.5 18.3 2 12.5 2zm0 19c-4.7 0-8.5-3.8-8.5-8.5S7.8 4 12.5 4s8.5 3.8 8.5 8.5-3.8 8.5-8.5 8.5z"/>
+        </svg>
+        <svg class="floating-element w-14 h-14 text-green-400" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+        </svg>
+        <svg class="floating-element w-10 h-10 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+        </svg>
+    </div>
+    
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl md:text-6xl font-gaming font-bold text-white mb-6">
+            Choose Your
+            <span class="text-gaming-highlight">Gaming Station</span>
+        </h1>
+        <p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+            Experience gaming like never before with our premium setups. From high-end PCs to the latest consoles, 
+            we have everything you need for the ultimate gaming session.
+        </p>
+        
+        <!-- Quick Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <button onclick="scrollToStations()" class="btn-primary px-8 py-3 text-lg font-semibold">
+                Browse Stations
+            </button>
+            <button onclick="showAvailableOnly()" class="btn-secondary px-8 py-3 text-lg font-semibold">
+                Show Available Only
+            </button>
+        </div>
+        
+        <!-- Live Status Indicator -->
+        <div class="mt-8 inline-flex items-center space-x-2 bg-gaming-secondary/50 backdrop-blur-sm rounded-full px-4 py-2 border border-gaming-accent">
+            <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span class="text-sm text-gray-300">Live availability updates</span>
+        </div>
+    </div>
+</section>
+
+<!-- Gaming Stations Grid -->
+<section id="stations-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+    {% include 'components/gaming_stations_grid.html' %}
+</section>
+
+<!-- Features Section -->
+<section class="bg-gaming-secondary/30 backdrop-blur-sm py-16 mb-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-gaming font-bold text-white mb-4">Why Choose Our Gaming Stations?</h2>
+            <p class="text-gray-400 max-w-2xl mx-auto">
+                We provide the best gaming experience with top-tier hardware and comfortable environments
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-gaming-highlight/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-gaming-highlight" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-2">High Performance</h3>
+                <p class="text-gray-400 text-sm">Latest hardware with RTX 4080+ GPUs and high refresh rate monitors</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-2">Secure Environment</h3>
+                <p class="text-gray-400 text-sm">Safe and monitored gaming environment with 24/7 security</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-2">Easy Booking</h3>
+                <p class="text-gray-400 text-sm">Simple online booking system with instant confirmation</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
+                        <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-2">Flexible Hours</h3>
+                <p class="text-gray-400 text-sm">Open 24/7 with flexible booking options to fit your schedule</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="text-center py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-gaming font-bold text-white mb-4">Ready to Start Gaming?</h2>
+        <p class="text-xl text-gray-300 mb-8">
+            Join thousands of gamers who trust us for their gaming sessions
+        </p>
+        
+        {% if user.is_authenticated %}
+            <button onclick="bookFirstAvailable()" class="btn-primary px-8 py-4 text-lg font-semibold mr-4">
+                Book Now
+            </button>
+            <a href="{% url 'authentication:customer_dashboard' %}" class="btn-secondary px-8 py-4 text-lg font-semibold">
+                My Dashboard
+            </a>
+        {% else %}
+            <a href="{% url 'authentication:customer_login' %}" class="btn-primary px-8 py-4 text-lg font-semibold mr-4">
+                Sign In to Book
+            </a>
+            <a href="#stations-section" class="btn-secondary px-8 py-4 text-lg font-semibold">
+                Browse Stations
+            </a>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+function scrollToStations() {
+    document.getElementById('stations-section').scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+    });
+}
+
+function showAvailableOnly() {
+    // Scroll to stations first
+    scrollToStations();
+    
+    // Set filter after a short delay
+    setTimeout(() => {
+        document.getElementById('availability-filter').value = 'available';
+        filterStations();
+    }, 500);
+}
+
+function bookFirstAvailable() {
+    const availableStations = document.querySelectorAll('.station-card[data-availability="available"]');
+    if (availableStations.length > 0) {
+        const firstStation = availableStations[0];
+        const bookButton = firstStation.querySelector('button[onclick*="bookStation"]');
+        if (bookButton) {
+            bookButton.click();
+        }
+    } else {
+        alert('No stations are currently available. Please check back later or try a different time.');
+    }
+}
+
+// Add smooth scrolling for anchor links
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate hero elements on load
+    const heroElements = document.querySelectorAll('.hero-section h1, .hero-section p, .hero-section .flex');
+    heroElements.forEach((element, index) => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(30px)';
+        element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        
+        setTimeout(() => {
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
+        }, index * 200);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,572 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Confirm Booking - Gaming Cafe{% endblock %}
+
+{% block extra_css %}
+<style>
+    .booking-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .booking-details {
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+    }
+    .capacity-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .capacity-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+    .capacity-dot.booked {
+        background-color: #ef4444;
+    }
+    .capacity-dot.your-booking {
+        background-color: #3b82f6;
+        animation: pulse 2s infinite;
+    }
+    .capacity-dot.available {
+        background-color: #10b981;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    .payment-option {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    .payment-option:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .payment-option.selected {
+        border-color: #3b82f6;
+        background-color: #dbeafe;
+    }
+    
+    /* Mobile-specific styles */
+    @media (max-width: 768px) {
+        .booking-card {
+            margin: 0 -1rem;
+        }
+        
+        .booking-details {
+            padding: 1rem;
+        }
+        
+        .capacity-indicator {
+            flex-wrap: wrap;
+            gap: 2px;
+        }
+        
+        .capacity-dot {
+            width: 12px;
+            height: 12px;
+        }
+        
+        .payment-option {
+            padding: 1rem;
+        }
+        
+        .grid-cols-1.md\\:grid-cols-2 {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    /* Touch-friendly buttons */
+    @media (hover: none) and (pointer: coarse) {
+        .payment-option {
+            min-height: 60px;
+        }
+        
+        button {
+            min-height: 48px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Confirm Your Booking</h1>
+        <p class="text-gray-600">Review your booking details and proceed to payment</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-32 lg:pb-0">
+        <!-- Booking Details -->
+        <div class="lg:col-span-2">
+            <div class="booking-card rounded-lg p-8 text-white mb-6">
+                <div class="booking-details rounded-lg p-6 text-gray-900">
+                    <h2 class="text-2xl font-bold mb-6">{{ booking.game.name }}</h2>
+                    
+                    <!-- Game Image -->
+                    <div class="flex items-start space-x-6 mb-6">
+                        <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                            {% if booking.game.image %}
+                            <img src="{{ booking.game.image.url }}" alt="{{ booking.game.name }}" class="w-full h-full object-cover rounded-lg">
+                            {% else %}
+                            <div class="text-white text-2xl">🎮</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex-1">
+                            <p class="text-gray-600 mb-4">{{ booking.game.description }}</p>
+                            
+                            <!-- Booking Type Badge -->
+                            <div class="inline-flex items-center space-x-2">
+                                {% if booking.booking_type == 'PRIVATE' %}
+                                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                                    🔒 Private Booking
+                                </span>
+                                {% else %}
+                                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                                    👥 Shared Booking
+                                </span>
+                                {% endif %}
+                                
+                                {% if is_hybrid %}
+                                <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
+                                    Hybrid Game
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Booking Details Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">Date & Time</label>
+                                <div class="text-lg font-semibold">
+                                    {{ booking.game_slot.date|date:"l, F d, Y" }}
+                                </div>
+                                <div class="text-gray-600">
+                                    {{ booking.game_slot.start_time|time:"H:i" }} - {{ booking.game_slot.end_time|time:"H:i" }}
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">Duration</label>
+                                <div class="text-lg font-semibold">{{ booking.game.slot_duration_minutes }} minutes</div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">Capacity Overview</label>
+                                <div class="bg-gray-50 rounded-lg p-3">
+                                    <div class="flex items-center space-x-3 mb-3">
+                                        <div class="capacity-indicator">
+                                            {% for i in "x"|ljust:booking.game.capacity %}
+                                            <div class="capacity-dot {% if forloop.counter0 < booking.spots_booked %}your-booking{% elif forloop.counter0 < booking.game_slot.availability.booked_spots %}booked{% else %}available{% endif %}"></div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="text-sm text-gray-600">
+                                            <div class="font-medium">Your booking: {{ booking.spots_booked }} spot{{ booking.spots_booked|pluralize }}</div>
+                                            <div>Total capacity: {{ booking.game.capacity }} player{{ booking.game.capacity|pluralize }}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Legend -->
+                                    <div class="flex items-center space-x-4 text-xs text-gray-500">
+                                        <div class="flex items-center space-x-1">
+                                            <div class="capacity-dot your-booking"></div>
+                                            <span>Your spots</span>
+                                        </div>
+                                        <div class="flex items-center space-x-1">
+                                            <div class="capacity-dot booked"></div>
+                                            <span>Other bookings</span>
+                                        </div>
+                                        <div class="flex items-center space-x-1">
+                                            <div class="capacity-dot available"></div>
+                                            <span>Available</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">Booking ID</label>
+                                <div class="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
+                                    {{ booking.id|truncatechars:8 }}...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pricing Breakdown -->
+                    <div class="border-t pt-6">
+                        <h3 class="text-lg font-semibold mb-4">Pricing Breakdown</h3>
+                        <div class="space-y-2">
+                            {% if is_private %}
+                            <div class="flex justify-between">
+                                <span>Private booking ({{ booking.game.capacity }} players)</span>
+                                <span>₹{{ booking.game.private_price }}</span>
+                            </div>
+                            {% else %}
+                            <div class="flex justify-between">
+                                <span>{{ booking.spots_booked }} spot{{ booking.spots_booked|pluralize }} × ₹{{ booking.price_per_spot }}</span>
+                                <span>₹{{ booking.total_amount }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="flex justify-between text-sm text-gray-600">
+                                <span>Platform fee</span>
+                                <span>₹0</span>
+                            </div>
+                            
+                            <div class="border-t pt-2 flex justify-between text-lg font-bold">
+                                <span>Total Amount</span>
+                                <span class="text-blue-600">₹{{ booking.total_amount }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Type Benefits -->
+            {% if is_hybrid %}
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <h3 class="font-semibold text-blue-800 mb-3">
+                    {% if is_private %}🔒 Private Booking Benefits{% else %}👥 Shared Booking Benefits{% endif %}
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    {% if is_private %}
+                    <div class="space-y-2 text-blue-700">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-green-500">✓</span>
+                            <span>Exclusive access to {{ booking.game.name }}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-green-500">✓</span>
+                            <span>Play with up to {{ booking.game.capacity }} friends</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-green-500">✓</span>
+                            <span>No waiting or sharing with strangers</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-green-500">✓</span>
+                            <span>Full control over game settings</span>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="space-y-2 text-blue-700">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-green-500">✓</span>
+                            <span>More affordable option</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-green-500">✓</span>
+                            <span>Meet and play with other gamers</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-green-500">✓</span>
+                            <span>Book just the spots you need</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-green-500">✓</span>
+                            <span>Great for solo players</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Alternative Option Info -->
+                    <div class="bg-white rounded p-3 border border-blue-200">
+                        <div class="text-xs text-gray-500 mb-1">Alternative option was:</div>
+                        <div class="font-medium text-gray-700">
+                            {% if is_private %}
+                            👥 Shared Booking - ₹{{ booking.game.shared_price }}/person
+                            {% else %}
+                            🔒 Private Booking - ₹{{ booking.game.private_price }} total
+                            {% endif %}
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            {% if is_private %}
+                            (Would have been ₹{{ booking.game.shared_price|floatformat:0 }} × {{ booking.spots_booked }} = ₹{{ booking.game.shared_price|mul:booking.spots_booked|floatformat:0 }})
+                            {% else %}
+                            ({{ booking.game.capacity }} players included)
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Important Notes -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <h3 class="font-semibold text-yellow-800 mb-2">📋 Important Notes</h3>
+                <ul class="text-sm text-yellow-700 space-y-1">
+                    <li>• Please arrive 5 minutes before your scheduled time</li>
+                    <li>• Cancellations must be made at least 1 hour in advance</li>
+                    {% if is_shared %}
+                    <li>• You'll be playing with other customers in shared booking</li>
+                    <li>• Be respectful and follow gaming etiquette</li>
+                    <li>• Other players may join your session</li>
+                    {% else %}
+                    <li>• You have exclusive access to the game during your slot</li>
+                    <li>• Bring all your friends - capacity is {{ booking.game.capacity }} players</li>
+                    {% endif %}
+                    <li>• Valid ID required for verification</li>
+                    <li>• Game rules and safety guidelines must be followed</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Payment Section -->
+        <div class="lg:col-span-1">
+            <!-- Mobile Booking Summary (visible on mobile) -->
+            <div class="lg:hidden bg-white border-t border-gray-200 fixed bottom-0 left-0 right-0 p-4 z-40">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <div class="font-semibold">{{ booking.game.name }}</div>
+                        <div class="text-sm text-gray-600">{{ booking.spots_booked }} spot{{ booking.spots_booked|pluralize }} • {{ booking.game_slot.date|date:"M d" }}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold text-lg text-blue-600">₹{{ booking.total_amount }}</div>
+                        <div class="text-xs text-gray-500">Total</div>
+                    </div>
+                </div>
+                <button onclick="proceedToPayment()" 
+                        class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                    Proceed to Payment
+                </button>
+            </div>
+            
+            <!-- Desktop Payment Section -->
+            <div class="hidden lg:block bg-white rounded-lg shadow-md p-6 sticky top-8">
+                <h3 class="text-xl font-semibold mb-6">Payment Method</h3>
+                
+                <!-- Payment Options -->
+                <div class="space-y-3 mb-6">
+                    <div class="payment-option border-2 border-gray-200 rounded-lg p-4 selected">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                💳
+                            </div>
+                            <div>
+                                <div class="font-medium">Credit/Debit Card</div>
+                                <div class="text-sm text-gray-500">Visa, Mastercard, RuPay</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-option border-2 border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                📱
+                            </div>
+                            <div>
+                                <div class="font-medium">UPI</div>
+                                <div class="text-sm text-gray-500">PhonePe, GPay, Paytm</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-option border-2 border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                🏦
+                            </div>
+                            <div>
+                                <div class="font-medium">Net Banking</div>
+                                <div class="text-sm text-gray-500">All major banks</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                    <h4 class="font-semibold mb-3">Order Summary</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span>{{ booking.game.name }}</span>
+                            <span>₹{{ booking.total_amount }}</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>{{ booking.game_slot.date|date:"M d" }} • {{ booking.game_slot.start_time|time:"H:i" }}</span>
+                            <span>{{ booking.spots_booked }} spot{{ booking.spots_booked|pluralize }}</span>
+                        </div>
+                        <div class="border-t pt-2 flex justify-between font-semibold">
+                            <span>Total</span>
+                            <span>₹{{ booking.total_amount }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="space-y-3">
+                    <button onclick="proceedToPayment()" 
+                            class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                        Proceed to Payment
+                    </button>
+                    
+                    <button onclick="cancelBooking()" 
+                            class="w-full border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+                        Cancel Booking
+                    </button>
+                </div>
+
+                <!-- Security Badge -->
+                <div class="mt-6 text-center">
+                    <div class="inline-flex items-center space-x-2 text-sm text-gray-500">
+                        <span>🔒</span>
+                        <span>Secured by SSL encryption</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function proceedToPayment() {
+    // For now, simulate payment
+    if (confirm('Proceed with payment of ₹{{ booking.total_amount }}?')) {
+        // Simulate payment processing
+        const loadingBtn = event.target;
+        loadingBtn.innerHTML = 'Processing...';
+        loadingBtn.disabled = true;
+        
+        // Simulate payment API call
+        setTimeout(() => {
+            fetch('/booking/simulate-payment/{{ booking.id }}/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert('Payment failed: ' + data.error);
+                    loadingBtn.innerHTML = 'Proceed to Payment';
+                    loadingBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Payment failed. Please try again.');
+                loadingBtn.innerHTML = 'Proceed to Payment';
+                loadingBtn.disabled = false;
+            });
+        }, 2000);
+    }
+}
+
+function cancelBooking() {
+    if (confirm('Are you sure you want to cancel this booking?')) {
+        fetch('/booking/games/cancel/{{ booking.id }}/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Booking cancelled successfully');
+                window.location.href = '/booking/games/';
+            } else {
+                alert('Failed to cancel booking: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to cancel booking. Please try again.');
+        });
+    }
+}
+
+// Add click handlers for payment options
+document.querySelectorAll('.payment-option').forEach(option => {
+    option.addEventListener('click', function() {
+        document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+        this.classList.add('selected');
+    });
+});
+
+// Real-time capacity updates for confirmation page
+function updateCapacityDisplay() {
+    const gameSlotId = '{{ booking.game_slot.id }}';
+    
+    fetch(`/booking/api/slot-availability/${gameSlotId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update capacity dots
+                const capacityDots = document.querySelectorAll('.capacity-dot');
+                capacityDots.forEach((dot, index) => {
+                    dot.className = 'capacity-dot ';
+                    if (index < {{ booking.spots_booked }}) {
+                        dot.className += 'your-booking';
+                    } else if (index < data.availability.booked_spots) {
+                        dot.className += 'booked';
+                    } else {
+                        dot.className += 'available';
+                    }
+                });
+                
+                // Show notification if capacity changed
+                const currentBookedSpots = data.availability.booked_spots - {{ booking.spots_booked }};
+                if (currentBookedSpots !== {{ booking.game_slot.availability.booked_spots|default:0 }} - {{ booking.spots_booked }}) {
+                    showCapacityChangeNotification(data.availability);
+                }
+            }
+        })
+        .catch(error => {
+            console.warn('Failed to update capacity display:', error);
+        });
+}
+
+function showCapacityChangeNotification(availability) {
+    // Create a temporary notification
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300';
+    notification.innerHTML = `
+        <div class="flex items-center space-x-2">
+            <span>📊</span>
+            <span>Capacity updated: ${availability.available_spots}/${availability.total_capacity} available</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Animate in
+    setTimeout(() => {
+        notification.classList.remove('translate-x-full');
+    }, 100);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+// Update capacity every 20 seconds
+setInterval(updateCapacityDisplay, 20000);
+
+// Update on page focus (when user returns to tab)
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+        updateCapacityDisplay();
+    }
+});
+</script>
+
+{% csrf_token %}
+{% endblock %}

@@ -1,0 +1,88 @@
+from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+from allauth.account.adapter import DefaultAccountAdapter
+from django.contrib import messages
+from django.shortcuts import redirect
+from django.urls import reverse
+from .models import Customer
+
+
+class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
+    """Custom adapter for handling Google OAuth authentication"""
+    
+    def pre_social_login(self, request, sociallogin):
+        """Handle pre-login logic for social accounts"""
+        if sociallogin.account.provider == 'google':
+            # Check if user already exists with this email
+            email = sociallogin.account.extra_data.get('email')
+            if email:
+                try:
+                    from django.contrib.auth.models import User
+                    existing_user = User.objects.get(email=email)
+                    
+                    # If user exists but doesn't have a social account, connect them
+                    if not sociallogin.is_existing:
+                        sociallogin.connect(request, existing_user)
+                        
+                except User.DoesNotExist:
+                    pass
+    
+    def save_user(self, request, sociallogin, form=None):
+        """Save user data from Google OAuth"""
+        user = super().save_user(request, sociallogin, form)
+        
+        # Update user information from Google data
+        extra_data = sociallogin.account.extra_data
+        
+        if not user.first_name and extra_data.get('given_name'):
+            user.first_name = extra_data.get('given_name')
+        
+        if not user.last_name and extra_data.get('family_name'):
+            user.last_name = extra_data.get('family_name')
+            
+        user.save()
+        
+        return user
+    
+    def get_login_redirect_url(self, request):
+        """Redirect users to appropriate dashboard after Google login"""
+        if request.user.is_authenticated:
+            if hasattr(request.user, 'customer_profile'):
+                return '/customer/dashboard/'
+            elif hasattr(request.user, 'cafe_owner_profile'):
+                return '/owner/dashboard/'
+            else:
+                # Create customer profile for Google OAuth users
+                Customer.objects.get_or_create(user=request.user)
+                return '/customer/dashboard/'
+        return '/'
+    
+    def authentication_error(self, request, provider_id, error=None, exception=None, extra_context=None):
+        """Handle authentication errors with user-friendly messages"""
+        if provider_id == 'google':
+            if 'access_denied' in str(error):
+                messages.error(request, 'Google authentication was cancelled. Please try again.')
+            elif 'invalid_request' in str(error):
+                messages.error(request, 'Invalid authentication request. Please try again.')
+            else:
+                messages.error(request, 'Authentication failed. Please try again or contact support.')
+        
+        return redirect(reverse('authentication:customer_login'))
+
+
+class CustomAccountAdapter(DefaultAccountAdapter):
+    """Custom adapter for account management"""
+    
+    def get_login_redirect_url(self, request):
+        """Redirect users based on their role after manual login"""
+        if request.user.is_authenticated:
+            if request.user.is_superuser:
+                return '/admin/'
+            elif hasattr(request.user, 'cafe_owner_profile'):
+                return '/owner/dashboard/'
+            elif hasattr(request.user, 'customer_profile'):
+                return '/customer/dashboard/'
+        return '/'
+    
+    def add_message(self, request, level, message_tag, message, extra_tags=''):
+        """Customize message display"""
+        messages.add_message(request, level, message, extra_tags=extra_tags)

@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Confirm Booking - Gaming Cafe{% endblock %}
+
+{% block extra_css %}
+<style>
+    .confirmation-card {
+        @apply bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20;
+    }
+    
+    .progress-step {
+        @apply flex items-center space-x-2 text-sm;
+    }
+    .progress-step.active {
+        @apply text-gaming-highlight font-semibold;
+    }
+    .progress-step.completed {
+        @apply text-green-400;
+    }
+    
+    .booking-detail-row {
+        @apply flex justify-between items-center py-3 border-b border-white/10 last:border-b-0;
+    }
+    
+    .animate-pulse-slow {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gaming-primary via-gaming-secondary to-gaming-accent">
+    <!-- Header -->
+    <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 mb-8 border border-white/20">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-white mb-2">Confirm Your Booking</h1>
+                <p class="text-gray-300">Review your booking details before proceeding to payment</p>
+            </div>
+            <a href="{% url 'booking:selection' %}" 
+               class="text-gaming-highlight hover:text-gaming-highlight/80 font-medium transition-colors duration-200">
+                ← Back to Selection
+            </a>
+        </div>
+        
+        <!-- Progress Indicator -->
+        <div class="flex items-center space-x-8 mt-6 pt-6 border-t border-white/20">
+            <div class="progress-step completed">
+                <div class="w-8 h-8 bg-green-400 rounded-full flex items-center justify-center text-white font-bold">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <span>Select Station & Time</span>
+            </div>
+            <div class="progress-step active">
+                <div class="w-8 h-8 bg-gaming-highlight rounded-full flex items-center justify-center text-white font-bold">2</div>
+                <span>Confirm Booking</span>
+            </div>
+            <div class="progress-step">
+                <div class="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center text-white font-bold">3</div>
+                <span>Payment</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Booking Details -->
+        <div class="lg:col-span-2">
+            <div class="confirmation-card mb-6">
+                <h2 class="text-xl font-bold text-white mb-6">Booking Details</h2>
+                
+                <div class="space-y-0">
+                    <div class="booking-detail-row">
+                        <span class="text-gray-300">Booking ID</span>
+                        <span class="text-white font-mono">{{ booking.id }}</span>
+                    </div>
+                    <div class="booking-detail-row">
+                        <span class="text-gray-300">Gaming Station</span>
+                        <div class="text-right">
+                            <p class="text-white font-medium">{{ booking.gaming_station.name }}</p>
+                            <p class="text-gray-400 text-sm">{{ booking.gaming_station.get_station_type_display }}</p>
+                        </div>
+                    </div>
+                    <div class="booking-detail-row">
+                        <span class="text-gray-300">Date</span>
+                        <span class="text-white font-medium">{{ booking.start_time|date:"l, F j, Y" }}</span>
+                    </div>
+                    <div class="booking-detail-row">
+                        <span class="text-gray-300">Time</span>
+                        <span class="text-white font-medium">{{ booking.start_time|date:"g:i A" }} - {{ booking.end_time|date:"g:i A" }}</span>
+                    </div>
+                    <div class="booking-detail-row">
+                        <span class="text-gray-300">Duration</span>
+                        <span class="text-white font-medium">{{ booking.duration_hours|floatformat:1 }} hour{{ booking.duration_hours|floatformat:1|add:"0"|length|add:"-1"|slice:"1:" }}s</span>
+                    </div>
+                    <div class="booking-detail-row">
+                        <span class="text-gray-300">Hourly Rate</span>
+                        <span class="text-white font-medium">${{ booking.hourly_rate }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Station Information -->
+            {% if booking.gaming_station.image or booking.gaming_station.description or booking.gaming_station.specifications %}
+            <div class="confirmation-card">
+                <h3 class="text-lg font-bold text-white mb-4">Station Information</h3>
+                
+                {% if booking.gaming_station.image %}
+                <div class="mb-4 rounded-lg overflow-hidden">
+                    <img src="{{ booking.gaming_station.image.url }}" 
+                         alt="{{ booking.gaming_station.name }}" 
+                         class="w-full h-48 object-cover">
+                </div>
+                {% endif %}
+                
+                {% if booking.gaming_station.description %}
+                <p class="text-gray-300 mb-4">{{ booking.gaming_station.description }}</p>
+                {% endif %}
+                
+                {% if booking.gaming_station.specifications %}
+                <div>
+                    <h4 class="text-white font-medium mb-2">Specifications</h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        {% for key, value in booking.gaming_station.specifications.items %}
+                        <div class="bg-white/5 rounded-lg p-2">
+                            <p class="text-gray-400 text-xs">{{ key }}</p>
+                            <p class="text-white text-sm font-medium">{{ value }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Payment Summary -->
+        <div class="lg:col-span-1">
+            <div class="confirmation-card mb-6">
+                <h3 class="text-lg font-bold text-white mb-4">Payment Summary</h3>
+                
+                <div class="space-y-3 mb-6">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-300">Subtotal</span>
+                        <span class="text-white">${{ booking.total_amount }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-300">Tax</span>
+                        <span class="text-white">$0.00</span>
+                    </div>
+                    <div class="border-t border-white/20 pt-3">
+                        <div class="flex justify-between items-center text-lg font-bold">
+                            <span class="text-white">Total</span>
+                            <span class="text-gaming-highlight">${{ booking.total_amount }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <button onclick="proceedToPayment()" 
+                            class="w-full bg-gaming-highlight hover:bg-gaming-highlight/80 text-white font-medium py-3 rounded-lg transition-all duration-200 transform hover:scale-105">
+                        <div class="flex items-center justify-center space-x-2">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"></path>
+                                <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Proceed to Payment</span>
+                        </div>
+                    </button>
+                    
+                    <button onclick="cancelBooking()" 
+                            class="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/40 font-medium py-3 rounded-lg transition-all duration-200">
+                        Cancel Booking
+                    </button>
+                </div>
+            </div>
+
+            <!-- Booking Status -->
+            <div class="confirmation-card">
+                <h3 class="text-lg font-bold text-white mb-4">Booking Status</h3>
+                
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-3 h-3 bg-yellow-400 rounded-full animate-pulse-slow"></div>
+                    <span class="text-yellow-300 font-medium">Pending Payment</span>
+                </div>
+                
+                <p class="text-gray-300 text-sm mb-4">
+                    Your booking is reserved for 15 minutes. Please complete payment to confirm your reservation.
+                </p>
+                
+                <div class="bg-yellow-500/20 border border-yellow-400/30 rounded-lg p-3">
+                    <div class="flex items-start space-x-2">
+                        <svg class="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                        </svg>
+                        <div>
+                            <p class="text-yellow-300 font-medium text-sm">Important</p>
+                            <p class="text-yellow-200 text-xs">Unpaid bookings will be automatically cancelled after 15 minutes.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function proceedToPayment() {
+    // Show loading state
+    const button = document.querySelector('button[onclick="proceedToPayment()"]');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<div class="flex items-center justify-center space-x-2"><div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div><span>Processing Payment...</span></div>';
+    button.disabled = true;
+    
+    // Simulate payment processing
+    fetch('/booking/simulate-payment/{{ booking.id }}/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = data.redirect_url;
+        } else {
+            alert(data.error || 'Payment failed');
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Payment processing error');
+        button.innerHTML = originalText;
+        button.disabled = false;
+    });
+}
+
+function cancelBooking() {
+    if (confirm('Are you sure you want to cancel this booking?')) {
+        fetch('/booking/cancel/{{ booking.id }}/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Booking cancelled successfully');
+                window.location.href = '{% url "authentication:customer_dashboard" %}';
+            } else {
+                alert(data.error || 'Error cancelling booking');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error cancelling booking');
+        });
+    }
+}
+
+// Add CSRF token for AJAX requests
+document.addEventListener('DOMContentLoaded', function() {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (!csrfToken) {
+        const token = document.createElement('input');
+        token.type = 'hidden';
+        token.name = 'csrfmiddlewaretoken';
+        token.value = '{{ csrf_token }}';
+        document.body.appendChild(token);
+    }
+});
+</script>
+{% endblock %}

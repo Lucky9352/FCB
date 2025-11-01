@@ -1,0 +1,649 @@
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import JsonResponse
+from django.utils import timezone
+from django.db.models import Q
+from datetime import datetime, timedelta
+from authentication.decorators import customer_required
+from .models import GamingStation, Booking, Notification
+from .notifications import NotificationService, InAppNotification
+from authentication.models import Customer
+import json
+
+
+@customer_required
+def booking_selection(request):
+    """Booking selection interface with calendar/grid view"""
+    # Get all active gaming stations
+    stations = GamingStation.objects.filter(
+        is_active=True,
+        is_maintenance=False
+    ).order_by('station_type', 'name')
+    
+    # Get selected date (default to today)
+    selected_date = request.GET.get('date', timezone.now().date().isoformat())
+    try:
+        selected_date = datetime.fromisoformat(selected_date).date()
+    except ValueError:
+        selected_date = timezone.now().date()
+    
+    # Generate time slots for the selected date (9 AM to 11 PM)
+    time_slots = []
+    start_hour = 9
+    end_hour = 23
+    
+    for hour in range(start_hour, end_hour):
+        time_slots.append({
+            'time': f"{hour:02d}:00",
+            'display': f"{hour % 12 or 12}:00 {'AM' if hour < 12 else 'PM'}",
+            'datetime': timezone.make_aware(
+                datetime.combine(selected_date, datetime.min.time().replace(hour=hour))
+            )
+        })
+    
+    # Get existing bookings for the selected date
+    existing_bookings = Booking.objects.filter(
+        start_time__date=selected_date,
+        status__in=['CONFIRMED', 'IN_PROGRESS', 'PENDING']
+    ).select_related('gaming_station')
+    
+    # Create availability matrix
+    availability = {}
+    for station in stations:
+        availability[station.id] = {}
+        for slot in time_slots:
+            # Check if this time slot is available for this station
+            slot_end = slot['datetime'] + timedelta(hours=1)
+            is_available = not existing_bookings.filter(
+                gaming_station=station,
+                start_time__lt=slot_end,
+                end_time__gt=slot['datetime']
+            ).exists()
+            
+            availability[station.id][slot['time']] = {
+                'available': is_available,
+                'datetime': slot['datetime'],
+                'end_datetime': slot_end
+            }
+    
+    context = {
+        'stations': stations,
+        'time_slots': time_slots,
+        'selected_date': selected_date,
+        'availability': availability,
+        'today': timezone.now().date(),
+    }
+    
+    return render(request, 'booking/selection.html', context)
+
+
+@customer_required
+def booking_create(request):
+    """Create a new booking"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            station_id = data.get('station_id')
+            start_time = data.get('start_time')
+            duration = int(data.get('duration', 1))  # Default 1 hour
+            
+            # Validate inputs
+            if not all([station_id, start_time]):
+                return JsonResponse({'error': 'Missing required fields'}, status=400)
+            
+            # Get station
+            station = get_object_or_404(GamingStation, id=station_id, is_active=True)
+            
+            # Parse start time
+            start_datetime = timezone.make_aware(datetime.fromisoformat(start_time))
+            end_datetime = start_datetime + timedelta(hours=duration)
+            
+            # Validate booking time is in the future
+            if start_datetime <= timezone.now():
+                return JsonResponse({'error': 'Booking time must be in the future'}, status=400)
+            
+            # Check availability
+            if not station.is_available_at_time(start_datetime, end_datetime):
+                return JsonResponse({'error': 'Time slot is not available'}, status=400)
+            
+            # Get customer
+            customer = request.user.customer_profile
+            
+            # Create booking
+            booking = Booking.objects.create(
+                customer=customer,
+                gaming_station=station,
+                start_time=start_datetime,
+                end_time=end_datetime,
+                hourly_rate=station.hourly_rate,
+                status='PENDING'
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'booking_id': str(booking.id),
+                'total_amount': str(booking.total_amount),
+                'redirect_url': f'/booking/confirm/{booking.id}/'
+            })
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@customer_required
+def booking_confirm(request, booking_id):
+    """Booking confirmation page"""
+    booking = get_object_or_404(
+        Booking, 
+        id=booking_id, 
+        customer=request.user.customer_profile,
+        status='PENDING'
+    )
+    
+    context = {
+        'booking': booking,
+    }
+    
+    return render(request, 'booking/confirm.html', context)
+
+
+@customer_required
+def get_availability(request):
+    """AJAX endpoint to get real-time availability"""
+    date_str = request.GET.get('date')
+    station_id = request.GET.get('station_id')
+    
+    try:
+        selected_date = datetime.fromisoformat(date_str).date()
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'Invalid date format'}, status=400)
+    
+    # Generate time slots
+    time_slots = []
+    for hour in range(9, 23):  # 9 AM to 11 PM
+        time_slots.append({
+            'time': f"{hour:02d}:00",
+            'datetime': timezone.make_aware(
+                datetime.combine(selected_date, datetime.min.time().replace(hour=hour))
+            )
+        })
+    
+    if station_id:
+        # Get availability for specific station
+        try:
+            station = GamingStation.objects.get(id=station_id, is_active=True)
+        except GamingStation.DoesNotExist:
+            return JsonResponse({'error': 'Station not found'}, status=404)
+        
+        availability = {}
+        for slot in time_slots:
+            slot_end = slot['datetime'] + timedelta(hours=1)
+            is_available = station.is_available_at_time(slot['datetime'], slot_end)
+            availability[slot['time']] = is_available
+        
+        return JsonResponse({'availability': availability})
+    else:
+        # Get availability for all stations
+        stations = GamingStation.objects.filter(is_active=True, is_maintenance=False)
+        availability = {}
+        
+        for station in stations:
+            availability[str(station.id)] = {}
+            for slot in time_slots:
+                slot_end = slot['datetime'] + timedelta(hours=1)
+                is_available = station.is_available_at_time(slot['datetime'], slot_end)
+                availability[str(station.id)][slot['time']] = is_available
+        
+        return JsonResponse({'availability': availability})
+
+
+@customer_required
+def my_bookings(request):
+    """Customer's booking history and management"""
+    customer = request.user.customer_profile
+    
+    # Get bookings with filters
+    status_filter = request.GET.get('status', 'all')
+    
+    bookings = customer.bookings.all().order_by('-created_at')
+    
+    if status_filter != 'all':
+        bookings = bookings.filter(status=status_filter.upper())
+    
+    # Categorize bookings
+    now = timezone.now()
+    upcoming = bookings.filter(
+        start_time__gt=now,
+        status__in=['CONFIRMED', 'PENDING']
+    ).order_by('start_time')
+    
+    current = bookings.filter(
+        start_time__lte=now,
+        end_time__gte=now,
+        status='IN_PROGRESS'
+    ).first()
+    
+    past = bookings.filter(
+        Q(end_time__lt=now) | Q(status__in=['COMPLETED', 'CANCELLED', 'NO_SHOW'])
+    ).order_by('-start_time')
+    
+    context = {
+        'upcoming_bookings': upcoming,
+        'current_booking': current,
+        'past_bookings': past,
+        'status_filter': status_filter,
+    }
+    
+    return render(request, 'booking/my_bookings.html', context)
+
+
+@customer_required
+def booking_success(request, booking_id):
+    """Booking success page with animations and notifications"""
+    booking = get_object_or_404(
+        Booking, 
+        id=booking_id, 
+        customer=request.user.customer_profile,
+        status='CONFIRMED'
+    )
+    
+    context = {
+        'booking': booking,
+    }
+    
+    return render(request, 'booking/success.html', context)
+
+
+@customer_required
+def simulate_payment(request, booking_id):
+    """Simulate payment processing for demo purposes"""
+    if request.method == 'POST':
+        booking = get_object_or_404(
+            Booking, 
+            id=booking_id, 
+            customer=request.user.customer_profile,
+            status='PENDING'
+        )
+        
+        try:
+            # Simulate payment processing
+            booking.status = 'CONFIRMED'
+            booking.payment_id = f'pay_{timezone.now().strftime("%Y%m%d%H%M%S")}'
+            booking.payment_status = 'completed'
+            booking.save()
+            
+            # Send confirmation email
+            NotificationService.send_booking_confirmation_email(booking)
+            
+            # Create in-app notification
+            InAppNotification.notify_booking_confirmed(booking)
+            
+            # Add success message
+            messages.success(request, 'Payment successful! Your booking has been confirmed.')
+            
+            return JsonResponse({
+                'success': True,
+                'redirect_url': f'/booking/success/{booking.id}/'
+            })
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@customer_required
+def cancel_booking(request, booking_id):
+    """Cancel a booking"""
+    if request.method == 'POST':
+        booking = get_object_or_404(
+            Booking, 
+            id=booking_id, 
+            customer=request.user.customer_profile,
+            status__in=['PENDING', 'CONFIRMED']
+        )
+        
+        try:
+            # Update booking status
+            booking.status = 'CANCELLED'
+            booking.save()
+            
+            # Send cancellation email
+            NotificationService.send_booking_cancellation_email(booking)
+            
+            # Create in-app notification
+            InAppNotification.notify_booking_cancelled(booking)
+            
+            # Add success message
+            messages.success(request, 'Booking cancelled successfully.')
+            
+            return JsonResponse({'success': True})
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@customer_required
+def get_notifications(request):
+    """Get user's notifications"""
+    notifications = request.user.notifications.filter(is_read=False).order_by('-created_at')[:10]
+    
+    notification_data = []
+    for notification in notifications:
+        notification_data.append({
+            'id': notification.id,
+            'title': notification.title,
+            'message': notification.message,
+            'type': notification.notification_type,
+            'created_at': notification.created_at.isoformat(),
+            'booking_id': str(notification.booking.id) if notification.booking else None
+        })
+    
+    return JsonResponse({
+        'notifications': notification_data,
+        'unread_count': notifications.count()
+    })
+
+
+@customer_required
+def mark_notification_read(request, notification_id):
+    """Mark a notification as read"""
+    if request.method == 'POST':
+        try:
+            notification = get_object_or_404(
+                Notification,
+                id=notification_id,
+                user=request.user
+            )
+            notification.mark_as_read()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+# NEW HYBRID BOOKING VIEWS
+
+@customer_required
+def game_selection(request):
+    """Game selection interface with hybrid booking options"""
+    from .models import Game
+    from .booking_service import BookingService
+    from datetime import date, timedelta
+    
+    # Get all active games
+    games = Game.objects.filter(is_active=True).order_by('name')
+    
+    # Get selected date (default to today)
+    selected_date = request.GET.get('date', timezone.now().date().isoformat())
+    try:
+        selected_date = datetime.fromisoformat(selected_date).date()
+    except ValueError:
+        selected_date = timezone.now().date()
+    
+    # Get available slots for each game
+    games_with_availability = []
+    for game in games:
+        available_slots = BookingService.get_available_slots(
+            game, 
+            date_from=selected_date,
+            date_to=selected_date
+        )
+        
+        games_with_availability.append({
+            'game': game,
+            'available_slots': available_slots,
+            'has_availability': len(available_slots) > 0
+        })
+    
+    context = {
+        'games_with_availability': games_with_availability,
+        'selected_date': selected_date,
+        'today': timezone.now().date(),
+        'date_range': [selected_date + timedelta(days=i) for i in range(7)]  # Next 7 days
+    }
+    
+    return render(request, 'booking/game_selection.html', context)
+
+
+@customer_required
+def hybrid_booking_create(request):
+    """Create a hybrid booking (private or shared) with enhanced validation"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            game_slot_id = data.get('game_slot_id')
+            booking_type = data.get('booking_type')  # 'PRIVATE' or 'SHARED'
+            spots_requested = int(data.get('spots_requested', 1))
+            
+            # Validate inputs
+            if not all([game_slot_id, booking_type]):
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Missing required fields',
+                    'details': 'Game slot ID and booking type are required'
+                }, status=400)
+            
+            if booking_type not in ['PRIVATE', 'SHARED']:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Invalid booking type',
+                    'details': 'Booking type must be PRIVATE or SHARED'
+                }, status=400)
+            
+            if spots_requested < 1:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Invalid spots requested',
+                    'details': 'Must request at least 1 spot'
+                }, status=400)
+            
+            # Get game slot
+            from .models import GameSlot
+            game_slot = get_object_or_404(GameSlot, id=game_slot_id, is_active=True)
+            
+            # Get customer
+            customer = request.user.customer_profile
+            
+            # Get current booking options to validate request
+            from .booking_service import BookingService
+            available_options = BookingService.get_booking_options(game_slot)
+            
+            # Find the requested booking option
+            requested_option = None
+            for option in available_options:
+                if option['type'] == booking_type and option['available']:
+                    requested_option = option
+                    break
+            
+            if not requested_option:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Booking option not available',
+                    'details': f'{booking_type} booking is not available for this slot',
+                    'available_options': available_options
+                }, status=400)
+            
+            # Validate spots for shared booking
+            if booking_type == 'SHARED':
+                max_spots = requested_option.get('max_spots_per_booking', requested_option['available_spots'])
+                if spots_requested > max_spots:
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'Too many spots requested',
+                        'details': f'Maximum {max_spots} spots can be booked at once',
+                        'max_spots_allowed': max_spots
+                    }, status=400)
+            
+            # Create booking using BookingService
+            booking = BookingService.create_booking(
+                customer=customer,
+                game_slot=game_slot,
+                booking_type=booking_type,
+                spots_requested=spots_requested
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'booking_id': str(booking.id),
+                'booking_type': booking.booking_type,
+                'spots_booked': booking.spots_booked,
+                'price_per_spot': str(booking.price_per_spot),
+                'total_amount': str(booking.total_amount),
+                'game_name': booking.game.name,
+                'slot_time': f"{booking.game_slot.start_time.strftime('%H:%M')} - {booking.game_slot.end_time.strftime('%H:%M')}",
+                'slot_date': booking.game_slot.date.isoformat(),
+                'redirect_url': f'/booking/games/confirm/{booking.id}/',
+                'message': f'Successfully booked {booking.spots_booked} spot{"s" if booking.spots_booked > 1 else ""} for {booking.game.name}'
+            })
+            
+        except ValidationError as e:
+            return JsonResponse({
+                'success': False,
+                'error': 'Booking validation failed',
+                'details': str(e),
+                'error_type': 'validation'
+            }, status=400)
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': 'Booking creation failed',
+                'details': str(e),
+                'error_type': 'system'
+            }, status=500)
+    
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@customer_required
+def hybrid_booking_confirm(request, booking_id):
+    """Hybrid booking confirmation page"""
+    booking = get_object_or_404(
+        Booking, 
+        id=booking_id, 
+        customer=request.user.customer_profile,
+        status='PENDING'
+    )
+    
+    # Get booking options that were available
+    from .booking_service import BookingService
+    available_options = BookingService.get_booking_options(booking.game_slot)
+    
+    context = {
+        'booking': booking,
+        'available_options': available_options,
+        'is_hybrid': booking.game.booking_type == 'HYBRID',
+        'is_private': booking.booking_type == 'PRIVATE',
+        'is_shared': booking.booking_type == 'SHARED',
+    }
+    
+    return render(request, 'booking/hybrid_confirm.html', context)
+
+
+@customer_required
+def get_slot_availability(request, game_slot_id):
+    """AJAX endpoint to get real-time slot availability with detailed information"""
+    try:
+        from .models import GameSlot
+        from .booking_service import BookingService
+        
+        game_slot = get_object_or_404(GameSlot, id=game_slot_id, is_active=True)
+        
+        # Get current booking options with detailed information
+        booking_options = BookingService.get_booking_options(game_slot)
+        
+        # Get booking type restrictions
+        restrictions = BookingService.get_booking_type_restrictions(game_slot)
+        
+        # Get existing bookings for this slot
+        existing_bookings = game_slot.bookings.filter(
+            status__in=['CONFIRMED', 'IN_PROGRESS', 'PENDING']
+        ).select_related('customer__user')
+        
+        booking_details = []
+        for booking in existing_bookings:
+            booking_details.append({
+                'booking_type': booking.booking_type,
+                'spots_booked': booking.spots_booked,
+                'customer_name': booking.customer.user.get_full_name() or booking.customer.user.username,
+                'status': booking.status,
+                'created_at': booking.created_at.isoformat()
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'game_slot_id': str(game_slot_id),
+            'game_info': {
+                'id': str(game_slot.game.id),
+                'name': game_slot.game.name,
+                'description': game_slot.game.description,
+                'capacity': game_slot.game.capacity,
+                'booking_type': game_slot.game.booking_type,
+                'private_price': float(game_slot.game.private_price),
+                'shared_price': float(game_slot.game.shared_price) if game_slot.game.shared_price else None
+            },
+            'slot_info': {
+                'date': game_slot.date.isoformat(),
+                'start_time': game_slot.start_time.strftime('%H:%M'),
+                'end_time': game_slot.end_time.strftime('%H:%M'),
+                'duration_minutes': game_slot.game.slot_duration_minutes,
+                'is_custom': game_slot.is_custom
+            },
+            'availability': {
+                'total_capacity': restrictions['total_capacity'],
+                'booked_spots': restrictions['booked_spots'],
+                'available_spots': restrictions['available_spots'],
+                'can_book_private': restrictions['can_book_private'],
+                'can_book_shared': restrictions['can_book_shared'],
+                'is_private_locked': restrictions['is_private_locked'],
+                'is_shared_locked': restrictions['is_shared_locked']
+            },
+            'booking_options': booking_options,
+            'existing_bookings': booking_details,
+            'restrictions': restrictions,
+            'timestamp': timezone.now().isoformat(),
+            'is_past_slot': game_slot.start_datetime <= timezone.now()
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e),
+            'error_type': 'system'
+        }, status=400)
+
+
+@customer_required
+def cancel_booking(request, booking_id):
+    """Cancel a booking"""
+    if request.method == 'POST':
+        try:
+            booking = get_object_or_404(
+                Booking, 
+                id=booking_id, 
+                customer=request.user.customer_profile
+            )
+            
+            if booking.status not in ['PENDING', 'CONFIRMED']:
+                return JsonResponse({'error': 'Booking cannot be cancelled'}, status=400)
+            
+            # Cancel using BookingService
+            from .booking_service import BookingService
+            BookingService.cancel_booking(booking)
+            
+            messages.success(request, 'Booking cancelled successfully')
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Booking cancelled successfully'
+            })
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    
+    return JsonResponse({'error': 'Method not allowed'}, status=405)

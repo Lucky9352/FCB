@@ -1,0 +1,13 @@
+{
+  "name": "gaming-cafe-booking-system",
+  "version": "1.0.0",
+  "description": "Gaming Cafe Booking System",
+  "scripts": {
+    "build-css": "tailwindcss -i ./static/css/input.css -o ./static/css/output.css --watch",
+    "build-css-prod": "tailwindcss -i ./static/css/input.css -o ./static/css/output.css --minify"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.0.0-alpha.30",
+    "@tailwindcss/postcss": "^4.0.0-alpha.30"
+  }
+}

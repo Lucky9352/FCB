@@ -1,0 +1,407 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Book Gaming Station - Gaming Cafe{% endblock %}
+
+{% block extra_css %}
+<style>
+    .time-slot {
+        @apply border border-gray-300 rounded-lg p-3 text-center cursor-pointer transition-all duration-200;
+    }
+    .time-slot.available {
+        @apply bg-green-50 border-green-200 hover:bg-green-100 text-green-800;
+    }
+    .time-slot.unavailable {
+        @apply bg-red-50 border-red-200 text-red-500 cursor-not-allowed opacity-60;
+    }
+    .time-slot.selected {
+        @apply bg-gaming-highlight border-gaming-highlight text-white;
+    }
+    
+    .station-card {
+        @apply bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20 transition-all duration-300;
+    }
+    .station-card.selected {
+        @apply border-gaming-highlight bg-gaming-highlight/20;
+    }
+    
+    .booking-summary {
+        @apply bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 sticky top-4;
+    }
+    
+    .progress-step {
+        @apply flex items-center space-x-2 text-sm;
+    }
+    .progress-step.active {
+        @apply text-gaming-highlight font-semibold;
+    }
+    .progress-step.completed {
+        @apply text-green-400;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gaming-primary via-gaming-secondary to-gaming-accent">
+    <!-- Header -->
+    <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 mb-8 border border-white/20">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-white mb-2">Book Gaming Station</h1>
+                <p class="text-gray-300">Select your preferred gaming station and time slot</p>
+            </div>
+            <a href="{% url 'authentication:customer_dashboard' %}" 
+               class="text-gaming-highlight hover:text-gaming-highlight/80 font-medium transition-colors duration-200">
+                ← Back to Dashboard
+            </a>
+        </div>
+        
+        <!-- Progress Indicator -->
+        <div class="flex items-center space-x-8 mt-6 pt-6 border-t border-white/20">
+            <div class="progress-step active">
+                <div class="w-8 h-8 bg-gaming-highlight rounded-full flex items-center justify-center text-white font-bold">1</div>
+                <span>Select Station & Time</span>
+            </div>
+            <div class="progress-step">
+                <div class="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center text-white font-bold">2</div>
+                <span>Confirm Booking</span>
+            </div>
+            <div class="progress-step">
+                <div class="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center text-white font-bold">3</div>
+                <span>Payment</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-3">
+            <!-- Date Selection -->
+            <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 mb-6 border border-white/20">
+                <h2 class="text-xl font-bold text-white mb-4">Select Date</h2>
+                <div class="flex items-center space-x-4">
+                    <input type="date" 
+                           id="date-picker" 
+                           value="{{ selected_date|date:'Y-m-d' }}"
+                           min="{{ today|date:'Y-m-d' }}"
+                           class="bg-gaming-secondary border border-gaming-accent rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-gaming-highlight">
+                    <button onclick="loadAvailability()" 
+                            class="bg-gaming-highlight hover:bg-gaming-highlight/80 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+                        Update Availability
+                    </button>
+                </div>
+            </div>
+
+            <!-- Gaming Stations -->
+            <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 mb-6 border border-white/20">
+                <h2 class="text-xl font-bold text-white mb-4">Select Gaming Station</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for station in stations %}
+                    <div class="station-card" data-station-id="{{ station.id }}" onclick="selectStation('{{ station.id }}')">
+                        <div class="flex items-start justify-between mb-3">
+                            <div>
+                                <h3 class="text-white font-semibold">{{ station.name }}</h3>
+                                <p class="text-gray-300 text-sm">{{ station.get_station_type_display }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-gaming-highlight font-bold">${{ station.hourly_rate }}/hr</p>
+                            </div>
+                        </div>
+                        
+                        {% if station.image %}
+                        <div class="mb-3 rounded-lg overflow-hidden">
+                            <img src="{{ station.image.url }}" alt="{{ station.name }}" class="w-full h-32 object-cover">
+                        </div>
+                        {% else %}
+                        <div class="mb-3 bg-gradient-to-br from-gaming-highlight/20 to-gaming-accent/20 rounded-lg h-32 flex items-center justify-center">
+                            <svg class="w-12 h-12 text-gaming-highlight" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+                            </svg>
+                        </div>
+                        {% endif %}
+                        
+                        {% if station.description %}
+                        <p class="text-gray-300 text-sm mb-3">{{ station.description|truncatewords:15 }}</p>
+                        {% endif %}
+                        
+                        {% if station.specifications %}
+                        <div class="text-xs text-gray-400">
+                            {% for key, value in station.specifications.items %}
+                            <span class="inline-block bg-white/10 rounded px-2 py-1 mr-1 mb-1">{{ key }}: {{ value }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Time Slots -->
+            <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+                <h2 class="text-xl font-bold text-white mb-4">Select Time Slot</h2>
+                <div id="time-slots-container">
+                    <p class="text-gray-300 text-center py-8">Please select a gaming station first</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Summary Sidebar -->
+        <div class="lg:col-span-1">
+            <div class="booking-summary">
+                <h3 class="text-lg font-bold text-white mb-4">Booking Summary</h3>
+                
+                <div id="booking-details" class="hidden">
+                    <div class="space-y-4 mb-6">
+                        <div>
+                            <label class="text-gray-300 text-sm">Gaming Station</label>
+                            <p id="selected-station" class="text-white font-medium">-</p>
+                        </div>
+                        <div>
+                            <label class="text-gray-300 text-sm">Date</label>
+                            <p id="selected-date" class="text-white font-medium">{{ selected_date|date:"M j, Y" }}</p>
+                        </div>
+                        <div>
+                            <label class="text-gray-300 text-sm">Time</label>
+                            <p id="selected-time" class="text-white font-medium">-</p>
+                        </div>
+                        <div>
+                            <label class="text-gray-300 text-sm">Duration</label>
+                            <select id="duration-select" 
+                                    class="w-full bg-gaming-secondary border border-gaming-accent rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-gaming-highlight"
+                                    onchange="updateBookingSummary()">
+                                <option value="1">1 hour</option>
+                                <option value="2">2 hours</option>
+                                <option value="3">3 hours</option>
+                                <option value="4">4 hours</option>
+                                <option value="5">5 hours</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-white/20 pt-4 mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-gray-300">Hourly Rate</span>
+                            <span id="hourly-rate" class="text-white">$0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-gray-300">Duration</span>
+                            <span id="duration-display" class="text-white">1 hour</span>
+                        </div>
+                        <div class="flex justify-between items-center text-lg font-bold">
+                            <span class="text-white">Total</span>
+                            <span id="total-amount" class="text-gaming-highlight">$0.00</span>
+                        </div>
+                    </div>
+                    
+                    <button id="proceed-button" 
+                            onclick="proceedToConfirmation()"
+                            disabled
+                            class="w-full bg-gaming-highlight hover:bg-gaming-highlight/80 disabled:bg-gray-500 disabled:cursor-not-allowed text-white font-medium py-3 rounded-lg transition-colors duration-200">
+                        Proceed to Confirmation
+                    </button>
+                </div>
+                
+                <div id="no-selection" class="text-center py-8">
+                    <svg class="w-12 h-12 mx-auto mb-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                    </svg>
+                    <p class="text-gray-300 text-sm">Select a station and time to see booking details</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedStation = null;
+let selectedTimeSlot = null;
+let stationData = {};
+
+// Initialize station data
+{% for station in stations %}
+stationData['{{ station.id }}'] = {
+    name: '{{ station.name }}',
+    type: '{{ station.get_station_type_display }}',
+    hourlyRate: {{ station.hourly_rate }}
+};
+{% endfor %}
+
+function selectStation(stationId) {
+    // Update UI
+    document.querySelectorAll('.station-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    document.querySelector(`[data-station-id="${stationId}"]`).classList.add('selected');
+    
+    selectedStation = stationId;
+    selectedTimeSlot = null;
+    
+    // Load time slots for this station
+    loadTimeSlots(stationId);
+    updateBookingSummary();
+}
+
+function loadTimeSlots(stationId) {
+    const selectedDate = document.getElementById('date-picker').value;
+    const container = document.getElementById('time-slots-container');
+    
+    container.innerHTML = '<div class="text-center py-4"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gaming-highlight mx-auto"></div></div>';
+    
+    fetch(`/booking/api/availability/?date=${selectedDate}&station_id=${stationId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                container.innerHTML = `<p class="text-red-400 text-center py-4">${data.error}</p>`;
+                return;
+            }
+            
+            let slotsHtml = '<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">';
+            
+            {% for slot in time_slots %}
+            const isAvailable = data.availability['{{ slot.time }}'];
+            const slotClass = isAvailable ? 'available' : 'unavailable';
+            const onclick = isAvailable ? `selectTimeSlot('{{ slot.time }}', '{{ slot.datetime|date:"c" }}')` : '';
+            
+            slotsHtml += `
+                <div class="time-slot ${slotClass}" ${onclick ? `onclick="${onclick}"` : ''} data-time="{{ slot.time }}">
+                    <div class="font-medium">{{ slot.display }}</div>
+                    <div class="text-xs mt-1">${isAvailable ? 'Available' : 'Booked'}</div>
+                </div>
+            `;
+            {% endfor %}
+            
+            slotsHtml += '</div>';
+            container.innerHTML = slotsHtml;
+        })
+        .catch(error => {
+            console.error('Error loading time slots:', error);
+            container.innerHTML = '<p class="text-red-400 text-center py-4">Error loading time slots</p>';
+        });
+}
+
+function selectTimeSlot(time, datetime) {
+    // Update UI
+    document.querySelectorAll('.time-slot').forEach(slot => {
+        slot.classList.remove('selected');
+    });
+    document.querySelector(`[data-time="${time}"]`).classList.add('selected');
+    
+    selectedTimeSlot = {
+        time: time,
+        datetime: datetime
+    };
+    
+    updateBookingSummary();
+}
+
+function updateBookingSummary() {
+    const bookingDetails = document.getElementById('booking-details');
+    const noSelection = document.getElementById('no-selection');
+    const proceedButton = document.getElementById('proceed-button');
+    
+    if (selectedStation && selectedTimeSlot) {
+        // Show booking details
+        bookingDetails.classList.remove('hidden');
+        noSelection.classList.add('hidden');
+        
+        // Update details
+        const station = stationData[selectedStation];
+        document.getElementById('selected-station').textContent = `${station.name} (${station.type})`;
+        document.getElementById('selected-time').textContent = selectedTimeSlot.time;
+        document.getElementById('hourly-rate').textContent = `$${station.hourlyRate}`;
+        
+        // Calculate total
+        const duration = parseInt(document.getElementById('duration-select').value);
+        const total = station.hourlyRate * duration;
+        
+        document.getElementById('duration-display').textContent = `${duration} hour${duration > 1 ? 's' : ''}`;
+        document.getElementById('total-amount').textContent = `$${total.toFixed(2)}`;
+        
+        // Enable proceed button
+        proceedButton.disabled = false;
+    } else {
+        // Hide booking details
+        bookingDetails.classList.add('hidden');
+        noSelection.classList.remove('hidden');
+        proceedButton.disabled = true;
+    }
+}
+
+function loadAvailability() {
+    if (selectedStation) {
+        loadTimeSlots(selectedStation);
+    }
+    
+    // Update selected date display
+    const selectedDate = document.getElementById('date-picker').value;
+    const dateObj = new Date(selectedDate);
+    document.getElementById('selected-date').textContent = dateObj.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}
+
+function proceedToConfirmation() {
+    if (!selectedStation || !selectedTimeSlot) {
+        alert('Please select a station and time slot');
+        return;
+    }
+    
+    const duration = parseInt(document.getElementById('duration-select').value);
+    
+    // Show loading state
+    const button = document.getElementById('proceed-button');
+    const originalText = button.textContent;
+    button.textContent = 'Creating Booking...';
+    button.disabled = true;
+    
+    // Create booking
+    fetch('/booking/create/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            station_id: selectedStation,
+            start_time: selectedTimeSlot.datetime,
+            duration: duration
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = data.redirect_url;
+        } else {
+            alert(data.error || 'Error creating booking');
+            button.textContent = originalText;
+            button.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error creating booking:', error);
+        alert('Error creating booking');
+        button.textContent = originalText;
+        button.disabled = false;
+    });
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('date-picker').min = today;
+    
+    // Add CSRF token for AJAX requests
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (!csrfToken) {
+        const token = document.createElement('input');
+        token.type = 'hidden';
+        token.name = 'csrfmiddlewaretoken';
+        token.value = '{{ csrf_token }}';
+        document.body.appendChild(token);
+    }
+});
+</script>
+{% endblock %}

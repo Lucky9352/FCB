@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - TapNex{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1 class="text-4xl font-gaming font-bold text-gaming-highlight mb-8">
+        Welcome to TapNex
+    </h1>
+    
+    <p class="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+        Your seamless gaming cafe booking platform. Book sessions, manage reservations, and enjoy the ultimate gaming experience.
+    </p>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+        <div class="card">
+            <h3 class="text-xl font-semibold text-gaming-highlight mb-4">Book Sessions</h3>
+            <p class="text-gray-300">Reserve your gaming time slots with ease</p>
+        </div>
+        
+        <div class="card">
+            <h3 class="text-xl font-semibold text-gaming-highlight mb-4">Manage Bookings</h3>
+            <p class="text-gray-300">View and modify your reservations</p>
+        </div>
+        
+        <div class="card">
+            <h3 class="text-xl font-semibold text-gaming-highlight mb-4">Premium Experience</h3>
+            <p class="text-gray-300">High-end gaming setups and comfortable environment</p>
+        </div>
+    </div>
+    
+    {% if not user.is_authenticated %}
+    <div class="mt-12">
+        <a href="{% url 'account_signup' %}" class="btn-primary text-lg px-8 py-3">
+            Get Started
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

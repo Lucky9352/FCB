@@ -1,0 +1,584 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Select Game - Forge Gaming Cafe{% endblock %}
+
+{% block extra_css %}
+<style>
+    .game-card {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    .game-card:hover {
+        transform: translateY(-5px);
+        border-color: #3b82f6;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    .booking-option {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    .booking-option:hover {
+        background-color: #f3f4f6;
+        transform: scale(1.02);
+    }
+    .booking-option.selected {
+        background-color: #dbeafe;
+        border-color: #3b82f6;
+    }
+    .capacity-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .capacity-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+    .capacity-dot.booked {
+        background-color: #ef4444;
+    }
+    .capacity-dot.available {
+        background-color: #10b981;
+    }
+    .date-selector {
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .date-selector::-webkit-scrollbar {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Select Your Game</h1>
+        <p class="text-gray-600">Choose from our available games and book your preferred time slot</p>
+    </div>
+
+    <!-- Date Selector -->
+    <div class="mb-8">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Select Date</h2>
+        <div class="date-selector flex space-x-2 pb-2">
+            {% for date in date_range %}
+            <a href="?date={{ date.isoformat }}" 
+               class="flex-shrink-0 px-4 py-2 rounded-lg border text-center min-w-[100px] {% if date == selected_date %}bg-blue-500 text-white border-blue-500{% else %}bg-white text-gray-700 border-gray-300 hover:bg-gray-50{% endif %}">
+                <div class="text-sm font-medium">
+                    {% if date == today %}Today{% else %}{{ date|date:"M d" }}{% endif %}
+                </div>
+                <div class="text-xs">{{ date|date:"D" }}</div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Games Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for game_data in games_with_availability %}
+        {% with game=game_data.game %}
+        <div class="game-card bg-white rounded-lg shadow-md overflow-hidden">
+            <!-- Game Image -->
+            <div class="h-48 bg-gradient-to-br from-blue-500 to-purple-600 relative">
+                {% if game.image %}
+                <img src="{{ game.image.url }}" alt="{{ game.name }}" class="w-full h-full object-cover">
+                {% else %}
+                <div class="flex items-center justify-center h-full">
+                    <div class="text-white text-center">
+                        <div class="text-4xl mb-2">🎮</div>
+                        <div class="text-lg font-semibold">{{ game.name }}</div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Booking Type Badge -->
+                <div class="absolute top-3 right-3">
+                    {% if game.booking_type == 'HYBRID' %}
+                    <span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                        🤝 Private + Shared
+                    </span>
+                    {% else %}
+                    <span class="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                        🔒 Private Only
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Game Info -->
+            <div class="p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-2">{{ game.name }}</h3>
+                <p class="text-gray-600 text-sm mb-4">{{ game.description|truncatewords:15 }}</p>
+                
+                <!-- Capacity Info -->
+                <div class="flex items-center justify-between mb-4">
+                    <div class="text-sm text-gray-500">
+                        <span class="font-medium">Capacity:</span> {{ game.capacity }} player{{ game.capacity|pluralize }}
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        <span class="font-medium">Duration:</span> {{ game.slot_duration_minutes }} min
+                    </div>
+                </div>
+
+                <!-- Available Slots -->
+                {% if game_data.has_availability %}
+                <div class="space-y-3">
+                    <h4 class="font-semibold text-gray-900">Available Time Slots</h4>
+                    
+                    {% for slot_data in game_data.available_slots|slice:":3" %}
+                    {% with slot=slot_data.slot availability=slot_data.availability options=slot_data.options %}
+                    <div class="border rounded-lg p-3 bg-gray-50">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="font-medium text-gray-900">
+                                {{ slot.start_time|time:"H:i" }} - {{ slot.end_time|time:"H:i" }}
+                            </div>
+                            <div class="capacity-indicator">
+                                {% for i in "x"|ljust:availability.total_capacity %}
+                                <div class="capacity-dot {% if forloop.counter0 < availability.booked_spots %}booked{% else %}available{% endif %}"></div>
+                                {% endfor %}
+                                <span class="text-xs text-gray-500 ml-1">
+                                    {{ availability.available_spots }}/{{ availability.total_capacity }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Booking Options -->
+                        <div class="space-y-2">
+                            {% for option in options %}
+                            <div class="booking-option border rounded-lg p-3 {% if option.available %}cursor-pointer hover:border-blue-300 hover:bg-blue-50{% else %}opacity-50 cursor-not-allowed bg-gray-50{% endif %} transition-all duration-200"
+                                 {% if option.available %}onclick="selectBookingOption('{{ slot.id }}', '{{ option.type }}', {{ option.available_spots|default:game.capacity }})"{% endif %}>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-2 mb-1">
+                                            <span class="text-lg">
+                                                {% if option.type == 'PRIVATE' %}🔒{% else %}👥{% endif %}
+                                            </span>
+                                            <div class="font-medium text-sm">
+                                                {% if option.type == 'PRIVATE' %}
+                                                Private Booking
+                                                {% else %}
+                                                Shared Booking
+                                                {% endif %}
+                                            </div>
+                                            {% if not option.available %}
+                                            <span class="bg-red-100 text-red-600 px-2 py-1 rounded-full text-xs font-medium">
+                                                Not Available
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-xs text-gray-600 mb-1">
+                                            {{ option.description }}
+                                        </div>
+                                        {% if not option.available and option.disabled_message %}
+                                        <div class="text-xs text-red-600">
+                                            {{ option.disabled_message }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="text-right ml-4">
+                                        <div class="font-bold text-lg {% if option.available %}text-blue-600{% else %}text-gray-400{% endif %}">
+                                            ₹{{ option.price }}
+                                        </div>
+                                        {% if option.type == 'SHARED' %}
+                                        <div class="text-xs text-gray-500">per person</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                {% if option.available and option.type == 'SHARED' and option.available_spots > 1 %}
+                                <div class="mt-2 pt-2 border-t border-gray-200">
+                                    <div class="text-xs text-gray-600">
+                                        <span class="font-medium">Available spots:</span> {{ option.available_spots }}
+                                        <span class="ml-2 font-medium">Max per booking:</span> {{ option.max_spots_per_booking|default:option.available_spots }}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endwith %}
+                    {% endfor %}
+                    
+                    {% if game_data.available_slots|length > 3 %}
+                    <button onclick="showAllSlots('{{ game.id }}')" 
+                            class="w-full text-blue-600 text-sm font-medium hover:text-blue-800">
+                        Show {{ game_data.available_slots|length|add:"-3" }} more slots
+                    </button>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <div class="text-gray-400 text-4xl mb-2">😔</div>
+                    <div class="text-gray-600">No slots available for {{ selected_date|date:"M d" }}</div>
+                    <div class="text-sm text-gray-500 mt-1">Try selecting a different date</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+
+    {% if not games_with_availability %}
+    <div class="text-center py-12">
+        <div class="text-gray-400 text-6xl mb-4">🎮</div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">No Games Available</h3>
+        <p class="text-gray-600">Please check back later or contact support.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Enhanced Booking Modal -->
+<div id="bookingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg max-w-lg w-full max-h-screen overflow-y-auto">
+            <!-- Modal Header -->
+            <div class="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+                <h3 class="text-xl font-semibold text-gray-900">Confirm Your Booking</h3>
+                <button onclick="closeBookingModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="px-6 py-4">
+                <div id="bookingDetails"></div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="sticky bottom-0 bg-gray-50 border-t px-6 py-4">
+                <div class="flex space-x-3">
+                    <button onclick="closeBookingModal()" 
+                            class="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </button>
+                    <button onclick="confirmBooking()" 
+                            class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                        Book Now
+                    </button>
+                </div>
+                
+                <!-- Security Notice -->
+                <div class="mt-3 text-center">
+                    <div class="inline-flex items-center space-x-1 text-xs text-gray-500">
+                        <span>🔒</span>
+                        <span>Secure booking • No hidden fees</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedBooking = null;
+
+function selectBookingOption(slotId, bookingType, availableSpots) {
+    // Get slot details
+    fetch(`/booking/api/slot-availability/${slotId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                selectedBooking = {
+                    slotId: slotId,
+                    bookingType: bookingType,
+                    availableSpots: availableSpots,
+                    slotData: data
+                };
+                showBookingModal(data);
+            } else {
+                alert('Error loading slot details: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error loading slot details');
+        });
+}
+
+function showBookingModal(slotData) {
+    const modal = document.getElementById('bookingModal');
+    const details = document.getElementById('bookingDetails');
+    
+    const option = slotData.booking_options.find(opt => opt.type === selectedBooking.bookingType);
+    
+    if (!option) {
+        alert('Booking option not found');
+        return;
+    }
+    
+    const isPrivate = selectedBooking.bookingType === 'PRIVATE';
+    const isShared = selectedBooking.bookingType === 'SHARED';
+    
+    details.innerHTML = `
+        <div class="space-y-4">
+            <!-- Game Info -->
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-lg">
+                <h4 class="font-bold text-lg">${slotData.game_info.name}</h4>
+                <p class="text-sm opacity-90">${slotData.slot_info.date} • ${slotData.slot_info.start_time} - ${slotData.slot_info.end_time}</p>
+            </div>
+            
+            <!-- Booking Type -->
+            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                <span class="text-2xl">${isPrivate ? '🔒' : '👥'}</span>
+                <div>
+                    <div class="font-semibold">${isPrivate ? 'Private Booking' : 'Shared Booking'}</div>
+                    <div class="text-sm text-gray-600">${option.description}</div>
+                </div>
+            </div>
+            
+            <!-- Capacity Visualization -->
+            <div class="p-3 border rounded-lg">
+                <div class="text-sm font-medium text-gray-700 mb-2">Capacity Overview</div>
+                <div class="flex items-center space-x-1 mb-2">
+                    ${Array.from({length: slotData.availability.total_capacity}, (_, i) => {
+                        let dotClass = 'capacity-dot available';
+                        if (i < slotData.availability.booked_spots) {
+                            dotClass = 'capacity-dot booked';
+                        }
+                        return `<div class="${dotClass}"></div>`;
+                    }).join('')}
+                </div>
+                <div class="text-xs text-gray-600">
+                    ${slotData.availability.available_spots}/${slotData.availability.total_capacity} spots available
+                </div>
+            </div>
+            
+            <!-- Pricing -->
+            <div class="p-3 border rounded-lg">
+                <div class="text-sm font-medium text-gray-700 mb-2">Pricing</div>
+                <div class="text-lg font-bold text-blue-600">₹${option.price}${isShared ? ' per person' : ''}</div>
+                ${isPrivate ? `<div class="text-sm text-gray-600">Includes ${option.capacity} players</div>` : ''}
+            </div>
+            
+            <!-- Spots Selection for Shared Booking -->
+            ${isShared ? `
+                <div class="p-3 border rounded-lg">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Number of spots to book:</label>
+                    <div class="grid grid-cols-4 gap-2 mb-3">
+                        ${Array.from({length: Math.min(selectedBooking.availableSpots, option.max_spots_per_booking || 4)}, (_, i) => 
+                            `<button type="button" onclick="selectSpots(${i + 1})" 
+                                     class="spot-selector px-3 py-2 border rounded text-sm font-medium hover:bg-blue-50 hover:border-blue-300 ${i === 0 ? 'selected bg-blue-100 border-blue-500' : ''}"
+                                     data-spots="${i + 1}">
+                                ${i + 1} spot${i > 0 ? 's' : ''}
+                            </button>`
+                        ).join('')}
+                    </div>
+                    <div id="totalPrice" class="text-sm text-gray-600">
+                        Total: ₹${option.price} (1 spot)
+                    </div>
+                </div>
+            ` : ''}
+            
+            <!-- Benefits -->
+            <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
+                <div class="text-sm font-medium text-green-800 mb-2">What's included:</div>
+                <ul class="text-sm text-green-700 space-y-1">
+                    ${option.benefits.map(benefit => `<li>• ${benefit}</li>`).join('')}
+                </ul>
+            </div>
+        </div>
+    `;
+    
+    modal.classList.remove('hidden');
+}
+
+function closeBookingModal() {
+    document.getElementById('bookingModal').classList.add('hidden');
+    selectedBooking = null;
+}
+
+let selectedSpots = 1;
+
+function selectSpots(spots) {
+    selectedSpots = spots;
+    
+    // Update UI
+    document.querySelectorAll('.spot-selector').forEach(btn => {
+        btn.classList.remove('selected', 'bg-blue-100', 'border-blue-500');
+        if (parseInt(btn.dataset.spots) === spots) {
+            btn.classList.add('selected', 'bg-blue-100', 'border-blue-500');
+        }
+    });
+    
+    // Update total price
+    const option = selectedBooking.slotData.booking_options.find(opt => opt.type === selectedBooking.bookingType);
+    const totalPrice = option.price * spots;
+    document.getElementById('totalPrice').textContent = `Total: ₹${totalPrice} (${spots} spot${spots > 1 ? 's' : ''})`;
+}
+
+function confirmBooking() {
+    if (!selectedBooking) return;
+    
+    const spotsRequested = selectedBooking.bookingType === 'SHARED' ? selectedSpots : selectedBooking.slotData.availability.total_capacity;
+    
+    const bookingData = {
+        game_slot_id: selectedBooking.slotId,
+        booking_type: selectedBooking.bookingType,
+        spots_requested: spotsRequested
+    };
+    
+    // Show loading state
+    const confirmBtn = event.target;
+    const originalText = confirmBtn.textContent;
+    confirmBtn.textContent = 'Creating Booking...';
+    confirmBtn.disabled = true;
+    
+    fetch('/booking/games/book/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(bookingData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message briefly before redirect
+            confirmBtn.textContent = 'Success! Redirecting...';
+            confirmBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            confirmBtn.classList.add('bg-green-600');
+            
+            setTimeout(() => {
+                window.location.href = data.redirect_url;
+            }, 1000);
+        } else {
+            // Show detailed error message
+            let errorMessage = data.error;
+            if (data.details) {
+                errorMessage += '\n\nDetails: ' + data.details;
+            }
+            
+            alert('Booking failed: ' + errorMessage);
+            
+            // Reset button
+            confirmBtn.textContent = originalText;
+            confirmBtn.disabled = false;
+            
+            // If availability changed, refresh the modal
+            if (data.error_type === 'validation') {
+                closeBookingModal();
+                selectBookingOption(selectedBooking.slotId, selectedBooking.bookingType, selectedBooking.availableSpots);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Booking failed due to a network error. Please check your connection and try again.');
+        
+        // Reset button
+        confirmBtn.textContent = originalText;
+        confirmBtn.disabled = false;
+    });
+}
+
+function showAllSlots(gameId) {
+    // Implement show all slots functionality
+    console.log('Show all slots for game:', gameId);
+}
+
+// Real-time availability updates
+let availabilityUpdateInterval;
+
+function startRealTimeUpdates() {
+    // Update availability every 15 seconds
+    availabilityUpdateInterval = setInterval(() => {
+        updateAvailabilityDisplay();
+    }, 15000);
+}
+
+function stopRealTimeUpdates() {
+    if (availabilityUpdateInterval) {
+        clearInterval(availabilityUpdateInterval);
+    }
+}
+
+function updateAvailabilityDisplay() {
+    // Get all visible game slots and update their availability
+    const gameCards = document.querySelectorAll('[data-game-id]');
+    
+    gameCards.forEach(card => {
+        const gameId = card.dataset.gameId;
+        const slotElements = card.querySelectorAll('[data-slot-id]');
+        
+        slotElements.forEach(slotElement => {
+            const slotId = slotElement.dataset.slotId;
+            
+            fetch(`/booking/api/slot-availability/${slotId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateSlotDisplay(slotElement, data);
+                    }
+                })
+                .catch(error => {
+                    console.warn('Failed to update availability for slot:', slotId);
+                });
+        });
+    });
+}
+
+function updateSlotDisplay(slotElement, availabilityData) {
+    // Update capacity indicators
+    const capacityIndicator = slotElement.querySelector('.capacity-indicator');
+    if (capacityIndicator) {
+        const dots = capacityIndicator.querySelectorAll('.capacity-dot');
+        dots.forEach((dot, index) => {
+            dot.className = 'capacity-dot ' + 
+                (index < availabilityData.availability.booked_spots ? 'booked' : 'available');
+        });
+        
+        const capacityText = capacityIndicator.querySelector('.text-xs');
+        if (capacityText) {
+            capacityText.textContent = `${availabilityData.availability.available_spots}/${availabilityData.availability.total_capacity}`;
+        }
+    }
+    
+    // Update booking options
+    const bookingOptions = slotElement.querySelectorAll('.booking-option');
+    bookingOptions.forEach(option => {
+        const optionType = option.dataset.bookingType;
+        const availableOption = availabilityData.booking_options.find(opt => opt.type === optionType);
+        
+        if (availableOption) {
+            if (availableOption.available) {
+                option.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-50');
+                option.classList.add('cursor-pointer', 'hover:border-blue-300', 'hover:bg-blue-50');
+            } else {
+                option.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-50');
+                option.classList.remove('cursor-pointer', 'hover:border-blue-300', 'hover:bg-blue-50');
+            }
+        }
+    });
+}
+
+// Start real-time updates when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    startRealTimeUpdates();
+});
+
+// Stop updates when page is hidden (to save resources)
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        stopRealTimeUpdates();
+    } else {
+        startRealTimeUpdates();
+    }
+});
+
+// Clean up on page unload
+window.addEventListener('beforeunload', () => {
+    stopRealTimeUpdates();
+});
+</script>
+
+{% csrf_token %}
+{% endblock %}
