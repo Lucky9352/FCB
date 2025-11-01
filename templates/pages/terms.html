@@ -1,329 +1,199 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Terms & Conditions - TapNex{% endblock %}
-{% block meta_description %}Read TapNex's terms and conditions to understand our platform policies, user responsibilities, and gaming cafe booking guidelines.{% endblock %}
+{% block title %}Terms & Conditions - TapNex Gaming Cafe{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<div class="relative overflow-hidden bg-gradient-to-br from-info to-info-focus py-24">
-    <!-- Background Elements -->
-    <div class="absolute inset-0 pointer-events-none">
-        <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-white/10 rounded-full mix-blend-overlay filter blur-xl opacity-60 animate-pulse"></div>
-        <div class="absolute bottom-1/4 right-1/4 w-48 h-48 bg-white/10 rounded-full mix-blend-overlay filter blur-xl opacity-60 animate-pulse delay-1000"></div>
-    </div>
-    
-    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div class="space-y-8">
-            <!-- Icon -->
-            <div class="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto shadow-glow">
-                <i class="bi bi-file-text-fill text-4xl text-white"></i>
+<div class="min-h-screen bg-gaming-primary">
+    <!-- Header -->
+    <div class="bg-gaming-secondary border-b border-gaming-accent py-16">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="w-20 h-20 bg-gaming-highlight/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-10 h-10 text-gaming-highlight" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"/>
+                </svg>
             </div>
-            
-            <!-- Title -->
-            <div>
-                <h1 class="text-5xl md:text-6xl font-black text-white mb-6">Terms & Conditions</h1>
-                <p class="text-xl md:text-2xl text-white/90 leading-relaxed max-w-3xl mx-auto">
-                    Terms and Conditions for <br class="hidden sm:block">
-                    <span class="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent font-bold">
-                        forge.tapnex.tech
-                    </span>
-                </p>
-            </div>
-            
-            <!-- Effective Date -->
-            <div class="inline-flex items-center space-x-2 px-6 py-3 bg-white/20 backdrop-blur-sm rounded-full border border-white/30">
-                <i class="bi bi-calendar-check text-white"></i>
-                <span class="text-white font-medium">Effective Date: October 29, 2025</span>
-            </div>
+            <h1 class="text-4xl md:text-5xl font-gaming font-bold text-white mb-4">Terms & Conditions</h1>
+            <p class="text-xl text-gray-400">Please read these terms carefully</p>
+            <p class="text-sm text-gray-500 mt-4">Last Updated: November 1, 2025</p>
         </div>
     </div>
-</div>
 
-<!-- Terms Content -->
-<div class="py-20 bg-gradient-to-br from-base-100 to-base-200">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Introduction -->
-        <div class="card bg-base-100 shadow-strong border border-base-300/50 glass-effect mb-12">
-            <div class="card-body p-8">
-                <div class="text-center mb-8">
-                    <div class="w-16 h-16 bg-gradient-to-br from-info to-info-focus rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="bi bi-info-circle-fill text-2xl text-white"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-base-content mb-4">Welcome to TapNex</h2>
-                    <p class="text-base-content/70 leading-relaxed">
-                        These terms and conditions govern your use of forge.tapnex.tech, an online booking platform for gaming assets operated by TapNex Technologies (powered by Nexgen FC).
-                    </p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Terms Sections -->
-        <div class="space-y-8">
-            <!-- Platform Section -->
-            <div class="card bg-base-100 shadow-soft border border-base-300/30 hover:shadow-strong transition-all duration-300">
-                <div class="card-body p-8">
-                    <div class="flex items-start space-x-4 mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-br from-primary to-primary-focus rounded-xl flex items-center justify-center flex-shrink-0">
-                            <span class="text-white font-bold">1</span>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-base-content mb-4">Platform Overview</h2>
-                            <p class="text-base-content/80 leading-relaxed">
-                                <strong class="text-primary">forge.tapnex.tech</strong> is an online booking platform that allows users to book fixed time slots for gaming assets at Forge Gaming. The platform is operated by <strong class="text-secondary">TapNex Technologies (powered by Nexgen FC)</strong>.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- Content -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-8 space-y-8">
+            
+            <!-- Introduction -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">1. Acceptance of Terms</h2>
+                <p class="text-gray-300 leading-relaxed">
+                    By accessing and using TapNex Gaming Cafe booking platform at <span class="text-gaming-highlight">forge.tapnex.tech</span>, you accept and agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use our services.
+                </p>
+            </section>
+
+            <!-- Service Description -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">2. Service Description</h2>
+                <p class="text-gray-300 mb-4">
+                    TapNex provides an online booking platform for gaming cafe slots, including:
+                </p>
+                <ul class="list-disc list-inside text-gray-300 space-y-2 ml-4">
+                    <li>Online reservation of gaming stations and slots</li>
+                    <li>Selection of gaming titles and time slots</li>
+                    <li>Private and shared booking options</li>
+                    <li>Secure online payment processing</li>
+                    <li>Booking management and notifications</li>
+                </ul>
+            </section>
 
             <!-- User Accounts -->
-            <div class="card bg-base-100 shadow-soft border border-base-300/30 hover:shadow-strong transition-all duration-300">
-                <div class="card-body p-8">
-                    <div class="flex items-start space-x-4 mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-br from-secondary to-secondary-focus rounded-xl flex items-center justify-center flex-shrink-0">
-                            <span class="text-white font-bold">2</span>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-base-content mb-4">User Accounts</h2>
-                            <p class="text-base-content/80 leading-relaxed mb-4">
-                                User accounts are required to book gaming slots. You are responsible for maintaining the security of your account credentials and for all activities that occur under your account.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">3. User Accounts</h2>
+                <p class="text-gray-300 mb-4">To use our booking services, you must:</p>
+                <ul class="list-disc list-inside text-gray-300 space-y-2 ml-4">
+                    <li>Create an account with accurate information</li>
+                    <li>Be at least 13 years old (or have parental consent)</li>
+                    <li>Maintain the security of your account credentials</li>
+                    <li>Accept responsibility for all activities under your account</li>
+                    <li>Notify us immediately of any unauthorized use</li>
+                </ul>
+            </section>
 
-            <!-- Booking Process -->
-            <div class="card bg-base-100 shadow-soft border border-base-300/30 hover:shadow-strong transition-all duration-300">
-                <div class="card-body p-8">
-                    <div class="flex items-start space-x-4 mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-br from-accent to-accent-focus rounded-xl flex items-center justify-center flex-shrink-0">
-                            <span class="text-white font-bold">3</span>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-base-content mb-4">Booking Process</h2>
-                            <p class="text-base-content/80 leading-relaxed mb-4">
-                                Users can select available time slots for gaming assets and complete payment through Razorpay integration. Bookings are confirmed upon successful payment processing.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Booking Policy -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">4. Booking Policy</h2>
+                
+                <h3 class="text-xl font-semibold text-gaming-highlight mb-3">Reservation</h3>
+                <ul class="list-disc list-inside text-gray-300 space-y-2 ml-4 mb-4">
+                    <li>Bookings are subject to availability</li>
+                    <li>You must arrive within 15 minutes of your scheduled time</li>
+                    <li>Late arrivals may result in reduced gaming time</li>
+                    <li>No-shows may result in forfeiture of booking</li>
+                </ul>
 
-            <!-- Payment Terms -->
-            <div class="card bg-base-100 shadow-soft border border-base-300/30 hover:shadow-strong transition-all duration-300">
-                <div class="card-body p-8">
-                    <div class="flex items-start space-x-4 mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-br from-warning to-warning-focus rounded-xl flex items-center justify-center flex-shrink-0">
-                            <span class="text-white font-bold">4</span>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-base-content mb-4">Payment Terms</h2>
-                            <p class="text-base-content/80 leading-relaxed mb-4">
-                                All payments are processed through Razorpay. The total amount consists of the Base Price + 2% Platform Fee (paid by the customer). All prices are displayed and charged in Indian Rupees (INR).
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                <h3 class="text-xl font-semibold text-gaming-highlight mb-3">Payment</h3>
+                <ul class="list-disc list-inside text-gray-300 space-y-2 ml-4">
+                    <li>All payments must be made online through Razorpay</li>
+                    <li>Prices are displayed in Indian Rupees (₹)</li>
+                    <li>Payment must be completed at the time of booking</li>
+                    <li>All prices include applicable taxes</li>
+                </ul>
+            </section>
 
-            <!-- Cancellations and Refunds -->
-            <div class="card bg-base-100 shadow-soft border border-base-300/30 hover:shadow-strong transition-all duration-300">
-                <div class="card-body p-8">
-                    <div class="flex items-start space-x-4 mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-br from-error to-error-focus rounded-xl flex items-center justify-center flex-shrink-0">
-                            <span class="text-white font-bold">5</span>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-base-content mb-4">Cancellations and Refunds</h2>
-                            <p class="text-base-content/80 leading-relaxed mb-4">
-                                All bookings are final and non-refundable once payment is confirmed. For detailed refund policies, please refer to our <a href="{% url 'refund_policy' %}" class="text-primary hover:underline">Cancellation and Refund Policy</a>.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Cancellation -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">5. Cancellation Policy</h2>
+                <p class="text-gray-300 mb-4">
+                    Please refer to our <a href="{% url 'refund_policy' %}" class="text-gaming-highlight hover:underline">Refund & Cancellation Policy</a> for detailed information about cancellations and refunds.
+                </p>
+            </section>
 
             <!-- User Conduct -->
-            <div class="card bg-base-100 shadow-soft border border-base-300/30 hover:shadow-strong transition-all duration-300">
-                <div class="card-body p-8">
-                    <div class="flex items-start space-x-4 mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-br from-info to-info-focus rounded-xl flex items-center justify-center flex-shrink-0">
-                            <span class="text-white font-bold">6</span>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-base-content mb-4">User Conduct</h2>
-                            <p class="text-base-content/80 leading-relaxed mb-4">
-                                Users must use the platform lawfully and in accordance with Forge Gaming's venue rules and regulations. Any violation may result in account suspension or termination.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">6. User Conduct</h2>
+                <p class="text-gray-300 mb-4">While using our platform and facilities, you agree to:</p>
+                <ul class="list-disc list-inside text-gray-300 space-y-2 ml-4">
+                    <li>Respect other users and staff</li>
+                    <li>Use equipment properly and report any damage</li>
+                    <li>Not engage in any illegal activities</li>
+                    <li>Not harass, abuse, or harm others</li>
+                    <li>Follow all cafe rules and guidelines</li>
+                    <li>Not resell or transfer bookings without permission</li>
+                </ul>
+            </section>
+
+            <!-- Prohibited Activities -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">7. Prohibited Activities</h2>
+                <p class="text-gray-300 mb-4">You may not:</p>
+                <ul class="list-disc list-inside text-gray-300 space-y-2 ml-4">
+                    <li>Use the platform for fraudulent purposes</li>
+                    <li>Attempt to gain unauthorized access to our systems</li>
+                    <li>Upload malicious code or viruses</li>
+                    <li>Scrape or automatically collect data from our platform</li>
+                    <li>Impersonate others or provide false information</li>
+                    <li>Interfere with the proper functioning of the platform</li>
+                </ul>
+            </section>
+
+            <!-- Liability -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">8. Limitation of Liability</h2>
+                <p class="text-gray-300 mb-4">
+                    TapNex Gaming Cafe is not liable for:
+                </p>
+                <ul class="list-disc list-inside text-gray-300 space-y-2 ml-4">
+                    <li>Loss of personal property</li>
+                    <li>Technical issues or service interruptions</li>
+                    <li>Third-party conduct or content</li>
+                    <li>Any indirect, incidental, or consequential damages</li>
+                </ul>
+            </section>
 
             <!-- Intellectual Property -->
-            <div class="card bg-base-100 shadow-soft border border-base-300/30 hover:shadow-strong transition-all duration-300">
-                <div class="card-body p-8">
-                    <div class="flex items-start space-x-4 mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-br from-success to-success-focus rounded-xl flex items-center justify-center flex-shrink-0">
-                            <span class="text-white font-bold">7</span>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-base-content mb-4">Intellectual Property</h2>
-                            <p class="text-base-content/80 leading-relaxed mb-4">
-                                All software, platform features, and content on forge.tapnex.tech are owned by TapNex Technologies. Users may not copy, modify, or distribute platform software without permission.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">9. Intellectual Property</h2>
+                <p class="text-gray-300">
+                    All content on the TapNex platform, including logos, text, graphics, and software, is the property of TapNex Technologies or its licensors and is protected by copyright and trademark laws.
+                </p>
+            </section>
 
-            <!-- Disclaimers -->
-            <div class="card bg-base-100 shadow-soft border border-base-300/30 hover:shadow-strong transition-all duration-300">
-                <div class="card-body p-8">
-                    <div class="flex items-start space-x-4 mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-br from-neutral to-neutral-focus rounded-xl flex items-center justify-center flex-shrink-0">
-                            <span class="text-white font-bold">8</span>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-base-content mb-4">Disclaimers</h2>
-                            <p class="text-base-content/80 leading-relaxed mb-4">
-                                TapNex Technologies is not liable for the quality, safety, or experience at Forge Gaming venues. Users participate at their own risk and are responsible for complying with venue policies.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Privacy -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">10. Privacy</h2>
+                <p class="text-gray-300">
+                    Your privacy is important to us. Please review our <a href="{% url 'privacy' %}" class="text-gaming-highlight hover:underline">Privacy Policy</a> to understand how we collect, use, and protect your information.
+                </p>
+            </section>
 
-            <!-- Liability Limitation -->
-            <div class="card bg-base-100 shadow-soft border border-base-300/30 hover:shadow-strong transition-all duration-300">
-                <div class="card-body p-8">
-                    <div class="flex items-start space-x-4 mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-br from-warning to-warning-focus rounded-xl flex items-center justify-center flex-shrink-0">
-                            <span class="text-white font-bold">9</span>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-base-content mb-4">Liability Limitation</h2>
-                            <p class="text-base-content/80 leading-relaxed mb-4">
-                                TapNex Technologies' liability is limited to the platform fee paid by the customer for the specific booking. We are not liable for indirect, incidental, or consequential damages.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Changes to Terms -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">11. Changes to Terms</h2>
+                <p class="text-gray-300">
+                    We reserve the right to modify these terms at any time. Changes will be effective immediately upon posting. Your continued use of the platform constitutes acceptance of the modified terms.
+                </p>
+            </section>
+
+            <!-- Termination -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">12. Termination</h2>
+                <p class="text-gray-300">
+                    We reserve the right to suspend or terminate your account and access to our services at any time, without notice, for conduct that we believe violates these Terms or is harmful to other users, us, or third parties, or for any other reason.
+                </p>
+            </section>
 
             <!-- Governing Law -->
-            <div class="card bg-base-100 shadow-soft border border-base-300/30 hover:shadow-strong transition-all duration-300">
-                <div class="card-body p-8">
-                    <div class="flex items-start space-x-4 mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-br from-primary to-primary-focus rounded-xl flex items-center justify-center flex-shrink-0">
-                            <span class="text-white font-bold">10</span>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-base-content mb-4">Governing Law</h2>
-                            <p class="text-base-content/80 leading-relaxed mb-4">
-                                These terms are governed by the laws of India. Any disputes will be resolved through arbitration in Bengaluru, Karnataka.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">13. Governing Law</h2>
+                <p class="text-gray-300">
+                    These Terms shall be governed by and construed in accordance with the laws of India. Any disputes arising from these terms will be subject to the exclusive jurisdiction of the courts in India.
+                </p>
+            </section>
 
-            <!-- Contact Information -->
-            <div class="card bg-base-100 shadow-soft border border-base-300/30 hover:shadow-strong transition-all duration-300">
-                <div class="card-body p-8">
-                    <div class="flex items-start space-x-4 mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-br from-secondary to-secondary-focus rounded-xl flex items-center justify-center flex-shrink-0">
-                            <span class="text-white font-bold">11</span>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-base-content mb-4">Contact Information</h2>
-                            <p class="text-base-content/80 leading-relaxed mb-4">
-                                For questions about these terms, please contact us at <strong class="text-primary">support@tapnex.tech</strong>.
-                            </p>
-                        </div>
-                    </div>
+            <!-- Contact -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">14. Contact Information</h2>
+                <p class="text-gray-300 mb-4">
+                    For questions about these Terms and Conditions, please contact:
+                </p>
+                <div class="bg-gaming-primary border border-gaming-accent rounded-lg p-6">
+                    <p class="text-white font-semibold mb-2">TapNex Technologies</p>
+                    <p class="text-gray-300">A brand of NEXGEN FC</p>
+                    <p class="text-gaming-highlight mt-4">Email: support@tapnex.tech</p>
+                    <p class="text-gray-300">Website: forge.tapnex.tech</p>
                 </div>
-            </div>
+            </section>
         </div>
-        
-        <!-- Contact Section -->
-        <div class="card bg-gradient-to-r from-primary to-secondary shadow-strong mt-12">
-            <div class="card-body p-8 text-center">
-                <div class="space-y-6">
-                    <div>
-                        <h3 class="text-2xl font-bold text-white mb-4">Questions about these terms?</h3>
-                        <p class="text-white/90 leading-relaxed max-w-2xl mx-auto">
-                            If you have any questions or concerns about our terms and conditions, 
-                            please don't hesitate to contact us.
-                        </p>
-                    </div>
-                    
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        <a href="{% url 'contact' %}" 
-                           class="btn btn-accent btn-lg font-semibold shadow-glow hover:shadow-glow-green transition-all duration-300 group">
-                            <i class="bi bi-envelope text-xl group-hover:scale-110 transition-transform duration-300"></i>
-                            Contact Us
-                        </a>
-                        
-                        <a href="{% url 'privacy' %}" 
-                           class="btn btn-outline btn-lg border-2 border-white text-white hover:bg-white hover:text-primary transition-all duration-300 group">
-                            <i class="bi bi-shield-check text-xl group-hover:scale-110 transition-transform duration-300"></i>
-                            Privacy Policy
-                        </a>
-                    </div>
-                </div>
-            </div>
+
+        <!-- Back to Home -->
+        <div class="text-center mt-8">
+            <a href="{% url 'home' %}" class="inline-flex items-center text-gaming-highlight hover:underline">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
+                </svg>
+                Back to Home
+            </a>
         </div>
     </div>
 </div>
-
-<style>
-    .glass-effect {
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-    }
-    
-    .shadow-strong {
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    }
-    
-    .shadow-soft {
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-    
-    .card:hover {
-        transform: translateY(-2px);
-    }
-    
-    .scroll-smooth {
-        scroll-behavior: smooth;
-    }
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Add smooth scrolling for any anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            document.querySelector(this.getAttribute('href')).scrollIntoView({
-                behavior: 'smooth'
-            });
-        });
-    });
-    
-    // Add reading progress indicator
-    const progressBar = document.createElement('div');
-    progressBar.className = 'fixed top-0 left-0 w-0 h-1 bg-gradient-to-r from-primary to-secondary z-50 transition-all duration-300';
-    document.body.appendChild(progressBar);
-    
-    window.addEventListener('scroll', () => {
-        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-        const scrolled = (winScroll / height) * 100;
-        progressBar.style.width = scrolled + '%';
-    });
-});
-</script>
 {% endblock %}

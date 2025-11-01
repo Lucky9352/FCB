@@ -1,314 +1,205 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Cancellation and Refund Policy - TapNex{% endblock %}
-{% block meta_description %}Read TapNex's cancellation and refund policy for forge.tapnex.tech. Understand our strict no-refund policy for gaming slot bookings.{% endblock %}
+{% block title %}Refund & Cancellation Policy - TapNex Gaming Cafe{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<div class="relative overflow-hidden bg-gradient-to-br from-error to-error-focus py-24">
-    <!-- Background Elements -->
-    <div class="absolute inset-0 pointer-events-none">
-        <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-white/10 rounded-full mix-blend-overlay filter blur-xl opacity-60 animate-pulse"></div>
-        <div class="absolute bottom-1/4 right-1/4 w-48 h-48 bg-white/10 rounded-full mix-blend-overlay filter blur-xl opacity-60 animate-pulse delay-1000"></div>
-    </div>
-    
-    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div class="space-y-8">
-            <!-- Icon -->
-            <div class="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto shadow-glow">
-                <i class="bi bi-x-circle-fill text-4xl text-white"></i>
+<div class="min-h-screen bg-gaming-primary">
+    <!-- Header -->
+    <div class="bg-gaming-secondary border-b border-gaming-accent py-16">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="w-20 h-20 bg-gaming-highlight/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-10 h-10 text-gaming-highlight" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+                </svg>
             </div>
-            
-            <!-- Title -->
-            <div>
-                <h1 class="text-5xl md:text-6xl font-black text-white mb-6">Cancellation & Refund Policy</h1>
-                <p class="text-xl md:text-2xl text-white/90 leading-relaxed max-w-3xl mx-auto">
-                    Important information about our <br class="hidden sm:block">
-                    <span class="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent font-bold">
-                        strict no-refund policy
-                    </span>
-                </p>
-            </div>
-            
-            <!-- Policy Alert -->
-            <div class="inline-flex items-center space-x-4 px-8 py-4 bg-white/20 backdrop-blur-sm rounded-full border border-white/30">
-                <i class="bi bi-exclamation-triangle-fill text-white text-2xl"></i>
-                <span class="text-white font-bold text-lg">STRICT NO-REFUND POLICY</span>
-            </div>
+            <h1 class="text-4xl md:text-5xl font-gaming font-bold text-white mb-4">Refund & Cancellation Policy</h1>
+            <p class="text-xl text-gray-400">Our cancellation and refund terms</p>
+            <p class="text-sm text-gray-500 mt-4">Last Updated: November 1, 2025</p>
         </div>
     </div>
-</div>
 
-<!-- Policy Content -->
-<div class="py-20 bg-gradient-to-br from-base-100 to-base-200">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Introduction -->
-        <div class="card bg-base-100 shadow-strong border border-base-300/50 glass-effect mb-12">
-            <div class="card-body p-8">
-                <div class="text-center mb-8">
-                    <div class="w-16 h-16 bg-gradient-to-br from-error to-error-focus rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="bi bi-info-circle-fill text-2xl text-white"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-base-content mb-4">Cancellation and Refund Policy</h2>
-                    <p class="text-base-content/70 leading-relaxed">
-                        This policy outlines the terms and conditions for cancellations and refunds on forge.tapnex.tech.
+    <!-- Content -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Important Notice -->
+        <div class="bg-red-900/20 border-2 border-red-500 rounded-xl p-6 mb-8">
+            <div class="flex items-start">
+                <svg class="w-6 h-6 text-red-400 mr-3 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                <div>
+                    <h3 class="text-lg font-bold text-red-400 mb-2">Important: Strict No-Refund Policy</h3>
+                    <p class="text-gray-300">
+                        Due to the nature of our gaming slot booking service, <strong class="text-white">all bookings are final and non-refundable</strong>. Please read this policy carefully before making a booking.
                     </p>
                 </div>
             </div>
         </div>
-        
-        <!-- Main Policy -->
-        <div class="space-y-8">
-            <!-- Strict No Refund Policy -->
-            <div class="card bg-base-100 shadow-soft border border-base-300/30 hover:shadow-strong transition-all duration-300">
-                <div class="card-body p-8">
-                    <div class="flex items-start space-x-4 mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-br from-error to-error-focus rounded-xl flex items-center justify-center flex-shrink-0">
-                            <span class="text-white font-bold text-xl">!</span>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-base-content mb-4">Strict No-Refund Policy</h2>
-                            <p class="text-base-content/80 leading-relaxed mb-4">
-                                <strong class="text-error">All bookings made through forge.tapnex.tech are final and non-refundable.</strong> 
-                                Once payment is confirmed and the booking is processed, no refunds will be provided under any circumstances.
-                            </p>
-                            <div class="alert alert-error border border-error/30 bg-error/10">
-                                <i class="bi bi-exclamation-triangle-fill text-error"></i>
-                                <div>
-                                    <p class="font-semibold text-error mb-2">No Exceptions for Standard Cases</p>
-                                    <p class="text-sm text-base-content/80">
-                                        This includes but is not limited to: no-shows, change of plans, dissatisfaction with venue experience, 
-                                        personal emergencies, or any other circumstances.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Rationale -->
-            <div class="card bg-base-100 shadow-soft border border-base-300/30 hover:shadow-strong transition-all duration-300">
-                <div class="card-body p-8">
-                    <div class="flex items-start space-x-4 mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-br from-warning to-warning-focus rounded-xl flex items-center justify-center flex-shrink-0">
-                            <i class="bi bi-question-circle-fill text-2xl text-white"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-base-content mb-4">Why This Policy?</h2>
-                            <p class="text-base-content/80 leading-relaxed mb-4">
-                                Gaming slot reservations are time-sensitive and exclusive. When you book a slot, it is reserved exclusively for you during that specific time period. This ensures fair access for all users and prevents last-minute cancellations that could affect other customers.
-                            </p>
-                            <ul class="space-y-2 text-base-content/80">
-                                <li class="flex items-start space-x-2">
-                                    <i class="bi bi-clock text-primary mt-1"></i>
-                                    <span>Slots are reserved exclusively for confirmed bookings</span>
-                                </li>
-                                <li class="flex items-start space-x-2">
-                                    <i class="bi bi-people text-secondary mt-1"></i>
-                                    <span>Prevents unfair advantage over other customers waiting for slots</span>
-                                </li>
-                                <li class="flex items-start space-x-2">
-                                    <i class="bi bi-calendar-check text-accent mt-1"></i>
-                                    <span>Ensures reliable scheduling for Forge Gaming operations</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-8 space-y-8">
+            
+            <!-- Policy Overview -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">1. Policy Overview</h2>
+                <p class="text-gray-300 leading-relaxed mb-4">
+                    TapNex Gaming Cafe operates a <strong class="text-white">strict no-refund policy</strong> for all gaming slot bookings made through our platform at <span class="text-gaming-highlight">forge.tapnex.tech</span>.
+                </p>
+                <p class="text-gray-300">
+                    Once a booking is confirmed and payment is processed, it cannot be cancelled, modified, or refunded under any circumstances.
+                </p>
+            </section>
 
-            <!-- No Refund Scenarios -->
-            <div class="card bg-base-100 shadow-soft border border-base-300/30 hover:shadow-strong transition-all duration-300">
-                <div class="card-body p-8">
-                    <div class="flex items-start space-x-4 mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-br from-neutral to-neutral-focus rounded-xl flex items-center justify-center flex-shrink-0">
-                            <i class="bi bi-x-octagon-fill text-2xl text-white"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-base-content mb-4">No Refunds Will Be Given For</h2>
-                            <p class="text-base-content/80 leading-relaxed mb-4">
-                                The following situations do not qualify for refunds:
-                            </p>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="space-y-3">
-                                    <div class="flex items-start space-x-2">
-                                        <i class="bi bi-x-circle text-error mt-1"></i>
-                                        <span class="text-sm">Failure to arrive for your booked slot</span>
-                                    </div>
-                                    <div class="flex items-start space-x-2">
-                                        <i class="bi bi-x-circle text-error mt-1"></i>
-                                        <span class="text-sm">Change of plans or personal reasons</span>
-                                    </div>
-                                    <div class="flex items-start space-x-2">
-                                        <i class="bi bi-x-circle text-error mt-1"></i>
-                                        <span class="text-sm">Dissatisfaction with gaming equipment</span>
-                                    </div>
-                                    <div class="flex items-start space-x-2">
-                                        <i class="bi bi-x-circle text-error mt-1"></i>
-                                        <span class="text-sm">Venue ambiance or atmosphere</span>
-                                    </div>
-                                </div>
-                                <div class="space-y-3">
-                                    <div class="flex items-start space-x-2">
-                                        <i class="bi bi-x-circle text-error mt-1"></i>
-                                        <span class="text-sm">Technical issues with games</span>
-                                    </div>
-                                    <div class="flex items-start space-x-2">
-                                        <i class="bi bi-x-circle text-error mt-1"></i>
-                                        <span class="text-sm">Staff service quality</span>
-                                    </div>
-                                    <div class="flex items-start space-x-2">
-                                        <i class="bi bi-x-circle text-error mt-1"></i>
-                                        <span class="text-sm">Weather conditions</span>
-                                    </div>
-                                    <div class="flex items-start space-x-2">
-                                        <i class="bi bi-x-circle text-error mt-1"></i>
-                                        <span class="text-sm">Any other unforeseen circumstances</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Why No Refunds -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">2. Reason for No-Refund Policy</h2>
+                <p class="text-gray-300 mb-4">
+                    This policy exists because:
+                </p>
+                <ul class="list-disc list-inside text-gray-300 space-y-2 ml-4">
+                    <li>Gaming slots are time-specific and cannot be resold once booked</li>
+                    <li>We allocate resources and staff based on confirmed bookings</li>
+                    <li>Other customers may have been turned away for your time slot</li>
+                    <li>Gaming equipment and stations are reserved exclusively for your booking</li>
+                </ul>
+            </section>
 
-            <!-- Exception Clause -->
-            <div class="card bg-base-100 shadow-soft border border-base-300/30 hover:shadow-strong transition-all duration-300">
-                <div class="card-body p-8">
-                    <div class="flex items-start space-x-4 mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-br from-success to-success-focus rounded-xl flex items-center justify-center flex-shrink-0">
-                            <i class="bi bi-shield-check-fill text-2xl text-white"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-base-content mb-4">Exception Clause</h2>
-                            <p class="text-base-content/80 leading-relaxed mb-4">
-                                <strong class="text-success">Refunds may only be processed if explicitly requested in writing by Forge Gaming</strong> 
-                                through their official email or communication channels. This is extremely rare and only applies in exceptional circumstances determined solely by Forge Gaming management.
-                            </p>
-                            <div class="alert alert-info border border-info/30 bg-info/10">
-                                <i class="bi bi-info-circle text-info"></i>
-                                <div>
-                                    <p class="font-semibold text-info mb-2">Processing Fees</p>
-                                    <p class="text-sm text-base-content/80">
-                                        In the unlikely event that a refund is approved, processing fees and platform charges may apply.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- No Cancellation -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">3. No Cancellation</h2>
+                <p class="text-gray-300 mb-4">
+                    <strong class="text-white">Bookings cannot be cancelled</strong> for any reason, including but not limited to:
+                </p>
+                <ul class="list-disc list-inside text-gray-300 space-y-2 ml-4">
+                    <li>Change of plans or schedule conflicts</li>
+                    <li>Personal emergencies</li>
+                    <li>Weather conditions</li>
+                    <li>Technical issues on your end</li>
+                    <li>Booking the wrong date or time</li>
+                    <li>Finding a better price elsewhere</li>
+                </ul>
+            </section>
 
-            <!-- Contact for Errors -->
-            <div class="card bg-base-100 shadow-soft border border-base-300/30 hover:shadow-strong transition-all duration-300">
-                <div class="card-body p-8">
-                    <div class="flex items-start space-x-4 mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-br from-primary to-primary-focus rounded-xl flex items-center justify-center flex-shrink-0">
-                            <i class="bi bi-envelope-fill text-2xl text-white"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-base-content mb-4">Contact for Payment Errors</h2>
-                            <p class="text-base-content/80 leading-relaxed mb-4">
-                                If you experience a genuine payment processing error (such as duplicate charges or incorrect amounts), 
-                                please contact our support team immediately:
-                            </p>
-                            <a href="mailto:support@tapnex.tech" class="text-primary hover:underline font-semibold text-lg">
-                                support@tapnex.tech
-                            </a>
-                            <p class="text-base-content/80 text-sm mt-2">
-                                Please include your booking reference number and payment details. 
-                                Payment error claims will be investigated and resolved within 7-10 business days.
-                            </p>
-                        </div>
-                    </div>
+            <!-- No Refunds -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">4. No Refunds</h2>
+                <p class="text-gray-300 mb-4">
+                    <strong class="text-white">Refunds will not be issued</strong> under any circumstances, including:
+                </p>
+                <ul class="list-disc list-inside text-gray-300 space-y-2 ml-4">
+                    <li>No-shows or late arrivals</li>
+                    <li>Duplicate bookings made in error</li>
+                    <li>Dissatisfaction with the service</li>
+                    <li>Technical difficulties preventing you from attending</li>
+                    <li>Cancellation by the customer for any reason</li>
+                </ul>
+            </section>
+
+            <!-- No Rescheduling -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">5. No Rescheduling</h2>
+                <p class="text-gray-300">
+                    Bookings cannot be rescheduled to a different date or time. If you cannot attend your booked slot, you will forfeit your booking and payment without any compensation or credit.
+                </p>
+            </section>
+
+            <!-- No Transfers -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">6. No Transfers</h2>
+                <p class="text-gray-300">
+                    Bookings are non-transferable and cannot be given, sold, or transferred to another person without prior written approval from TapNex Gaming Cafe.
+                </p>
+            </section>
+
+            <!-- Exceptions -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">7. Limited Exceptions</h2>
+                <p class="text-gray-300 mb-4">
+                    Refunds or cancellations may <strong class="text-white">only</strong> be considered in the following rare circumstances:
+                </p>
+                <ul class="list-disc list-inside text-gray-300 space-y-2 ml-4">
+                    <li><strong class="text-white">Technical Failure by TapNex:</strong> If our systems fail and we cannot provide the booked service</li>
+                    <li><strong class="text-white">Cafe Closure:</strong> If the gaming cafe is forced to close due to unforeseen circumstances beyond our control</li>
+                    <li><strong class="text-white">Double Booking Error:</strong> If we accidentally double-book a slot due to a system error</li>
+                </ul>
+                <p class="text-gray-300 mt-4">
+                    Even in these cases, refunds are issued at TapNex's sole discretion and must be requested in writing within 24 hours of the incident.
+                </p>
+            </section>
+
+            <!-- Payment Issues -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">8. Payment Issues</h2>
+                <p class="text-gray-300 mb-4">
+                    If you experience payment issues:
+                </p>
+                <ul class="list-disc list-inside text-gray-300 space-y-2 ml-4">
+                    <li><strong class="text-white">Duplicate Charges:</strong> If your card is charged multiple times for the same booking due to a technical error, the duplicate charge will be refunded within 7-10 business days</li>
+                    <li><strong class="text-white">Payment Failure:</strong> If payment fails but money is deducted, it will be refunded by your bank/payment processor within 5-7 business days</li>
+                </ul>
+            </section>
+
+            <!-- Chargeback Warning -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">9. Chargeback Warning</h2>
+                <div class="bg-yellow-900/20 border border-yellow-600 rounded-lg p-4">
+                    <p class="text-gray-300">
+                        <strong class="text-yellow-400">Warning:</strong> Initiating a chargeback with your bank/credit card company for a valid booking is considered fraud. This may result in:
+                    </p>
+                    <ul class="list-disc list-inside text-gray-300 space-y-1 ml-4 mt-2">
+                        <li>Permanent ban from TapNex Gaming Cafe</li>
+                        <li>Legal action to recover costs</li>
+                        <li>Blacklisting from future bookings</li>
+                    </ul>
                 </div>
-            </div>
+            </section>
+
+            <!-- Before You Book -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">10. Before You Book</h2>
+                <div class="bg-gaming-primary border border-gaming-accent rounded-lg p-6">
+                    <p class="text-gaming-highlight font-semibold mb-3">Please ensure before booking:</p>
+                    <ul class="list-disc list-inside text-gray-300 space-y-2 ml-4">
+                        <li>You have selected the correct date and time</li>
+                        <li>You have chosen the right game and booking type</li>
+                        <li>You are available to attend at the scheduled time</li>
+                        <li>You understand and accept this no-refund policy</li>
+                        <li>You have read all booking terms and conditions</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Acknowledgment -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">11. Acknowledgment</h2>
+                <p class="text-gray-300">
+                    By completing a booking on TapNex Gaming Cafe, you acknowledge that you have read, understood, and agree to this Refund and Cancellation Policy. You confirm that you accept the no-refund, no-cancellation, and no-rescheduling terms.
+                </p>
+            </section>
+
+            <!-- Contact -->
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-4">12. Questions & Support</h2>
+                <p class="text-gray-300 mb-4">
+                    If you have questions about this policy or need assistance, please contact us BEFORE making a booking:
+                </p>
+                <div class="bg-gaming-primary border border-gaming-accent rounded-lg p-6">
+                    <p class="text-white font-semibold mb-2">TapNex Technologies</p>
+                    <p class="text-gray-300">A brand of NEXGEN FC</p>
+                    <p class="text-gaming-highlight mt-4">Email: support@tapnex.tech</p>
+                    <p class="text-gray-300">Website: forge.tapnex.tech</p>
+                </div>
+            </section>
         </div>
-        
-        <!-- Final Warning -->
-        <div class="card bg-gradient-to-r from-error to-warning shadow-strong mt-12">
-            <div class="card-body p-8">
-                <div class="text-center space-y-6">
-                    <div>
-                        <h3 class="text-2xl font-bold text-white mb-4">Please Read Carefully</h3>
-                        <p class="text-white/90 leading-relaxed max-w-3xl mx-auto">
-                            By making a booking on forge.tapnex.tech, you acknowledge and agree to this strict no-refund policy. 
-                            Please ensure you are certain about your booking before completing payment.
-                        </p>
-                    </div>
-                    
-                    <div class="p-6 bg-white/10 rounded-lg border border-white/20">
-                        <p class="text-white font-semibold text-lg">
-                            ⚠️ Bookings are final. No refunds will be provided.
-                        </p>
-                    </div>
-                    
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        <a href="{% url 'contact' %}" 
-                           class="btn btn-accent btn-lg font-semibold shadow-glow hover:shadow-glow-green transition-all duration-300 group">
-                            <i class="bi bi-envelope text-xl group-hover:scale-110 transition-transform duration-300"></i>
-                            Contact Support
-                        </a>
-                        
-                        <a href="{% url 'terms' %}" 
-                           class="btn btn-outline btn-lg border-2 border-white text-white hover:bg-white hover:text-primary transition-all duration-300 group">
-                            <i class="bi bi-file-text text-xl group-hover:scale-110 transition-transform duration-300"></i>
-                            Terms & Conditions
-                        </a>
-                    </div>
-                </div>
-            </div>
+
+        <!-- Back to Home -->
+        <div class="text-center mt-8">
+            <a href="{% url 'home' %}" class="inline-flex items-center text-gaming-highlight hover:underline">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
+                </svg>
+                Back to Home
+            </a>
         </div>
     </div>
 </div>
-
-<style>
-    .glass-effect {
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-    }
-    
-    .shadow-strong {
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    }
-    
-    .shadow-soft {
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-    
-    .card:hover {
-        transform: translateY(-2px);
-    }
-    
-    .scroll-smooth {
-        scroll-behavior: smooth;
-    }
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Add smooth scrolling for any anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            document.querySelector(this.getAttribute('href')).scrollIntoView({
-                behavior: 'smooth'
-            });
-        });
-    });
-    
-    // Add reading progress indicator
-    const progressBar = document.createElement('div');
-    progressBar.className = 'fixed top-0 left-0 w-0 h-1 bg-gradient-to-r from-error to-warning z-50 transition-all duration-300';
-    document.body.appendChild(progressBar);
-    
-    window.addEventListener('scroll', () => {
-        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-        const scrolled = (winScroll / height) * 100;
-        progressBar.style.width = scrolled + '%';
-    });
-});
-</script>
 {% endblock %}
