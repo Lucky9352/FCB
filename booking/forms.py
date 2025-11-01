@@ -193,14 +193,9 @@ class GameCreationForm(forms.ModelForm):
         return cleaned_data
     
     def save(self, commit=True):
-        """Override save to generate slots after creation"""
+        """Override save - DO NOT generate slots here (will be done via AJAX with progress bar)"""
         instance = super().save(commit=commit)
-        
-        if commit:
-            # Generate initial slots for the next 7 days (reduced from 30 for faster creation)
-            # More slots can be generated later via management command or scheduled task
-            instance.generate_slots(days_ahead=7)
-        
+        # Slot generation is now handled separately via AJAX endpoint
         return instance
 
 

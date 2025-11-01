@@ -285,12 +285,92 @@
                    class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">
                     Cancel
                 </a>
-                <button type="submit" 
+                <button type="submit" id="submitBtn"
                         class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
                     {{ submit_text }}
                 </button>
             </div>
         </form>
+
+        <!-- Progress Modal - Improved Styling -->
+        <div id="progressModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full transform transition-all">
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-4 rounded-t-2xl">
+                    <h3 class="text-2xl font-bold flex items-center">
+                        <i class="fas fa-cog fa-spin mr-3"></i>
+                        Generating Time Slots
+                    </h3>
+                </div>
+                
+                <!-- Modal Body -->
+                <div class="p-6">
+                    <!-- Current Status -->
+                    <div class="mb-6">
+                        <p id="progressStatus" class="text-gray-700 text-lg font-medium mb-2">Starting slot generation...</p>
+                        <p id="progressDate" class="text-sm text-gray-500"></p>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <span id="progressPercent" class="text-2xl font-bold text-indigo-600">0%</span>
+                            <span id="slotsCreated" class="text-sm font-semibold text-gray-600 bg-gray-100 px-3 py-1 rounded-full">0 slots created</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-6 overflow-hidden shadow-inner">
+                            <div id="progressBar" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-6 rounded-full transition-all duration-500 ease-out flex items-center justify-end pr-2" style="width: 0%">
+                                <span class="text-white text-xs font-bold opacity-0" id="barPercent"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex space-x-3">
+                        <!-- Cancel Button (shown during generation) -->
+                        <button id="cancelBtn" class="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors duration-200 flex items-center justify-center">
+                            <i class="fas fa-times-circle mr-2"></i>Cancel Generation
+                        </button>
+                        
+                        <!-- Success Button (hidden initially) -->
+                        <button id="continueBtn" class="hidden flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200 flex items-center justify-center">
+                            <i class="fas fa-check-circle mr-2"></i>Continue to Game Details
+                        </button>
+                    </div>
+                    
+                    <!-- Warning Text -->
+                    <p class="text-xs text-gray-500 mt-4 text-center">
+                        <i class="fas fa-info-circle mr-1"></i>Please don't close this window while slots are being generated
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Confirmation Modal for Cancel -->
+        <div id="confirmCancelModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-60 hidden items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all">
+                <div class="p-6">
+                    <div class="text-center mb-6">
+                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                            <i class="fas fa-exclamation-triangle text-red-600 text-3xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Cancel Slot Generation?</h3>
+                        <p class="text-gray-600">
+                            This will stop the generation process and delete all <span id="deleteSlotsCount" class="font-semibold text-red-600">0</span> slots that were created.
+                        </p>
+                        <p class="text-sm text-gray-500 mt-2">This action cannot be undone.</p>
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <button id="confirmCancelNo" class="flex-1 px-6 py-3 border-2 border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg font-medium transition-colors duration-200">
+                            No, Continue
+                        </button>
+                        <button id="confirmCancelYes" class="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors duration-200">
+                            Yes, Cancel & Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -493,6 +573,181 @@ document.addEventListener('DOMContentLoaded', function() {
     if (selectAllCheckbox) {
         const allChecked = Array.from(dayCheckboxes).every(cb => cb.checked);
         selectAllCheckbox.checked = allChecked;
+    }
+    
+    // Handle form submission with AJAX for progress tracking
+    const gameForm = document.getElementById('gameForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const progressModal = document.getElementById('progressModal');
+    const progressBar = document.getElementById('progressBar');
+    const barPercent = document.getElementById('barPercent');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressStatus = document.getElementById('progressStatus');
+    const progressDate = document.getElementById('progressDate');
+    const slotsCreated = document.getElementById('slotsCreated');
+    const continueBtn = document.getElementById('continueBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const confirmCancelModal = document.getElementById('confirmCancelModal');
+    const confirmCancelYes = document.getElementById('confirmCancelYes');
+    const confirmCancelNo = document.getElementById('confirmCancelNo');
+    const deleteSlotsCount = document.getElementById('deleteSlotsCount');
+    
+    let currentGameId = null;
+    let currentEventSource = null;
+    let currentSlotsCreated = 0;
+    
+    {% if not game %}  {# Only for game creation, not updates #}
+    gameForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Disable submit button
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating Game...';
+        
+        // Submit form via AJAX
+        const formData = new FormData(gameForm);
+        
+        fetch(gameForm.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show progress modal with flex display
+                progressModal.classList.remove('hidden');
+                progressModal.classList.add('flex');
+                
+                // Start slot generation with progress tracking
+                currentGameId = data.game_id;
+                generateSlotsWithProgress(data.game_id, data.game_name);
+            } else {
+                alert('Error creating game: ' + (data.error || JSON.stringify(data.errors)));
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '{{ submit_text }}';
+            }
+        })
+        .catch(error => {
+            alert('Error: ' + error);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '{{ submit_text }}';
+        });
+    });
+    {% endif %}
+    
+    // Cancel button click
+    cancelBtn.addEventListener('click', function() {
+        // Update confirmation modal with current slots count
+        deleteSlotsCount.textContent = currentSlotsCreated;
+        
+        // Show confirmation modal
+        confirmCancelModal.classList.remove('hidden');
+        confirmCancelModal.classList.add('flex');
+    });
+    
+    // Confirmation - No, continue
+    confirmCancelNo.addEventListener('click', function() {
+        confirmCancelModal.classList.add('hidden');
+        confirmCancelModal.classList.remove('flex');
+    });
+    
+    // Confirmation - Yes, cancel and delete
+    confirmCancelYes.addEventListener('click', function() {
+        // Close event source
+        if (currentEventSource) {
+            currentEventSource.close();
+        }
+        
+        // Delete the game and its slots
+        if (currentGameId) {
+            fetch(`/booking/games/manage/${currentGameId}/delete-with-slots/`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Hide both modals
+                    confirmCancelModal.classList.add('hidden');
+                    confirmCancelModal.classList.remove('flex');
+                    progressModal.classList.add('hidden');
+                    progressModal.classList.remove('flex');
+                    
+                    // Re-enable submit button
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '{{ submit_text }}';
+                    
+                    // Show success message
+                    alert('Slot generation cancelled. Game and slots have been deleted.');
+                } else {
+                    alert('Error deleting game: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Error: ' + error);
+            });
+        }
+    });
+    
+    function generateSlotsWithProgress(gameId, gameName) {
+        const days = 7;  // Generate slots for 7 days
+        currentEventSource = new EventSource(`/booking/games/manage/api/generate-slots/${gameId}/?days=${days}`);
+        
+        currentEventSource.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            
+            // Update progress bar
+            progressBar.style.width = data.progress + '%';
+            progressPercent.textContent = data.progress + '%';
+            barPercent.textContent = data.progress >= 10 ? data.progress + '%' : '';
+            barPercent.style.opacity = data.progress >= 10 ? '1' : '0';
+            progressStatus.textContent = data.status;
+            
+            if (data.date) {
+                progressDate.textContent = 'Processing: ' + data.date;
+            }
+            
+            if (data.slots_created !== undefined) {
+                currentSlotsCreated = data.slots_created;
+                slotsCreated.textContent = data.slots_created + ' slots created';
+            }
+            
+            // Check if complete
+            if (data.complete) {
+                currentEventSource.close();
+                
+                // Hide cancel button, show success button
+                cancelBtn.classList.add('hidden');
+                continueBtn.classList.remove('hidden');
+                progressStatus.textContent = `✨ ${data.slots_created} time slots generated successfully!`;
+                progressStatus.classList.add('text-green-600', 'font-semibold');
+                
+                // Redirect on button click
+                continueBtn.addEventListener('click', function() {
+                    window.location.href = `/booking/games/manage/${gameId}/`;
+                });
+            }
+        };
+        
+        currentEventSource.onerror = function(error) {
+            currentEventSource.close();
+            progressStatus.textContent = 'Error generating slots. Please try again.';
+            progressStatus.classList.add('text-red-600');
+            cancelBtn.classList.add('hidden');
+            
+            setTimeout(() => {
+                progressModal.classList.add('hidden');
+                progressModal.classList.remove('flex');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '{{ submit_text }}';
+            }, 3000);
+        };
     }
 });
 </script>

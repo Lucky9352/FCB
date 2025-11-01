@@ -74,6 +74,12 @@
                     <span class="sidebar-text">Games & Stations</span>
                 </a>
                 
+                <a href="{% url 'booking:game_management:custom_slot_create' %}" 
+                   class="flex items-center space-x-3 px-4 py-3 rounded-lg mb-2 transition-colors duration-200 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 hover:from-green-500/30 hover:to-emerald-500/30">
+                    <i class="fas fa-calendar-plus w-5 text-green-300"></i>
+                    <span class="sidebar-text text-green-200">Add Custom Slots</span>
+                </a>
+                
                 <a href="{% url 'authentication:owner_customers' %}" 
                    class="flex items-center space-x-3 px-4 py-3 rounded-lg mb-2 transition-colors duration-200 {% if request.resolver_match.url_name == 'owner_customers' %}bg-white/20{% else %}hover:bg-white/10{% endif %}">
                     <i class="fas fa-users w-5"></i>
@@ -128,12 +134,6 @@
                                    class="w-64 px-4 py-2 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                             <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
                         </div>
-
-                        <!-- Quick Actions -->
-                        <button class="hidden md:flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200">
-                            <i class="fas fa-plus"></i>
-                            <span>New Booking</span>
-                        </button>
 
                         <!-- User Profile -->
                         <div class="relative group">

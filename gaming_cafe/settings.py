@@ -66,6 +66,7 @@ MIDDLEWARE = [
     'authentication.middleware.SessionTimeoutMiddleware',
     'authentication.middleware.AdminAccessMiddleware',
     'authentication.middleware.RoleBasedRedirectMiddleware',
+    'booking.middleware.AutoSlotMaintenanceMiddleware',  # Auto-generate slots in background
 ]
 
 ROOT_URLCONF = 'gaming_cafe.urls'
@@ -244,3 +245,4 @@ else:
     SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
+

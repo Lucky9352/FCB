@@ -30,4 +30,6 @@ urlpatterns = [
     path('api/slot-preview/', game_management_views.slot_preview, name='slot_preview'),
     path('api/schedule-preview/', game_management_views.schedule_preview, name='schedule_preview'),
     path('api/schedule-optimization/<uuid:game_id>/', game_management_views.schedule_optimization_suggestions, name='schedule_optimization_suggestions'),
+    path('api/generate-slots/<uuid:game_id>/', game_management_views.generate_slots_with_progress, name='generate_slots_with_progress'),
+    path('<uuid:game_id>/delete-with-slots/', game_management_views.delete_game_with_slots, name='delete_game_with_slots'),
 ]

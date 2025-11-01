@@ -374,7 +374,11 @@ def game_selection(request):
     """Game selection interface with hybrid booking options"""
     from .models import Game
     from .booking_service import BookingService
+    from .auto_slot_generator import auto_generate_slots_all_games
     from datetime import date, timedelta
+    
+    # Ensure slots are available (runs in background, doesn't block)
+    auto_generate_slots_all_games(async_mode=True)
     
     # Get all active games
     games = Game.objects.filter(is_active=True).order_by('name')

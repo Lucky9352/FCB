@@ -12,6 +12,9 @@ from authentication.decorators import cafe_owner_required
 from .models import Game, GameSlot, SlotAvailability, Booking
 from .forms import GameCreationForm, GameUpdateForm, CustomSlotForm, BulkScheduleUpdateForm
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @cafe_owner_required
@@ -66,17 +69,31 @@ def game_create(request):
         if form.is_valid():
             try:
                 with transaction.atomic():
-                    game = form.save()
+                    # Save game WITHOUT generating slots (we'll do that via AJAX)
+                    game = form.save(commit=False)
+                    game.save()
+                    # Don't call form.save() which triggers slot generation
+                    
+                    # Return JSON response for AJAX slot generation
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        return JsonResponse({
+                            'success': True,
+                            'game_id': str(game.id),
+                            'game_name': game.name
+                        })
                     
                     messages.success(
                         request,
-                        f'Game "{game.name}" created successfully! '
-                        f'Time slots have been generated for the next 30 days.'
+                        f'Game "{game.name}" created successfully! Generating time slots...'
                     )
-                    return redirect('booking:game_detail', game_id=game.id)
+                    return redirect('booking:game_management:game_detail', game_id=game.id)
             except Exception as e:
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'success': False, 'error': str(e)}, status=400)
                 messages.error(request, f'Error creating game: {str(e)}')
         else:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'errors': form.errors}, status=400)
             messages.error(request, 'Please correct the errors below.')
     else:
         form = GameCreationForm()
@@ -224,34 +241,92 @@ def game_toggle_status(request, game_id):
 
 @cafe_owner_required
 def custom_slot_create(request):
-    """Create custom temporary slots"""
+    """Create custom temporary slots with auto-generation"""
+    from datetime import datetime, timedelta
+    
     if request.method == 'POST':
-        form = CustomSlotForm(request.POST)
-        if form.is_valid():
-            try:
-                with transaction.atomic():
-                    slot = form.save()
+        try:
+            # Get form data
+            game_id = request.POST.get('game')
+            start_date_str = request.POST.get('start_date')
+            end_date_str = request.POST.get('end_date')
+            start_time_str = request.POST.get('start_time')
+            end_time_str = request.POST.get('end_time')
+            slot_duration = int(request.POST.get('slot_duration', 60))
+            
+            # Validate game
+            game = Game.objects.get(id=game_id)
+            
+            # Parse dates
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date() if end_date_str else start_date
+            
+            # Parse times
+            start_time = datetime.strptime(start_time_str, '%H:%M').time()
+            end_time = datetime.strptime(end_time_str, '%H:%M').time()
+            
+            slots_created = 0
+            
+            with transaction.atomic():
+                # Iterate through date range
+                current_date = start_date
+                while current_date <= end_date:
+                    # Generate slots for this day
+                    current_time = datetime.combine(current_date, start_time)
+                    end_datetime = datetime.combine(current_date, end_time)
                     
-                    messages.success(
-                        request,
-                        f'Custom slot created for {slot.game.name} on {slot.date} '
-                        f'from {slot.start_time} to {slot.end_time}.'
-                    )
-                    return redirect('booking:game_detail', game_id=slot.game.id)
-            except Exception as e:
-                messages.error(request, f'Error creating custom slot: {str(e)}')
-        else:
-            messages.error(request, 'Please correct the errors below.')
-    else:
-        form = CustomSlotForm()
+                    while current_time < end_datetime:
+                        slot_end_time = current_time + timedelta(minutes=slot_duration)
+                        
+                        # Don't create slot if it exceeds end time
+                        if slot_end_time.time() > end_time:
+                            break
+                        
+                        # Check if slot already exists
+                        existing = GameSlot.objects.filter(
+                            game=game,
+                            date=current_date,
+                            start_time=current_time.time(),
+                            end_time=slot_end_time.time()
+                        ).exists()
+                        
+                        if not existing:
+                            GameSlot.objects.create(
+                                game=game,
+                                date=current_date,
+                                start_time=current_time.time(),
+                                end_time=slot_end_time.time(),
+                                is_available=True
+                            )
+                            slots_created += 1
+                        
+                        current_time = slot_end_time
+                    
+                    current_date += timedelta(days=1)
+            
+            messages.success(
+                request,
+                f'Successfully created {slots_created} custom slot(s) for {game.name} '
+                f'from {start_date} to {end_date}.'
+            )
+            return redirect('authentication:owner_overview')
+            
+        except Game.DoesNotExist:
+            messages.error(request, 'Selected game not found.')
+        except ValueError as e:
+            messages.error(request, f'Invalid date or time format: {str(e)}')
+        except Exception as e:
+            messages.error(request, f'Error creating custom slots: {str(e)}')
+    
+    # Get all active games for selection
+    games = Game.objects.filter(is_active=True).order_by('name')
     
     context = {
-        'form': form,
-        'title': 'Add Custom Slot',
-        'submit_text': 'Create Slot',
+        'games': games,
+        'today': datetime.now().date().isoformat(),
     }
     
-    return render(request, 'booking/game_management/custom_slot_form.html', context)
+    return render(request, 'authentication/owner_custom_slots.html', context)
 
 
 @cafe_owner_required
@@ -1077,3 +1152,82 @@ def advanced_schedule_management(request, game_id):
     }
     
     return render(request, 'booking/game_management/advanced_schedule.html', context)
+
+
+@cafe_owner_required
+def generate_slots_with_progress(request, game_id):
+    """Generate slots for a game with progress tracking via streaming response"""
+    from django.http import StreamingHttpResponse
+    from .slot_generator import SlotGenerator
+    from django.db import transaction
+    import time
+    
+    game = get_object_or_404(Game, id=game_id)
+    days_ahead = int(request.GET.get('days', 7))
+    
+    def slot_generation_progress():
+        """Generator function that yields progress updates"""
+        start_date = date.today()
+        end_date = start_date + timedelta(days=days_ahead)
+        
+        total_days = (end_date - start_date).days + 1
+        current_day = 0
+        slots_created = 0
+        
+        yield f"data: {json.dumps({'progress': 0, 'status': 'Starting slot generation...', 'slots_created': 0})}\n\n"
+        
+        current_date = start_date
+        while current_date <= end_date:
+            weekday = current_date.strftime('%A').lower()
+            
+            if weekday in game.available_days:
+                try:
+                    # Use atomic transaction for each date
+                    with transaction.atomic():
+                        created = SlotGenerator._generate_slots_for_date(game, current_date)
+                        slots_created += created
+                    
+                    current_day += 1
+                    progress = int((current_day / total_days) * 100)
+                    
+                    yield f"data: {json.dumps({'progress': progress, 'status': f'Generated {created} slots for {current_date}', 'slots_created': slots_created, 'date': str(current_date)})}\n\n"
+                    
+                except Exception as e:
+                    logger.error(f"Error generating slots for {current_date}: {str(e)}")
+                    yield f"data: {json.dumps({'progress': int((current_day / total_days) * 100), 'status': f'Error on {current_date}: {str(e)}', 'error': True})}\n\n"
+            else:
+                current_day += 1
+                progress = int((current_day / total_days) * 100)
+                yield f"data: {json.dumps({'progress': progress, 'status': f'Skipped {current_date} (not available)', 'slots_created': slots_created})}\n\n"
+            
+            current_date += timedelta(days=1)
+            time.sleep(0.05)  # Small delay to show progress
+        
+        yield f"data: {json.dumps({'progress': 100, 'status': 'Slot generation completed!', 'slots_created': slots_created, 'complete': True})}\n\n"
+    
+    return StreamingHttpResponse(slot_generation_progress(), content_type='text/event-stream')
+
+
+@cafe_owner_required
+def delete_game_with_slots(request, game_id):
+    """Delete a game and all its slots (used when cancelling slot generation)"""
+    if request.method == 'POST':
+        try:
+            game = get_object_or_404(Game, id=game_id)
+            game_name = game.name
+            
+            # Delete game (cascades to slots automatically due to ForeignKey)
+            game.delete()
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'Game "{game_name}" and all its slots have been deleted.'
+            })
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
+
