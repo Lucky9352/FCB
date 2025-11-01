@@ -104,6 +104,12 @@ def superuser_dashboard(request):
             'message': f"{inactive_games} games are currently inactive"
         })
     
+    # Get cafe owner if exists
+    try:
+        cafe_owner = CafeOwner.objects.select_related('user').first()
+    except CafeOwner.DoesNotExist:
+        cafe_owner = None
+    
     context = {
         'tapnex_user': tapnex_user,
         'stats': stats,
@@ -111,6 +117,7 @@ def superuser_dashboard(request):
         'recent_bookings': recent_bookings,
         'recent_users': recent_users,
         'alerts': alerts,
+        'cafe_owner': cafe_owner,
     }
     
     return render(request, 'authentication/superuser_dashboard.html', context)

@@ -9,6 +9,7 @@ from django.views.decorators.http import require_http_methods
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import SetPasswordForm
 from django.utils import timezone
+from django.db import models
 from datetime import datetime, timedelta, date
 from decimal import Decimal
 import json
@@ -166,6 +167,35 @@ def revenue_reports(request):
 
 
 @tapnex_superuser_required
+def create_cafe_owner(request):
+    """Create a new cafe owner account"""
+    
+    # Check if a cafe owner already exists
+    if CafeOwner.objects.exists():
+        messages.warning(request, 'A cafe owner account already exists. You can manage it instead.')
+        return redirect('authentication:cafe_owner_management')
+    
+    if request.method == 'POST':
+        from .forms import CafeOwnerRegistrationForm
+        form = CafeOwnerRegistrationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Cafe owner account created successfully!')
+            return redirect('authentication:cafe_owner_management')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        from .forms import CafeOwnerRegistrationForm
+        form = CafeOwnerRegistrationForm()
+    
+    context = {
+        'form': form,
+    }
+    
+    return render(request, 'authentication/create_cafe_owner.html', context)
+
+
+@tapnex_superuser_required
 def cafe_owner_management(request):
     """Manage cafe owner account and settings"""
     
@@ -173,7 +203,7 @@ def cafe_owner_management(request):
         cafe_owner = CafeOwner.objects.select_related('user').get()
     except CafeOwner.DoesNotExist:
         messages.error(request, 'No cafe owner account found. Please create one first.')
-        return redirect('authentication:tapnex_dashboard')
+        return redirect('authentication:create_cafe_owner')
     
     if request.method == 'POST':
         form = CafeOwnerManagementForm(request.POST, instance=cafe_owner)

@@ -47,6 +47,7 @@ urlpatterns = [
     path('tapnex/ajax/revenue-data/', tapnex_views.ajax_revenue_data, name='ajax_revenue_data'),
     
     # Cafe Owner Management
+    path('tapnex/cafe-owner/create/', tapnex_views.create_cafe_owner, name='create_cafe_owner'),
     path('tapnex/cafe-owner-management/', tapnex_views.cafe_owner_management, name='cafe_owner_management'),
     path('tapnex/reset-cafe-owner-password/', tapnex_views.reset_cafe_owner_password, name='reset_cafe_owner_password'),
     
