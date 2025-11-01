@@ -41,20 +41,29 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             
         user.save()
         
+        # Create customer profile for Google OAuth users
+        Customer.objects.get_or_create(user=user)
+        
         return user
     
     def get_login_redirect_url(self, request):
         """Redirect users to appropriate dashboard after Google login"""
         if request.user.is_authenticated:
-            if hasattr(request.user, 'customer_profile'):
-                return '/customer/dashboard/'
-            elif hasattr(request.user, 'cafe_owner_profile'):
-                return '/owner/dashboard/'
-            else:
-                # Create customer profile for Google OAuth users
+            # Ensure customer profile exists for Google OAuth users
+            if not hasattr(request.user, 'customer_profile') and not hasattr(request.user, 'cafe_owner_profile'):
                 Customer.objects.get_or_create(user=request.user)
-                return '/customer/dashboard/'
-        return '/'
+            
+            if hasattr(request.user, 'customer_profile'):
+                return '/accounts/customer/dashboard/'
+            elif hasattr(request.user, 'cafe_owner_profile'):
+                return '/accounts/owner/dashboard/'
+            elif request.user.is_superuser:
+                return '/accounts/tapnex/dashboard/'
+            else:
+                # Fallback - create customer profile
+                Customer.objects.get_or_create(user=request.user)
+                return '/accounts/customer/dashboard/'
+        return '/accounts/login/'
     
     def authentication_error(self, request, provider_id, error=None, exception=None, extra_context=None):
         """Handle authentication errors with user-friendly messages"""

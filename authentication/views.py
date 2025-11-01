@@ -128,3 +128,16 @@ def profile_redirect_view(request):
 def home_view(request):
     """Home page view with role-based navigation"""
     return render(request, 'home.html')
+
+
+def debug_user_view(request):
+    """Debug view to check user authentication status"""
+    if request.user.is_authenticated:
+        return render(request, 'authentication/debug_user.html', {
+            'user': request.user,
+            'has_customer_profile': hasattr(request.user, 'customer_profile'),
+            'has_cafe_owner_profile': hasattr(request.user, 'cafe_owner_profile'),
+            'is_superuser': request.user.is_superuser,
+        })
+    else:
+        return redirect('authentication:customer_login')
