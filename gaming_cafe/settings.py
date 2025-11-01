@@ -19,7 +19,8 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+# Use a default key for build process, but require it in production
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-build-key-only-replace-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
@@ -93,15 +94,15 @@ WSGI_APPLICATION = 'gaming_cafe.wsgi.application'
 # Use Supabase PostgreSQL for all environments
 DATABASES = {
     'default': dj_database_url.config(
-        default=config('DATABASE_URL'),
+        default=config('DATABASE_URL', default='sqlite:///db.sqlite3'),
         conn_max_age=600,
         conn_health_checks=True,
     )
 }
 
 # Supabase Configuration
-SUPABASE_URL = config('SUPABASE_URL')
-SUPABASE_KEY = config('SUPABASE_KEY')
+SUPABASE_URL = config('SUPABASE_URL', default='')
+SUPABASE_KEY = config('SUPABASE_KEY', default='')
 
 
 # Password validation
@@ -186,8 +187,8 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 # Google OAuth Credentials
-GOOGLE_OAUTH_CLIENT_ID = config('GOOGLE_OAUTH_CLIENT_ID')
-GOOGLE_OAUTH_CLIENT_SECRET = config('GOOGLE_OAUTH_CLIENT_SECRET')
+GOOGLE_OAUTH_CLIENT_ID = config('GOOGLE_OAUTH_CLIENT_ID', default='')
+GOOGLE_OAUTH_CLIENT_SECRET = config('GOOGLE_OAUTH_CLIENT_SECRET', default='')
 
 # Custom Adapters
 ACCOUNT_ADAPTER = 'authentication.adapters.CustomAccountAdapter'
@@ -209,8 +210,8 @@ STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='')
 STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET', default='')
 
 # Razorpay Configuration
-RAZORPAY_KEY_ID = config('RAZORPAY_KEY_ID')
-RAZORPAY_KEY_SECRET = config('RAZORPAY_KEY_SECRET')
+RAZORPAY_KEY_ID = config('RAZORPAY_KEY_ID', default='')
+RAZORPAY_KEY_SECRET = config('RAZORPAY_KEY_SECRET', default='')
 
 # Company Information for Razorpay Whitelisting
 COMPANY_NAME = 'TapNex Technologies'
