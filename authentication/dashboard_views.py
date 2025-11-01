@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.db.models import Q
 from .models import Customer, CafeOwner
 from .decorators import customer_required, cafe_owner_required
-from booking.models import GamingStation, Booking
+from booking.models import Game, Booking
 
 
 @customer_required
@@ -33,11 +33,10 @@ def customer_dashboard(request):
         status='IN_PROGRESS'
     ).first()
     
-    # Get available gaming stations for quick booking
-    available_stations = GamingStation.objects.filter(
-        is_active=True,
-        is_maintenance=False
-    ).order_by('station_type', 'name')[:6]
+    # Get available games for quick booking
+    available_games = Game.objects.filter(
+        is_active=True
+    ).order_by('name')[:6]
     
     # Get booking statistics
     total_bookings = customer.bookings.count()
@@ -49,7 +48,7 @@ def customer_dashboard(request):
         'recent_bookings': recent_bookings,
         'upcoming_bookings': upcoming_bookings,
         'current_booking': current_booking,
-        'available_stations': available_stations,
+        'available_games': available_games,
         'total_bookings': total_bookings,
         'completed_bookings': completed_bookings,
         'now': now,

@@ -90,18 +90,18 @@
     <div class="mb-8">
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-bold text-white">Quick Book</h2>
-            <a href="#" class="text-gaming-highlight hover:text-gaming-highlight/80 font-medium transition-colors duration-200">
-                View All Stations →
+            <a href="{% url 'booking:game_selection' %}" class="text-gaming-highlight hover:text-gaming-highlight/80 font-medium transition-colors duration-200">
+                View All Games →
             </a>
         </div>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {% for station in available_stations %}
-            <div class="station-card" onclick="quickBook('{{ station.id }}')">
+            {% for game in available_games %}
+            <div class="station-card">
                 <div class="flex items-start justify-between mb-3">
                     <div>
-                        <h3 class="text-white font-semibold">{{ station.name }}</h3>
-                        <p class="text-gray-300 text-sm">{{ station.get_station_type_display }}</p>
+                        <h3 class="text-white font-semibold">{{ game.name }}</h3>
+                        <p class="text-gray-300 text-sm">{{ game.slot_duration_minutes }} min slots</p>
                     </div>
                     <div class="flex items-center space-x-1">
                         <div class="w-2 h-2 bg-green-400 rounded-full"></div>
@@ -109,21 +109,24 @@
                     </div>
                 </div>
                 
-                {% if station.image %}
+                {% if game.image %}
                 <div class="mb-3 rounded-lg overflow-hidden">
-                    <img src="{{ station.image.url }}" alt="{{ station.name }}" class="w-full h-24 object-cover">
+                    <img src="{{ game.image.url }}" alt="{{ game.name }}" class="w-full h-24 object-cover">
                 </div>
                 {% else %}
                 <div class="mb-3 bg-gradient-to-br from-gaming-highlight/20 to-gaming-accent/20 rounded-lg h-24 flex items-center justify-center">
                     <svg class="w-8 h-8 text-gaming-highlight" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+                        <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"></path>
                     </svg>
                 </div>
                 {% endif %}
                 
                 <div class="flex items-center justify-between">
-                    <span class="text-gaming-highlight font-bold">${{ station.hourly_rate }}/hr</span>
-                    <a href="{% url 'booking:selection' %}?station={{ station.id }}" class="bg-gaming-highlight hover:bg-gaming-highlight/80 text-white px-3 py-1 rounded-lg text-sm font-medium transition-colors duration-200 inline-block text-center">
+                    <div>
+                        <span class="text-gaming-highlight font-bold text-sm">₹{{ game.private_price }}</span>
+                        <span class="text-gray-400 text-xs"> private</span>
+                    </div>
+                    <a href="{% url 'booking:game_selection' %}" class="bg-gaming-highlight hover:bg-gaming-highlight/80 text-white px-3 py-1 rounded-lg text-sm font-medium transition-colors duration-200 inline-block text-center">
                         Book Now
                     </a>
                 </div>
@@ -131,9 +134,12 @@
             {% empty %}
             <div class="col-span-full text-center py-8">
                 <svg class="w-12 h-12 mx-auto mb-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+                    <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"></path>
                 </svg>
-                <p class="text-gray-300">No gaming stations available at the moment.</p>
+                <p class="text-gray-300">No games available at the moment.</p>
+                <a href="{% url 'booking:game_selection' %}" class="mt-4 inline-block bg-gaming-highlight hover:bg-gaming-highlight/80 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200">
+                    Browse All Games
+                </a>
             </div>
             {% endfor %}
         </div>
