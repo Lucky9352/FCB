@@ -25,12 +25,12 @@ from booking.models import Booking, Game, GameSlot
 
 
 class SuperuserLoginView(LoginView):
-    """Custom login view for TapNex superusers (Staff Login)"""
+    """Custom login view for TapNex superusers and Cafe Owners (Staff Login)"""
     template_name = 'authentication/superuser_login.html'
     redirect_authenticated_user = True
     
     def get_success_url(self):
-        # Only allow superusers
+        # Check if user is superuser
         if self.request.user.is_superuser:
             # Create TapNexSuperuser profile if doesn't exist
             TapNexSuperuser.objects.get_or_create(
@@ -42,8 +42,13 @@ class SuperuserLoginView(LoginView):
                 }
             )
             return '/accounts/tapnex/dashboard/'
+        # Check if user is cafe owner
+        elif hasattr(self.request.user, 'cafe_owner_profile'):
+            return '/accounts/owner/dashboard/'
         else:
-            messages.error(self.request, 'Access denied. This login is for TapNex administrators only.')
+            messages.error(self.request, 'Access denied. This login is for TapNex administrators and cafe owners only.')
+            from django.contrib.auth import logout
+            logout(self.request)
             return '/accounts/cafe-owner/login/'
     
     def form_invalid(self, form):
