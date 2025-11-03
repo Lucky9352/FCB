@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shipping Policy - TapNex Gaming Cafe{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-900">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-900 to-purple-900 border-b border-blue-700 py-16">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Shipping & Delivery Policy</h1>
+            <p class="text-xl text-gray-300">Service Delivery Information</p>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="bg-gray-800 border border-gray-700 rounded-xl p-8 space-y-8">
+            
+            <!-- Important Notice -->
+            <div class="bg-blue-900/30 border border-blue-700 rounded-lg p-6">
+                <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Important Notice
+                </h2>
+                <p class="text-gray-300 text-lg">
+                    <strong>TapNex (NEXGEN FC)</strong> is an <strong>on-premise gaming cafe service</strong>. We do not ship or deliver physical products. All services are provided at our physical location.
+                </p>
+            </div>
+
+            <!-- Service Nature -->
+            <div>
+                <h2 class="text-2xl font-bold text-white mb-4">Nature of Service</h2>
+                <div class="text-gray-300 space-y-4">
+                    <p>
+                        Our business model is based on <strong>location-based gaming services</strong>. Customers book gaming sessions online and visit our cafe to enjoy:
+                    </p>
+                    <ul class="list-disc list-inside space-y-2 ml-4">
+                        <li>High-performance gaming PCs and consoles</li>
+                        <li>Popular multiplayer and single-player games</li>
+                        <li>Comfortable gaming environment</li>
+                        <li>Refreshments and snacks (where available)</li>
+                        <li>Professional gaming equipment and accessories</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Booking Delivery -->
+            <div>
+                <h2 class="text-2xl font-bold text-white mb-4">Booking Confirmation "Delivery"</h2>
+                <div class="text-gray-300 space-y-4">
+                    <p>While we don't ship physical products, we do deliver the following digitally:</p>
+                    
+                    <div class="bg-gray-900 rounded-lg p-4 space-y-3">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 mr-2 mt-1 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <div>
+                                <strong class="text-white">Instant Booking Confirmation</strong>
+                                <p class="text-sm text-gray-400">Delivered via email immediately after payment</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 mr-2 mt-1 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <div>
+                                <strong class="text-white">Digital Receipt</strong>
+                                <p class="text-sm text-gray-400">Downloadable from your dashboard</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 mr-2 mt-1 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <div>
+                                <strong class="text-white">Booking Reminders</strong>
+                                <p class="text-sm text-gray-400">Sent before your gaming session</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 mr-2 mt-1 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <div>
+                                <strong class="text-white">QR Code</strong>
+                                <p class="text-sm text-gray-400">For easy check-in at our cafe</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- How It Works -->
+            <div>
+                <h2 class="text-2xl font-bold text-white mb-4">How Our Service Works</h2>
+                <div class="space-y-4">
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">1</div>
+                        <div class="text-gray-300">
+                            <h3 class="font-semibold text-white mb-1">Book Online</h3>
+                            <p>Select your preferred game, date, and time slot on our website</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">2</div>
+                        <div class="text-gray-300">
+                            <h3 class="font-semibold text-white mb-1">Make Payment</h3>
+                            <p>Complete secure online payment via Razorpay</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">3</div>
+                        <div class="text-gray-300">
+                            <h3 class="font-semibold text-white mb-1">Receive Confirmation</h3>
+                            <p>Get instant booking confirmation via email and SMS</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">4</div>
+                        <div class="text-gray-300">
+                            <h3 class="font-semibold text-white mb-1">Visit Our Cafe</h3>
+                            <p>Arrive at the scheduled time and enjoy your gaming session</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cafe Location -->
+            <div>
+                <h2 class="text-2xl font-bold text-white mb-4">Cafe Location & Timings</h2>
+                <div class="bg-gray-900 rounded-lg p-6">
+                    <div class="space-y-4 text-gray-300">
+                        <div>
+                            <h3 class="font-semibold text-white mb-2">Address</h3>
+                            <p>NEXGEN FC - TapNex Gaming Cafe</p>
+                            <p class="text-sm text-gray-400">[Your cafe address will be provided after booking]</p>
+                        </div>
+                        
+                        <div>
+                            <h3 class="font-semibold text-white mb-2">Operating Hours</h3>
+                            <p>Monday - Sunday: 10:00 AM - 10:00 PM</p>
+                            <p class="text-sm text-gray-400">Extended hours on weekends and holidays</p>
+                        </div>
+                        
+                        <div>
+                            <h3 class="font-semibold text-white mb-2">Contact</h3>
+                            <p>Email: support@tapnex.tech</p>
+                            <p>Phone: [Contact number provided with booking]</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cancellation Policy -->
+            <div>
+                <h2 class="text-2xl font-bold text-white mb-4">Cancellation & Modifications</h2>
+                <div class="text-gray-300 space-y-4">
+                    <p>Since we don't ship products, our cancellation policy is based on booking modifications:</p>
+                    <ul class="list-disc list-inside space-y-2 ml-4">
+                        <li><strong>Free Cancellation:</strong> Up to 24 hours before scheduled session</li>
+                        <li><strong>Late Cancellation:</strong> 50% refund if cancelled within 24 hours</li>
+                        <li><strong>No-Show:</strong> No refund for missed bookings without cancellation</li>
+                        <li><strong>Rescheduling:</strong> Free rescheduling available (subject to availability)</li>
+                    </ul>
+                    <p class="mt-4">
+                        For detailed refund information, please refer to our 
+                        <a href="{% url 'refund_policy' %}" class="text-blue-400 hover:text-blue-300 underline">Refund Policy</a>.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Contact Section -->
+            <div class="bg-gradient-to-r from-purple-900/30 to-blue-900/30 border border-purple-700 rounded-lg p-6">
+                <h2 class="text-2xl font-bold text-white mb-4">Have Questions?</h2>
+                <p class="text-gray-300 mb-4">
+                    If you have any questions about our service delivery or booking process, please don't hesitate to contact us.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="{% url 'contact' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg text-center transition">
+                        Contact Us
+                    </a>
+                    <a href="{% url 'home' %}" class="border border-gray-600 hover:border-gray-500 text-white font-semibold py-3 px-6 rounded-lg text-center transition">
+                        Back to Home
+                    </a>
+                </div>
+            </div>
+
+            <!-- Last Updated -->
+            <div class="text-center text-sm text-gray-500 pt-4 border-t border-gray-700">
+                <p>Last Updated: November 3, 2025</p>
+                <p>TapNex Technologies - NEXGEN FC Gaming Cafe</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

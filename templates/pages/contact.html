@@ -4,23 +4,164 @@
 {% block title %}Contact Us - TapNex Gaming Cafe{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gaming-primary">
-    <div class="bg-gaming-secondary border-b border-gaming-accent py-16">
+<div class="min-h-screen bg-gray-900">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-900 to-purple-900 border-b border-blue-700 py-16">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 class="text-4xl md:text-5xl font-gaming font-bold text-white mb-4">Contact Us</h1>
-            <p class="text-xl text-gray-400">Get in touch with the TapNex team</p>
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Contact Us</h1>
+            <p class="text-xl text-gray-300">Get in touch with the TapNex team</p>
         </div>
     </div>
 
+    <!-- Content -->
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-8">
-            <h2 class="text-2xl font-bold text-white mb-6">Contact Information</h2>
-            <p class="text-gray-300 mb-4">Email: support@tapnex.tech</p>
-            <p class="text-gray-300">Website: forge.tapnex.tech</p>
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- Contact Information -->
+            <div class="bg-gray-800 border border-gray-700 rounded-xl p-8">
+                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    Contact Information
+                </h2>
+                
+                <div class="space-y-6">
+                    <!-- Email -->
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-white mb-1">Email</h3>
+                            <p class="text-gray-400">support@tapnex.tech</p>
+                            <a href="mailto:support@tapnex.tech" class="text-blue-400 hover:text-blue-300 text-sm">Send us an email →</a>
+                        </div>
+                    </div>
+
+                    <!-- Website -->
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-white mb-1">Website</h3>
+                            <p class="text-gray-400">forge.tapnex.tech</p>
+                            <a href="https://forge.tapnex.tech" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">Visit website →</a>
+                        </div>
+                    </div>
+
+                    <!-- Business -->
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-white mb-1">Business</h3>
+                            <p class="text-gray-400">TapNex Technologies</p>
+                            <p class="text-gray-400 text-sm">NEXGEN FC Gaming Cafe</p>
+                        </div>
+                    </div>
+
+                    <!-- Operating Hours -->
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-white mb-1">Operating Hours</h3>
+                            <p class="text-gray-400">Monday - Sunday</p>
+                            <p class="text-gray-400 text-sm">10:00 AM - 10:00 PM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Links & Support -->
+            <div class="space-y-6">
+                <!-- Support -->
+                <div class="bg-gray-800 border border-gray-700 rounded-xl p-8">
+                    <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                        Customer Support
+                    </h2>
+                    
+                    <div class="space-y-4 text-gray-300">
+                        <p>Our support team is available to help you with:</p>
+                        <ul class="list-disc list-inside space-y-2 ml-4">
+                            <li>Booking assistance</li>
+                            <li>Payment issues</li>
+                            <li>Technical support</li>
+                            <li>General inquiries</li>
+                            <li>Feedback and suggestions</li>
+                        </ul>
+                        <p class="text-sm text-gray-400 mt-4">
+                            We typically respond within 24 hours during business days.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-gradient-to-r from-purple-900/30 to-blue-900/30 border border-purple-700 rounded-xl p-8">
+                    <h2 class="text-2xl font-bold text-white mb-6">Quick Actions</h2>
+                    
+                    <div class="space-y-3">
+                        <a href="{% url 'booking:game_selection' %}" class="block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg text-center transition">
+                            Make a Booking
+                        </a>
+                        <a href="{% url 'booking:my_bookings' %}" class="block border border-gray-600 hover:border-gray-500 text-white font-semibold py-3 px-4 rounded-lg text-center transition">
+                            View My Bookings
+                        </a>
+                        <a href="{% url 'refund_policy' %}" class="block border border-gray-600 hover:border-gray-500 text-white font-semibold py-3 px-4 rounded-lg text-center transition">
+                            Refund Policy
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
 
+        <!-- FAQ Section -->
+        <div class="mt-12 bg-gray-800 border border-gray-700 rounded-xl p-8">
+            <h2 class="text-2xl font-bold text-white mb-6">Frequently Asked Questions</h2>
+            
+            <div class="space-y-6">
+                <div>
+                    <h3 class="font-semibold text-white mb-2">How do I make a booking?</h3>
+                    <p class="text-gray-400">Simply browse our available games, select your preferred time slot, and complete the payment. You'll receive instant confirmation via email.</p>
+                </div>
+                
+                <div>
+                    <h3 class="font-semibold text-white mb-2">What payment methods do you accept?</h3>
+                    <p class="text-gray-400">We accept all major credit/debit cards, UPI, net banking, and digital wallets through our secure Razorpay payment gateway.</p>
+                </div>
+                
+                <div>
+                    <h3 class="font-semibold text-white mb-2">Can I cancel or reschedule my booking?</h3>
+                    <p class="text-gray-400">Yes! Free cancellation is available up to 24 hours before your scheduled session. You can also reschedule based on slot availability.</p>
+                </div>
+                
+                <div>
+                    <h3 class="font-semibold text-white mb-2">Do I need to bring anything?</h3>
+                    <p class="text-gray-400">Just bring yourself and your booking confirmation (email or QR code). All gaming equipment and accessories are provided.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back to Home -->
         <div class="text-center mt-8">
-            <a href="{% url 'home' %}" class="inline-flex items-center text-gaming-highlight hover:underline">
+            <a href="{% url 'home' %}" class="inline-flex items-center text-blue-400 hover:text-blue-300 transition">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
                 Back to Home
             </a>
         </div>

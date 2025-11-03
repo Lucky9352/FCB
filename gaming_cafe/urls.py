@@ -25,7 +25,8 @@ from authentication.policy_views import (
     terms_conditions_view,
     refund_policy_view,
     contact_view,
-    about_view
+    about_view,
+    shipping_policy_view
 )
 from django.views.generic import TemplateView, RedirectView
 
@@ -47,6 +48,7 @@ urlpatterns = [
     path('privacy/', privacy_policy_view, name='privacy'),
     path('terms/', terms_conditions_view, name='terms'),
     path('refund-policy/', refund_policy_view, name='refund_policy'),
+    path('shipping-policy/', shipping_policy_view, name='shipping_policy'),
     path('contact/', contact_view, name='contact'),
     path('about/', about_view, name='about'),
     

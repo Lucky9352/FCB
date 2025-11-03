@@ -51,3 +51,8 @@ def contact_view(request):
 def about_view(request):
     """About us view"""
     return render(request, 'pages/about.html')
+
+
+def shipping_policy_view(request):
+    """Shipping & Delivery policy view"""
+    return render(request, 'pages/shipping_policy.html')
