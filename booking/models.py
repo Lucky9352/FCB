@@ -490,8 +490,8 @@ class Booking(models.Model):
             if self.booking_type == 'PRIVATE' and self.spots_booked != self.game.capacity:
                 raise ValidationError("Private bookings must book full capacity")
         
-        # Backward compatibility validation
-        elif self.gaming_station and self.start_time and self.end_time:
+        # Backward compatibility validation (only if old fields are populated)
+        elif self.gaming_station and self.start_time is not None and self.end_time is not None:
             if self.end_time <= self.start_time:
                 raise ValidationError("End time must be after start time")
             

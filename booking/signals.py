@@ -44,15 +44,22 @@ def auto_update_booking_status(sender, instance, created, **kwargs):
     if not created:  # Only for existing bookings
         now = timezone.now()
         
+        # Get start and end times (supports both new game_slot and old start_time)
+        start_dt = instance.start_datetime
+        end_dt = instance.end_datetime
+        
+        if not start_dt or not end_dt:
+            return  # Skip if times are not available
+        
         # Auto-start confirmed bookings
         if (instance.status == 'CONFIRMED' and 
-            instance.start_time <= now < instance.end_time):
+            start_dt <= now < end_dt):
             instance.status = 'IN_PROGRESS'
             instance.save(update_fields=['status'])
         
         # Auto-complete in-progress bookings
         elif (instance.status == 'IN_PROGRESS' and 
-              now >= instance.end_time):
+              now >= end_dt):
             instance.status = 'COMPLETED'
             instance.save(update_fields=['status'])
 
@@ -66,16 +73,30 @@ def broadcast_booking_update(sender, instance, created, **kwargs):
             'id': str(instance.id),
             'customer_id': str(instance.customer.id),
             'customer_name': instance.customer.user.get_full_name() or instance.customer.user.username,
-            'gaming_station_id': str(instance.gaming_station.id),
-            'gaming_station_name': instance.gaming_station.name,
-            'start_time': instance.start_time.isoformat(),
-            'end_time': instance.end_time.isoformat(),
             'status': instance.status,
             'total_amount': float(instance.total_amount),
             'is_walk_in': instance.is_walk_in,
             'created': created,
             'timestamp': timezone.now().isoformat()
         }
+        
+        # Add game-specific data if available
+        if instance.game:
+            booking_data['game_id'] = str(instance.game.id)
+            booking_data['game_name'] = instance.game.name
+        
+        # Add gaming station data if available (backward compatibility)
+        if instance.gaming_station:
+            booking_data['gaming_station_id'] = str(instance.gaming_station.id)
+            booking_data['gaming_station_name'] = instance.gaming_station.name
+        
+        # Add time data
+        start_dt = instance.start_datetime
+        end_dt = instance.end_datetime
+        if start_dt:
+            booking_data['start_time'] = start_dt.isoformat()
+        if end_dt:
+            booking_data['end_time'] = end_dt.isoformat()
         
         # Broadcast the update
         success = supabase_realtime.publish_booking_update(booking_data)
@@ -96,10 +117,17 @@ def broadcast_booking_deletion(sender, instance, **kwargs):
         # Prepare deletion data for broadcast
         deletion_data = {
             'id': str(instance.id),
-            'gaming_station_id': str(instance.gaming_station.id),
             'action': 'deleted',
             'timestamp': timezone.now().isoformat()
         }
+        
+        # Add gaming station ID if available
+        if instance.gaming_station:
+            deletion_data['gaming_station_id'] = str(instance.gaming_station.id)
+        
+        # Add game ID if available
+        if instance.game:
+            deletion_data['game_id'] = str(instance.game.id)
         
         # Broadcast the deletion
         success = supabase_realtime.publish_booking_update(deletion_data)
