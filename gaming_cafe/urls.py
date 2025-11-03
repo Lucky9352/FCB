@@ -27,11 +27,15 @@ from authentication.policy_views import (
     contact_view,
     about_view
 )
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
 
 urlpatterns = [
     # Django Admin is disabled - use /accounts/tapnex/dashboard/ instead
     # path('admin/', admin.site.urls),
+    
+    # URL Redirects for common paths (without /accounts/ prefix)
+    path('customer/dashboard/', RedirectView.as_view(pattern_name='authentication:customer_dashboard', permanent=True)),
+    path('owner/dashboard/', RedirectView.as_view(pattern_name='authentication:cafe_owner_dashboard', permanent=True)),
     
     path('accounts/', include('authentication.urls')),
     path('accounts/', include('allauth.urls')),
