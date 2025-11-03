@@ -59,7 +59,16 @@ class TapNexSuperuser(models.Model):
         max_digits=8, 
         decimal_places=2, 
         default=0.00,
-        help_text="Fixed platform fee per transaction"
+        help_text="Platform fee - can be fixed amount or percentage based on platform_fee_type"
+    )
+    platform_fee_type = models.CharField(
+        max_length=10,
+        choices=[
+            ('FIXED', 'Fixed Amount (₹)'),
+            ('PERCENT', 'Percentage (%)')
+        ],
+        default='PERCENT',
+        help_text="Type of platform fee calculation"
     )
     
     # Contact Information
@@ -85,14 +94,23 @@ class TapNexSuperuser(models.Model):
         """Calculate commission from a booking amount"""
         from decimal import Decimal
         
-        commission = (Decimal(str(booking_amount)) * self.commission_rate) / 100
-        total_commission = commission + self.platform_fee
-        net_payout = Decimal(str(booking_amount)) - total_commission
+        booking_amount = Decimal(str(booking_amount))
+        commission = (booking_amount * self.commission_rate) / 100
+        
+        # Calculate platform fee based on type
+        if self.platform_fee_type == 'PERCENT':
+            platform_fee_amount = (booking_amount * self.platform_fee) / 100
+        else:  # FIXED
+            platform_fee_amount = self.platform_fee
+        
+        total_commission = commission + platform_fee_amount
+        net_payout = booking_amount - total_commission
         
         return {
             'gross_revenue': booking_amount,
             'commission_amount': commission,
-            'platform_fee': self.platform_fee,
+            'platform_fee': platform_fee_amount,
+            'platform_fee_type': self.platform_fee_type,
             'total_commission': total_commission,
             'net_payout': net_payout
         }

@@ -122,6 +122,24 @@
                         {% endif %}
                     </div>
 
+                    <!-- Platform Fee Type -->
+                    <div>
+                        <label for="{{ form.platform_fee_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.platform_fee_type.label }}
+                        </label>
+                        {{ form.platform_fee_type }}
+                        {% if form.platform_fee_type.help_text %}
+                            <p class="mt-1 text-sm text-gray-500">{{ form.platform_fee_type.help_text }}</p>
+                        {% endif %}
+                        {% if form.platform_fee_type.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form.platform_fee_type.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Platform Fee -->
                     <div>
                         <label for="{{ form.platform_fee.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">

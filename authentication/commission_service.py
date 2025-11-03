@@ -13,20 +13,28 @@ class CommissionCalculator:
     """Service for calculating commissions and revenue analytics"""
     
     @staticmethod
-    def calculate_commission(booking_amount, commission_rate, platform_fee):
+    def calculate_commission(booking_amount, commission_rate, platform_fee, platform_fee_type='PERCENT'):
         """Calculate commission from a booking amount"""
         booking_amount = Decimal(str(booking_amount))
         commission_rate = Decimal(str(commission_rate))
         platform_fee = Decimal(str(platform_fee))
         
         commission = (booking_amount * commission_rate) / 100
-        total_commission = commission + platform_fee
+        
+        # Calculate platform fee based on type
+        if platform_fee_type == 'PERCENT':
+            platform_fee_amount = (booking_amount * platform_fee) / 100
+        else:  # FIXED
+            platform_fee_amount = platform_fee
+        
+        total_commission = commission + platform_fee_amount
         net_payout = booking_amount - total_commission
         
         return {
             'gross_revenue': booking_amount,
             'commission_amount': commission,
-            'platform_fee': platform_fee,
+            'platform_fee': platform_fee_amount,
+            'platform_fee_type': platform_fee_type,
             'total_commission': total_commission,
             'net_payout': net_payout
         }
@@ -44,9 +52,11 @@ class CommissionCalculator:
             tapnex_user = TapNexSuperuser.objects.first()
             commission_rate = tapnex_user.commission_rate if tapnex_user else Decimal('10.00')
             platform_fee = tapnex_user.platform_fee if tapnex_user else Decimal('0.00')
+            platform_fee_type = tapnex_user.platform_fee_type if tapnex_user else 'PERCENT'
         except TapNexSuperuser.DoesNotExist:
             commission_rate = Decimal('10.00')
             platform_fee = Decimal('0.00')
+            platform_fee_type = 'PERCENT'
         
         # Get confirmed bookings in date range
         bookings = Booking.objects.filter(
@@ -63,7 +73,13 @@ class CommissionCalculator:
         
         # Calculate commission breakdown
         commission_amount = (gross_revenue * commission_rate) / 100
-        total_platform_fees = platform_fee * total_bookings
+        
+        # Calculate platform fees based on type
+        if platform_fee_type == 'PERCENT':
+            total_platform_fees = (gross_revenue * platform_fee) / 100
+        else:  # FIXED
+            total_platform_fees = platform_fee * total_bookings
+        
         total_commission = commission_amount + total_platform_fees
         net_payout = gross_revenue - total_commission
         

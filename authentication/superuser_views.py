@@ -469,6 +469,7 @@ def system_settings(request):
         if action == 'update_commission':
             tapnex_user.commission_rate = request.POST.get('commission_rate', tapnex_user.commission_rate)
             tapnex_user.platform_fee = request.POST.get('platform_fee', tapnex_user.platform_fee)
+            tapnex_user.platform_fee_type = request.POST.get('platform_fee_type', tapnex_user.platform_fee_type)
             tapnex_user.save()
             messages.success(request, 'Commission settings updated.')
         

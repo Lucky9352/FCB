@@ -158,7 +158,7 @@ class CommissionSettingsForm(forms.ModelForm):
     class Meta:
         from .models import TapNexSuperuser
         model = TapNexSuperuser
-        fields = ['commission_rate', 'platform_fee', 'contact_email', 'phone']
+        fields = ['commission_rate', 'platform_fee', 'platform_fee_type', 'contact_email', 'phone']
         widgets = {
             'commission_rate': forms.NumberInput(attrs={
                 'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
@@ -173,6 +173,9 @@ class CommissionSettingsForm(forms.ModelForm):
                 'step': '0.01',
                 'min': '0'
             }),
+            'platform_fee_type': forms.Select(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
             'contact_email': forms.EmailInput(attrs={
                 'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
                 'placeholder': 'admin@tapnex.com'
@@ -184,13 +187,15 @@ class CommissionSettingsForm(forms.ModelForm):
         }
         labels = {
             'commission_rate': 'Commission Rate (%)',
-            'platform_fee': 'Platform Fee per Transaction ($)',
+            'platform_fee': 'Platform Fee',
+            'platform_fee_type': 'Platform Fee Type',
             'contact_email': 'TapNex Contact Email',
             'phone': 'TapNex Contact Phone'
         }
         help_texts = {
             'commission_rate': 'Percentage commission taken from each booking (e.g., 10.00 for 10%)',
-            'platform_fee': 'Fixed fee charged per transaction in addition to commission',
+            'platform_fee': 'Platform fee amount - can be fixed (₹) or percentage (%) based on type selected',
+            'platform_fee_type': 'Choose whether platform fee is a fixed amount per booking or a percentage of booking amount',
             'contact_email': 'Primary contact email for TapNex Technologies',
             'phone': 'Contact phone number for TapNex support'
         }
