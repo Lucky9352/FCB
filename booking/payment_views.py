@@ -129,17 +129,28 @@ def verify_razorpay_payment(request):
                 'error': 'Invalid payment signature'
             }, status=400)
         
-        # Update booking with payment details
-        booking.razorpay_payment_id = razorpay_payment_id
-        booking.razorpay_signature = razorpay_signature
-        booking.payment_status = 'PAID'
-        booking.status = 'CONFIRMED'
-        booking.save(update_fields=[
-            'razorpay_payment_id',
-            'razorpay_signature',
-            'payment_status',
-            'status'
-        ])
+        # Update booking with payment details (with database lock)
+        from django.db import transaction
+        with transaction.atomic():
+            booking = Booking.objects.select_for_update().get(id=booking_id)
+            
+            booking.razorpay_payment_id = razorpay_payment_id
+            booking.razorpay_signature = razorpay_signature
+            booking.payment_status = 'PAID'
+            booking.status = 'CONFIRMED'
+            
+            # Check and set notification flag atomically
+            should_notify = not booking.owner_notified
+            if should_notify:
+                booking.owner_notified = True
+            
+            booking.save(update_fields=[
+                'razorpay_payment_id',
+                'razorpay_signature',
+                'payment_status',
+                'status',
+                'owner_notified'
+            ])
         
         logger.info(f"Payment verified successfully for booking {booking_id}")
         
@@ -150,13 +161,11 @@ def verify_razorpay_payment(request):
         else:
             logger.warning(f"Failed to generate QR code for booking {booking_id}")
         
-        # Send Telegram notification to owner (only once)
-        if not booking.owner_notified:
+        # Send Telegram notification (only if flag was just set)
+        if should_notify:
             try:
                 from booking.telegram_service import telegram_service
                 telegram_service.send_new_booking_notification(booking)
-                booking.owner_notified = True
-                booking.save(update_fields=['owner_notified'])
                 logger.info(f"Telegram notification sent for booking {booking_id}")
             except Exception as e:
                 logger.error(f"Failed to send Telegram notification for booking {booking_id}: {e}")
@@ -281,37 +290,46 @@ def handle_payment_captured(payment_entity):
         payment_id = payment_entity.get('id')
         amount = payment_entity.get('amount')
         
-        # Find booking by order ID
-        booking = Booking.objects.filter(razorpay_order_id=order_id).first()
-        
-        if not booking:
-            logger.warning(f"Booking not found for order {order_id}")
-            return
-        
-        # Update booking
-        booking.razorpay_payment_id = payment_id
-        booking.payment_status = 'PAID'
-        booking.status = 'CONFIRMED'
-        booking.save(update_fields=[
-            'razorpay_payment_id',
-            'payment_status',
-            'status'
-        ])
-        
-        logger.info(f"Payment captured for booking {booking.id}")
-        
-        # Send Telegram notification to owner (only once)
-        if not booking.owner_notified:
-            try:
-                from booking.telegram_service import telegram_service
-                telegram_service.send_new_booking_notification(booking)
-                booking.owner_notified = True
-                booking.save(update_fields=['owner_notified'])
-                logger.info(f"Telegram notification sent for booking {booking.id}")
-            except Exception as e:
-                logger.error(f"Failed to send Telegram notification for booking {booking.id}: {e}")
-        else:
-            logger.info(f"Telegram notification already sent for booking {booking.id}")
+        # Find booking by order ID with database lock
+        from django.db import transaction
+        with transaction.atomic():
+            booking = Booking.objects.select_for_update().filter(razorpay_order_id=order_id).first()
+            
+            if not booking:
+                logger.warning(f"Booking not found for order {order_id}")
+                return
+            
+            # Update booking
+            booking.razorpay_payment_id = payment_id
+            booking.payment_status = 'PAID'
+            booking.status = 'CONFIRMED'
+            
+            # Check and send notification (atomically)
+            if not booking.owner_notified:
+                booking.owner_notified = True  # Set BEFORE save to prevent race
+                booking.save(update_fields=[
+                    'razorpay_payment_id',
+                    'payment_status',
+                    'status',
+                    'owner_notified'
+                ])
+                
+                logger.info(f"Payment captured for booking {booking.id}")
+                
+                # Send notification AFTER database lock is released
+                try:
+                    from booking.telegram_service import telegram_service
+                    telegram_service.send_new_booking_notification(booking)
+                    logger.info(f"Telegram notification sent for booking {booking.id}")
+                except Exception as e:
+                    logger.error(f"Failed to send Telegram notification for booking {booking.id}: {e}")
+            else:
+                booking.save(update_fields=[
+                    'razorpay_payment_id',
+                    'payment_status',
+                    'status'
+                ])
+                logger.info(f"Payment captured for booking {booking.id} - notification already sent")
         
     except Exception as e:
         logger.error(f"Error handling payment.captured: {str(e)}")
@@ -350,32 +368,43 @@ def handle_order_paid(order_entity):
         order_id = order_entity.get('id')
         amount_paid = order_entity.get('amount_paid')
         
-        # Find booking by order ID
-        booking = Booking.objects.filter(razorpay_order_id=order_id).first()
-        
-        if not booking:
-            logger.warning(f"Booking not found for order {order_id}")
-            return
-        
-        # Update booking
-        booking.payment_status = 'PAID'
-        booking.status = 'CONFIRMED'
-        booking.save(update_fields=['payment_status', 'status'])
-        
-        logger.info(f"Order paid for booking {booking.id}")
-        
-        # Send Telegram notification to owner (only once)
-        if not booking.owner_notified:
-            try:
-                from booking.telegram_service import telegram_service
-                telegram_service.send_new_booking_notification(booking)
-                booking.owner_notified = True
-                booking.save(update_fields=['owner_notified'])
-                logger.info(f"Telegram notification sent for booking {booking.id}")
-            except Exception as e:
-                logger.error(f"Failed to send Telegram notification for booking {booking.id}: {e}")
-        else:
-            logger.info(f"Telegram notification already sent for booking {booking.id}")
+        # Find booking by order ID with database lock
+        from django.db import transaction
+        with transaction.atomic():
+            booking = Booking.objects.select_for_update().filter(razorpay_order_id=order_id).first()
+            
+            if not booking:
+                logger.warning(f"Booking not found for order {order_id}")
+                return
+            
+            # Update booking
+            booking.payment_status = 'PAID'
+            booking.status = 'CONFIRMED'
+            
+            # Check and send notification (atomically)
+            if not booking.owner_notified:
+                booking.owner_notified = True  # Set BEFORE save to prevent race
+                booking.save(update_fields=[
+                    'payment_status',
+                    'status',
+                    'owner_notified'
+                ])
+                
+                logger.info(f"Order paid for booking {booking.id}")
+                
+                # Send notification AFTER database lock is released
+                try:
+                    from booking.telegram_service import telegram_service
+                    telegram_service.send_new_booking_notification(booking)
+                    logger.info(f"Telegram notification sent for booking {booking.id}")
+                except Exception as e:
+                    logger.error(f"Failed to send Telegram notification for booking {booking.id}: {e}")
+            else:
+                booking.save(update_fields=[
+                    'payment_status',
+                    'status'
+                ])
+                logger.info(f"Order paid for booking {booking.id} - notification already sent")
         
     except Exception as e:
         logger.error(f"Error handling order.paid: {str(e)}")
