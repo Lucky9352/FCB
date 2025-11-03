@@ -26,11 +26,13 @@ logger = logging.getLogger(__name__)
 @require_http_methods(["POST"])
 def create_razorpay_order(request, booking_id):
     """
-    Create a Razorpay order for a booking
+    Create a Razorpay order for a booking with payment split configuration
     
     POST /booking/payment/create-order/<booking_id>/
     """
     try:
+        from authentication.models import TapNexSuperuser, CafeOwner
+        
         # Get booking
         booking = get_object_or_404(
             Booking, 
@@ -45,8 +47,40 @@ def create_razorpay_order(request, booking_id):
                 'error': 'Booking is not in pending status'
             }, status=400)
         
-        # Create Razorpay order
-        order_result = razorpay_service.create_order(booking)
+        # Get TapNex settings for commission/platform fee rates
+        tapnex_user = TapNexSuperuser.objects.first()
+        if not tapnex_user:
+            logger.error("TapNex superuser not found")
+            return JsonResponse({
+                'success': False,
+                'error': 'System configuration error'
+            }, status=500)
+        
+        # Calculate payment split
+        # Commission is fixed at 7%, platform fee from settings
+        platform_fee_rate = float(tapnex_user.platform_fee) if tapnex_user.platform_fee_type == 'PERCENT' else 2
+        split = razorpay_service.calculate_payment_split(
+            booking.subtotal,  # Base booking amount
+            commission_rate=7,  # Fixed 7% commission
+            platform_fee_rate=platform_fee_rate
+        )
+        
+        # Update booking with calculated amounts
+        booking.platform_fee = split['platform_fee']
+        booking.total_amount = split['total_charged']  # What user pays
+        booking.commission_amount = split['commission']  # Commission deducted
+        booking.owner_payout = split['owner_payout']  # What owner receives
+        booking.save(update_fields=['platform_fee', 'total_amount', 'commission_amount', 'owner_payout'])
+        
+        # Get cafe owner's Razorpay account (if configured)
+        cafe_owner = CafeOwner.objects.first()
+        owner_account_id = None
+        if cafe_owner and cafe_owner.razorpay_account_id:
+            owner_account_id = cafe_owner.razorpay_account_id
+            logger.info(f"Using Razorpay account {owner_account_id} for transfer")
+        
+        # Create Razorpay order (with transfer if account configured)
+        order_result = razorpay_service.create_order_with_transfer(booking, owner_account_id)
         
         if not order_result['success']:
             return JsonResponse({
@@ -161,6 +195,42 @@ def verify_razorpay_payment(request):
         else:
             logger.warning(f"Failed to generate QR code for booking {booking_id}")
         
+        # Create transfer to owner if not done during order creation
+        # (This happens if transfer was not included in order due to account not configured)
+        from authentication.models import CafeOwner
+        cafe_owner = CafeOwner.objects.first()
+        
+        if cafe_owner and cafe_owner.razorpay_account_id and not booking.razorpay_transfer_id:
+            try:
+                # Create transfer to owner
+                transfer_result = razorpay_service.create_transfer(
+                    razorpay_payment_id,
+                    cafe_owner.razorpay_account_id,
+                    int(booking.owner_payout * 100),  # Convert to paise
+                    str(booking.id),
+                    notes={
+                        'booking_id': str(booking.id),
+                        'transfer_type': 'owner_payout',
+                        'commission': str(booking.commission_amount),
+                        'owner_payout': str(booking.owner_payout)
+                    }
+                )
+                
+                if transfer_result['success']:
+                    booking.transfer_status = 'PROCESSED'
+                    booking.razorpay_transfer_id = transfer_result['transfer_id']
+                    booking.transfer_processed_at = timezone.now()
+                    booking.save(update_fields=['transfer_status', 'razorpay_transfer_id', 'transfer_processed_at'])
+                    logger.info(f"Transfer created successfully: {transfer_result['transfer_id']} for booking {booking_id}")
+                else:
+                    booking.transfer_status = 'FAILED'
+                    booking.save(update_fields=['transfer_status'])
+                    logger.error(f"Transfer creation failed for booking {booking_id}: {transfer_result.get('error')}")
+            except Exception as e:
+                logger.error(f"Error creating transfer for booking {booking_id}: {str(e)}")
+                booking.transfer_status = 'FAILED'
+                booking.save(update_fields=['transfer_status'])
+        
         # Send Telegram notification (only if flag was just set)
         if should_notify:
             try:
@@ -181,7 +251,8 @@ def verify_razorpay_payment(request):
             'message': 'Payment verified successfully',
             'booking_id': str(booking.id),
             'status': booking.status,
-            'qr_generated': qr_generated
+            'qr_generated': qr_generated,
+            'transfer_status': booking.transfer_status
         })
         
     except Exception as e:
@@ -247,6 +318,12 @@ def razorpay_webhook(request):
             handle_payment_failed(payment_entity)
         elif event == 'order.paid':
             handle_order_paid(order_entity)
+        elif event == 'transfer.processed':
+            handle_transfer_processed(payload.get('transfer', {}).get('entity', {}))
+        elif event == 'transfer.failed':
+            handle_transfer_failed(payload.get('transfer', {}).get('entity', {}))
+        elif event == 'transfer.reversed':
+            handle_transfer_reversed(payload.get('transfer', {}).get('entity', {}))
         else:
             logger.info(f"Unhandled webhook event: {event}")
         
@@ -408,6 +485,103 @@ def handle_order_paid(order_entity):
         
     except Exception as e:
         logger.error(f"Error handling order.paid: {str(e)}")
+
+
+def handle_transfer_processed(transfer_entity):
+    """Handle transfer.processed event - Transfer to owner account successful"""
+    try:
+        transfer_id = transfer_entity.get('id')
+        amount = transfer_entity.get('amount')
+        recipient = transfer_entity.get('recipient')
+        notes = transfer_entity.get('notes', {})
+        booking_id = notes.get('booking_id')
+        
+        if not booking_id:
+            logger.warning(f"Transfer {transfer_id} has no booking_id in notes")
+            return
+        
+        # Find booking
+        booking = Booking.objects.filter(id=booking_id).first()
+        
+        if not booking:
+            logger.warning(f"Booking {booking_id} not found for transfer {transfer_id}")
+            return
+        
+        # Update booking with transfer success
+        booking.razorpay_transfer_id = transfer_id
+        booking.transfer_status = 'PROCESSED'
+        booking.transfer_processed_at = timezone.now()
+        booking.save(update_fields=['razorpay_transfer_id', 'transfer_status', 'transfer_processed_at'])
+        
+        logger.info(f"Transfer processed successfully for booking {booking_id}: ₹{amount/100} to {recipient}")
+        
+    except Exception as e:
+        logger.error(f"Error handling transfer.processed: {str(e)}")
+
+
+def handle_transfer_failed(transfer_entity):
+    """Handle transfer.failed event - Transfer to owner account failed"""
+    try:
+        transfer_id = transfer_entity.get('id')
+        error_code = transfer_entity.get('error_code')
+        error_description = transfer_entity.get('error_description')
+        notes = transfer_entity.get('notes', {})
+        booking_id = notes.get('booking_id')
+        
+        if not booking_id:
+            logger.warning(f"Transfer {transfer_id} has no booking_id in notes")
+            return
+        
+        # Find booking
+        booking = Booking.objects.filter(id=booking_id).first()
+        
+        if not booking:
+            logger.warning(f"Booking {booking_id} not found for transfer {transfer_id}")
+            return
+        
+        # Update booking with transfer failure
+        booking.razorpay_transfer_id = transfer_id
+        booking.transfer_status = 'FAILED'
+        booking.notes = f"{booking.notes}\nTransfer failed: {error_description} ({error_code})"
+        booking.save(update_fields=['razorpay_transfer_id', 'transfer_status', 'notes'])
+        
+        logger.error(f"Transfer failed for booking {booking_id}: {error_description}")
+        
+        # TODO: Alert admin about failed transfer for manual processing
+        
+    except Exception as e:
+        logger.error(f"Error handling transfer.failed: {str(e)}")
+
+
+def handle_transfer_reversed(transfer_entity):
+    """Handle transfer.reversed event - Transfer was reversed"""
+    try:
+        transfer_id = transfer_entity.get('id')
+        notes = transfer_entity.get('notes', {})
+        booking_id = notes.get('booking_id')
+        
+        if not booking_id:
+            logger.warning(f"Transfer {transfer_id} has no booking_id in notes")
+            return
+        
+        # Find booking
+        booking = Booking.objects.filter(id=booking_id).first()
+        
+        if not booking:
+            logger.warning(f"Booking {booking_id} not found for transfer {transfer_id}")
+            return
+        
+        # Update booking with transfer reversal
+        booking.transfer_status = 'FAILED'
+        booking.notes = f"{booking.notes}\nTransfer reversed: {transfer_id}"
+        booking.save(update_fields=['transfer_status', 'notes'])
+        
+        logger.warning(f"Transfer reversed for booking {booking_id}: {transfer_id}")
+        
+        # TODO: Alert admin about reversed transfer
+        
+    except Exception as e:
+        logger.error(f"Error handling transfer.reversed: {str(e)}")
 
 
 @customer_required

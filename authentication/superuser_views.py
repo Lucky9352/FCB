@@ -462,6 +462,7 @@ def system_settings(request):
     """System-wide settings and configuration"""
     
     tapnex_user = get_object_or_404(TapNexSuperuser, user=request.user)
+    cafe_owner = CafeOwner.objects.first()  # Get cafe owner for Razorpay settings
     
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -486,6 +487,22 @@ def system_settings(request):
             tapnex_user.telegram_enabled = request.POST.get('telegram_enabled') == 'on'
             tapnex_user.save()
             messages.success(request, 'Telegram notification settings updated.')
+        
+        elif action == 'update_razorpay':
+            if cafe_owner:
+                cafe_owner.razorpay_account_id = request.POST.get('razorpay_account_id', '').strip()
+                cafe_owner.razorpay_account_email = request.POST.get('razorpay_account_email', '').strip()
+                
+                # Set status to ACTIVE if account ID is provided
+                if cafe_owner.razorpay_account_id:
+                    cafe_owner.razorpay_account_status = 'ACTIVE'
+                else:
+                    cafe_owner.razorpay_account_status = 'PENDING'
+                
+                cafe_owner.save()
+                messages.success(request, '💳 Razorpay account settings updated successfully!')
+            else:
+                messages.error(request, 'No cafe owner found. Please create a cafe owner account first.')
     
     # Get system statistics
     system_stats = {
@@ -498,6 +515,7 @@ def system_settings(request):
     
     context = {
         'tapnex_user': tapnex_user,
+        'cafe_owner': cafe_owner,
         'system_stats': system_stats,
     }
     

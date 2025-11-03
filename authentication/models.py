@@ -34,6 +34,28 @@ class CafeOwner(models.Model):
         message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."
     )
     phone = models.CharField(validators=[phone_regex], max_length=17)
+    
+    # Razorpay Account Settings for Route/Transfer
+    razorpay_account_id = models.CharField(
+        max_length=100, 
+        blank=True,
+        help_text="Razorpay Account/Route ID for receiving payments (e.g., acc_xxxxx or route_xxxxx)"
+    )
+    razorpay_account_email = models.EmailField(
+        blank=True,
+        help_text="Email associated with the Razorpay account"
+    )
+    razorpay_account_status = models.CharField(
+        max_length=20,
+        choices=[
+            ('PENDING', 'Pending Verification'),
+            ('ACTIVE', 'Active'),
+            ('SUSPENDED', 'Suspended')
+        ],
+        default='PENDING',
+        help_text="Status of Razorpay account"
+    )
+    
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

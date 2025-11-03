@@ -172,6 +172,128 @@
         }
         </script>
 
+        <!-- Razorpay Account Settings -->
+        <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-8 mb-6">
+            <h2 class="text-2xl font-bold text-white mb-2">💳 Razorpay Route Configuration</h2>
+            <p class="text-gray-400 mb-6">Configure cafe owner's Razorpay account for automatic payment transfers</p>
+            
+            {% if not cafe_owner %}
+            <div class="bg-yellow-900/30 border border-yellow-600 text-yellow-200 px-4 py-3 rounded-lg mb-4">
+                ⚠️ No cafe owner account found. Please create a cafe owner account first.
+            </div>
+            {% else %}
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_razorpay">
+                
+                <div class="grid grid-cols-1 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            Razorpay Account ID / Route ID
+                            <span class="text-gray-500 text-xs">(Format: acc_xxxxx or route_xxxxx)</span>
+                        </label>
+                        <input type="text" 
+                               name="razorpay_account_id" 
+                               value="{{ cafe_owner.razorpay_account_id|default:'' }}" 
+                               placeholder="acc_ABCDEFxxxxxx or route_ABCDEFxxxxxx"
+                               class="w-full px-4 py-2 bg-gaming-primary border border-gaming-accent rounded-lg text-white font-mono text-sm">
+                        <p class="text-xs text-gray-400 mt-1">
+                            Enter the Razorpay Linked Account ID where owner payments should be transferred
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            Account Email
+                        </label>
+                        <input type="email" 
+                               name="razorpay_account_email" 
+                               value="{{ cafe_owner.razorpay_account_email|default:cafe_owner.contact_email }}" 
+                               placeholder="owner@example.com"
+                               class="w-full px-4 py-2 bg-gaming-primary border border-gaming-accent rounded-lg text-white">
+                        <p class="text-xs text-gray-400 mt-1">
+                            Email associated with the Razorpay account
+                        </p>
+                    </div>
+                    
+                    <div class="bg-gaming-primary border border-gaming-accent rounded-lg p-6">
+                        <h3 class="text-white font-semibold mb-4 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+                            </svg>
+                            Payment Split Breakdown
+                        </h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between items-center py-2 border-b border-gaming-accent">
+                                <span class="text-gray-300">Commission Rate:</span>
+                                <span class="text-gaming-highlight font-bold text-lg">7%</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gaming-accent">
+                                <span class="text-gray-300">Platform Fee:</span>
+                                <span class="text-gaming-highlight font-bold text-lg">{{ tapnex_user.platform_fee }}{% if tapnex_user.platform_fee_type == 'PERCENT' %}%{% else %} ₹{% endif %}</span>
+                            </div>
+                            
+                            <div class="bg-gaming-secondary rounded-lg p-4 mt-4">
+                                <p class="text-gray-300 font-semibold mb-3">💡 Example Calculation:</p>
+                                <div class="space-y-2 text-xs">
+                                    <div class="flex justify-between text-gray-400">
+                                        <span>Booking Amount:</span>
+                                        <span class="text-white font-mono">₹100.00</span>
+                                    </div>
+                                    <div class="flex justify-between text-gray-400">
+                                        <span>Platform Fee (2%):</span>
+                                        <span class="text-yellow-400 font-mono">+ ₹2.00</span>
+                                    </div>
+                                    <div class="flex justify-between font-semibold border-t border-gaming-accent pt-2">
+                                        <span class="text-blue-400">User Pays:</span>
+                                        <span class="text-blue-400 font-mono">₹102.00</span>
+                                    </div>
+                                    
+                                    <div class="border-t border-gaming-accent mt-3 pt-3">
+                                        <div class="flex justify-between text-gray-400">
+                                            <span>Booking Amount:</span>
+                                            <span class="text-white font-mono">₹100.00</span>
+                                        </div>
+                                        <div class="flex justify-between text-gray-400">
+                                            <span>Commission (7%):</span>
+                                            <span class="text-red-400 font-mono">- ₹7.00</span>
+                                        </div>
+                                        <div class="flex justify-between font-semibold border-t border-gaming-accent pt-2 mt-2">
+                                            <span class="text-green-400">Owner Receives:</span>
+                                            <span class="text-green-400 font-mono text-lg">₹93.00</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if cafe_owner.razorpay_account_id %}
+                    <div class="bg-blue-900/20 border border-blue-600/50 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-400 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                            <div>
+                                <p class="text-blue-300 font-semibold mb-1">Account Configured</p>
+                                <p class="text-blue-200 text-sm">Account ID: <code class="bg-gaming-primary px-2 py-1 rounded">{{ cafe_owner.razorpay_account_id }}</code></p>
+                                <p class="text-blue-200 text-sm mt-1">Status: <span class="px-2 py-1 rounded {% if cafe_owner.razorpay_account_status == 'ACTIVE' %}bg-green-600{% else %}bg-yellow-600{% endif %}">{{ cafe_owner.razorpay_account_status }}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="flex gap-4">
+                    <button type="submit" class="bg-gaming-highlight hover:bg-opacity-90 text-white font-semibold py-3 px-8 rounded-lg transition-all">
+                        💾 Save Razorpay Settings
+                    </button>
+                </div>
+            </form>
+            {% endif %}
+        </div>
+
         <!-- Profile Settings -->
         <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-8 mb-6">
             <h2 class="text-2xl font-bold text-white mb-6">Profile Settings</h2>

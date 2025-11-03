@@ -79,14 +79,15 @@ def owner_overview(request):
     today = now.date()
     yesterday = today - timedelta(days=1)
     
-    # Today's Stats
+    # Today's Stats - Use owner_payout instead of total_amount
     todays_bookings = Booking.objects.filter(
         start_time__date=today
     )
     
+    # Owner's revenue = sum of owner_payout (after commission deduction)
     todays_revenue = todays_bookings.filter(
         payment_status='PAID'
-    ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
+    ).aggregate(total=Sum('owner_payout'))['total'] or Decimal('0.00')
     
     active_sessions = Booking.objects.filter(
         start_time__lte=now,
@@ -113,11 +114,11 @@ def owner_overview(request):
     # Total customers today
     customers_today = todays_bookings.values('customer').distinct().count()
     
-    # Yesterday's revenue for comparison
+    # Yesterday's revenue for comparison (owner_payout)
     yesterdays_revenue = Booking.objects.filter(
         start_time__date=yesterday,
         payment_status='PAID'
-    ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
+    ).aggregate(total=Sum('owner_payout'))['total'] or Decimal('0.00')
     
     # Calculate percentage change
     if yesterdays_revenue > 0:
@@ -371,10 +372,10 @@ def owner_customers(request):
     # Base queryset
     customers = Customer.objects.all().select_related('user')
     
-    # Add stats to each customer
+    # Add stats to each customer - Use owner_payout for revenue
     customers = customers.annotate(
         total_bookings=Count('bookings'),
-        total_spent=Sum('bookings__total_amount', filter=Q(bookings__payment_status='PAID')),
+        total_spent=Sum('bookings__owner_payout', filter=Q(bookings__payment_status='PAID')),
         last_booking_date=Count('bookings__start_time')
     )
     
@@ -407,7 +408,7 @@ def owner_customers(request):
     # Customer segments count
     total_customers = Customer.objects.count()
     vip_customers = Customer.objects.annotate(
-        total_spent=Sum('bookings__total_amount', filter=Q(bookings__payment_status='PAID'))
+        total_spent=Sum('bookings__owner_payout', filter=Q(bookings__payment_status='PAID'))
     ).filter(total_spent__gte=1000).count()
     
     new_customers = Customer.objects.filter(
@@ -432,7 +433,7 @@ def owner_customers(request):
 
 @cafe_owner_required
 def owner_revenue(request):
-    """Revenue and finance section"""
+    """Revenue and finance section - Shows owner's earnings after commission"""
     cafe_owner = request.user.cafe_owner_profile
     now = timezone.now()
     today = now.date()
@@ -456,34 +457,48 @@ def owner_revenue(request):
         start_date = today.replace(day=1)
         end_date = today
     
-    # Total revenue
+    # Total revenue for owner (after commission) - Use owner_payout
     total_revenue = Booking.objects.filter(
         start_time__date__gte=start_date,
         start_time__date__lte=end_date,
         payment_status='PAID'
-    ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
+    ).aggregate(total=Sum('owner_payout'))['total'] or Decimal('0.00')
     
-    # Revenue by payment method
+    # Gross revenue (before commission) for reference
+    gross_revenue = Booking.objects.filter(
+        start_time__date__gte=start_date,
+        start_time__date__lte=end_date,
+        payment_status='PAID'
+    ).aggregate(total=Sum('subtotal'))['total'] or Decimal('0.00')
+    
+    # Total commission deducted
+    total_commission = Booking.objects.filter(
+        start_time__date__gte=start_date,
+        start_time__date__lte=end_date,
+        payment_status='PAID'
+    ).aggregate(total=Sum('commission_amount'))['total'] or Decimal('0.00')
+    
+    # Revenue by payment method (using owner_payout)
     revenue_by_method = Booking.objects.filter(
         start_time__date__gte=start_date,
         start_time__date__lte=end_date,
         payment_status='PAID'
     ).values('payment_method').annotate(
-        total=Sum('total_amount'),
+        total=Sum('owner_payout'),
         count=Count('id')
     )
     
-    # Revenue by game
+    # Revenue by game (using owner_payout)
     revenue_by_game = Booking.objects.filter(
         start_time__date__gte=start_date,
         start_time__date__lte=end_date,
         payment_status='PAID'
     ).values('game__name').annotate(
-        total=Sum('total_amount'),
+        total=Sum('owner_payout'),
         count=Count('id')
     ).order_by('-total')[:10]
     
-    # Revenue trend (daily for the period)
+    # Revenue trend (daily for the period) - owner_payout
     revenue_trend = Booking.objects.filter(
         start_time__date__gte=start_date,
         start_time__date__lte=end_date,
@@ -491,7 +506,7 @@ def owner_revenue(request):
     ).annotate(
         date=TruncDate('start_time')
     ).values('date').annotate(
-        revenue=Sum('total_amount')
+        revenue=Sum('owner_payout')
     ).order_by('date')
     
     # Payment management
@@ -503,17 +518,16 @@ def owner_revenue(request):
         payment_status='FAILED'
     ).select_related('game', 'customer').order_by('-created_at')[:20]
     
-    # Commission tracking (assuming 10% platform commission)
-    commission_rate = Decimal('0.10')
-    platform_commission = total_revenue * commission_rate
-    net_revenue = total_revenue - platform_commission
+    # Commission tracking - Fixed 7% commission rate
+    commission_rate = Decimal('7.00')
     
     context = {
         'cafe_owner': cafe_owner,
-        'total_revenue': total_revenue,
-        'platform_commission': platform_commission,
-        'net_revenue': net_revenue,
-        'commission_rate': commission_rate * 100,
+        'total_revenue': total_revenue,  # Owner's net revenue after commission
+        'gross_revenue': gross_revenue,  # Before commission
+        'platform_commission': total_commission,  # Total commission deducted
+        'net_revenue': total_revenue,  # Same as total_revenue (already net)
+        'commission_rate': commission_rate,
         'revenue_by_method': revenue_by_method,
         'revenue_by_game': revenue_by_game,
         'revenue_trend': list(revenue_trend),
@@ -560,11 +574,11 @@ def owner_reports(request):
         count=Count('id')
     ).order_by('hour')
     
-    # Average booking value
+    # Average booking value - Use owner_payout
     avg_booking_value = Booking.objects.filter(
         start_time__date__gte=start_date,
         payment_status='PAID'
-    ).aggregate(avg=Avg('total_amount'))['avg'] or Decimal('0.00')
+    ).aggregate(avg=Avg('owner_payout'))['avg'] or Decimal('0.00')
     
     # Cancellation analysis
     total_bookings = Booking.objects.filter(start_time__date__gte=start_date).count()
@@ -581,9 +595,9 @@ def owner_reports(request):
     
     total_customers = Customer.objects.count()
     
-    # Customer lifetime value
+    # Customer lifetime value - Use owner_payout
     customer_ltv = Customer.objects.annotate(
-        ltv=Sum('bookings__total_amount', filter=Q(bookings__payment_status='PAID'))
+        ltv=Sum('bookings__owner_payout', filter=Q(bookings__payment_status='PAID'))
     ).aggregate(avg_ltv=Avg('ltv'))['avg_ltv'] or Decimal('0.00')
     
     # Utilization rate
@@ -592,7 +606,7 @@ def owner_reports(request):
     total_bookings_count = Booking.objects.filter(start_time__date__gte=start_date).count()
     utilization_rate = (total_bookings_count / total_possible_slots * 100) if total_possible_slots > 0 else 0
     
-    # Revenue comparison (current period vs previous period)
+    # Revenue comparison (current period vs previous period) - Use owner_payout
     previous_start_date = start_date - timedelta(days=days)
     previous_end_date = start_date - timedelta(days=1)
     
@@ -600,13 +614,13 @@ def owner_reports(request):
         start_time__date__gte=start_date,
         start_time__date__lte=today,
         payment_status='PAID'
-    ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
+    ).aggregate(total=Sum('owner_payout'))['total'] or Decimal('0.00')
     
     previous_revenue = Booking.objects.filter(
         start_time__date__gte=previous_start_date,
         start_time__date__lte=previous_end_date,
         payment_status='PAID'
-    ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
+    ).aggregate(total=Sum('owner_payout'))['total'] or Decimal('0.00')
     
     revenue_change = ((current_revenue - previous_revenue) / previous_revenue * 100) if previous_revenue > 0 else 0
     

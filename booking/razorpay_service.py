@@ -243,6 +243,199 @@ class RazorpayService:
         except Exception as e:
             logger.error(f"Failed to fetch payment {payment_id}: {str(e)}")
             return None
+    
+    def calculate_payment_split(self, booking_amount, commission_rate=7, platform_fee_rate=2):
+        """
+        Calculate payment split with commission and platform fee
+        
+        Payment Flow:
+        - User pays: booking_amount + platform_fee
+        - Platform keeps: commission + platform_fee
+        - Owner receives: booking_amount - commission
+        
+        Args:
+            booking_amount: Base booking amount (Decimal)
+            commission_rate: Commission percentage (default 7%)
+            platform_fee_rate: Platform fee percentage (default 2%)
+            
+        Returns:
+            dict: {
+                'booking_amount': Decimal - Base booking amount
+                'platform_fee': Decimal - Platform fee (paid by user)
+                'total_charged': Decimal - Total amount user pays
+                'commission': Decimal - Commission deducted from owner
+                'owner_payout': Decimal - Amount owner receives
+            }
+        """
+        booking_amount = Decimal(str(booking_amount))
+        commission_rate = Decimal(str(commission_rate))
+        platform_fee_rate = Decimal(str(platform_fee_rate))
+        
+        # Calculate platform fee (paid by user, added to total)
+        platform_fee = (booking_amount * platform_fee_rate / 100).quantize(Decimal('0.01'))
+        
+        # Calculate commission (deducted from owner's share)
+        commission = (booking_amount * commission_rate / 100).quantize(Decimal('0.01'))
+        
+        # Total amount user pays
+        total_charged = booking_amount + platform_fee
+        
+        # Amount owner receives (booking_amount - commission)
+        owner_payout = booking_amount - commission
+        
+        logger.info(f"Payment Split - Booking: ₹{booking_amount}, Platform Fee: ₹{platform_fee}, "
+                   f"Commission: ₹{commission}, Total Charged: ₹{total_charged}, Owner Payout: ₹{owner_payout}")
+        
+        return {
+            'booking_amount': booking_amount,
+            'platform_fee': platform_fee,
+            'total_charged': total_charged,
+            'commission': commission,
+            'owner_payout': owner_payout
+        }
+    
+    def create_order_with_transfer(self, booking, owner_account_id=None):
+        """
+        Create a Razorpay order with optional transfer/route configuration
+        
+        Note: Razorpay Route requires additional setup. If owner_account_id is not provided,
+        creates a normal order. Transfer is created after payment success.
+        
+        Args:
+            booking: Booking instance
+            owner_account_id: Razorpay account ID of owner (optional)
+            
+        Returns:
+            dict: Order data from Razorpay
+        """
+        try:
+            # Convert amount to paise (smallest currency unit)
+            amount_paise = int(booking.total_amount * 100)
+            
+            # Create order data
+            order_data = {
+                'amount': amount_paise,
+                'currency': 'INR',
+                'receipt': str(booking.id),
+                'notes': {
+                    'booking_id': str(booking.id),
+                    'customer_email': booking.customer.user.email,
+                    'customer_name': booking.customer.user.get_full_name() or booking.customer.user.username,
+                    'game_name': booking.game.name,
+                    'booking_type': booking.booking_type,
+                    'owner_payout': str(booking.owner_payout),
+                    'commission': str(booking.commission_amount),
+                    'platform_fee': str(booking.platform_fee),
+                }
+            }
+            
+            # Add transfer configuration if owner account is provided
+            # Note: This requires Razorpay Route to be enabled on your account
+            if owner_account_id:
+                order_data['transfers'] = [{
+                    'account': owner_account_id,
+                    'amount': int(booking.owner_payout * 100),  # Amount in paise
+                    'currency': 'INR',
+                    'notes': {
+                        'booking_id': str(booking.id),
+                        'transfer_type': 'owner_payout'
+                    }
+                }]
+                logger.info(f"Order created with transfer configuration for account {owner_account_id}")
+            
+            # Create order via Razorpay API
+            order = self.client.order.create(data=order_data)
+            
+            logger.info(f"Razorpay order created: {order['id']} for booking {booking.id}")
+            
+            return {
+                'success': True,
+                'order_id': order['id'],
+                'amount': order['amount'],
+                'currency': order['currency'],
+                'order_data': order
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to create Razorpay order for booking {booking.id}: {str(e)}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
+    
+    def create_transfer(self, payment_id, owner_account_id, amount, booking_id, notes=None):
+        """
+        Create a transfer to owner's Razorpay account after payment
+        
+        This is used when transfer is not created during order creation.
+        Requires Razorpay Route to be enabled on your account.
+        
+        Args:
+            payment_id: Razorpay payment ID
+            owner_account_id: Owner's Razorpay account ID
+            amount: Amount to transfer in paise
+            booking_id: Reference booking ID
+            notes: Optional notes dict
+            
+        Returns:
+            dict: Transfer response
+        """
+        try:
+            transfer_data = {
+                'account': owner_account_id,
+                'amount': amount,
+                'currency': 'INR',
+                'notes': notes or {
+                    'booking_id': str(booking_id),
+                    'transfer_type': 'owner_payout'
+                }
+            }
+            
+            # Create transfer from payment
+            transfer = self.client.payment.transfer(payment_id, transfer_data)
+            
+            logger.info(f"Transfer created: {transfer['id']} for payment {payment_id}, "
+                       f"amount: ₹{amount/100}, account: {owner_account_id}")
+            
+            return {
+                'success': True,
+                'transfer_id': transfer['id'],
+                'transfer': transfer
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to create transfer for payment {payment_id}: {str(e)}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
+    
+    def fetch_transfer(self, transfer_id):
+        """
+        Fetch transfer details and status from Razorpay
+        
+        Args:
+            transfer_id: Razorpay transfer ID
+            
+        Returns:
+            dict: Transfer details or error
+        """
+        try:
+            transfer = self.client.transfer.fetch(transfer_id)
+            
+            logger.info(f"Fetched transfer {transfer_id}: status={transfer.get('status')}")
+            
+            return {
+                'success': True,
+                'transfer': transfer
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to fetch transfer {transfer_id}: {str(e)}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
 
 
 # Singleton instance

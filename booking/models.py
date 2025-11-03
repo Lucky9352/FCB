@@ -364,6 +364,40 @@ class Booking(models.Model):
     razorpay_payment_id = models.CharField(max_length=100, blank=True, help_text="Razorpay payment ID")
     razorpay_signature = models.CharField(max_length=500, blank=True, help_text="Razorpay payment signature")
     
+    # Razorpay Route/Transfer Fields
+    commission_amount = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        help_text="Commission amount deducted from owner's share (7%)"
+    )
+    owner_payout = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        help_text="Amount transferred to owner after commission deduction"
+    )
+    razorpay_transfer_id = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Razorpay transfer ID for route payment to owner"
+    )
+    transfer_status = models.CharField(
+        max_length=20,
+        choices=[
+            ('PENDING', 'Pending'),
+            ('PROCESSED', 'Processed'),
+            ('FAILED', 'Failed')
+        ],
+        default='PENDING',
+        help_text="Status of transfer to owner account"
+    )
+    transfer_processed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Timestamp when transfer was processed"
+    )
+    
     # QR Code Verification Fields
     verification_token = models.CharField(
         max_length=100, 
