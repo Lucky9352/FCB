@@ -30,6 +30,7 @@ urlpatterns = [
     path('payment/webhook/', payment_views.razorpay_webhook, name='razorpay_webhook'),
     path('payment/cancelled/<uuid:booking_id>/', payment_views.payment_cancelled, name='payment_cancelled'),
     path('payment/success/<uuid:booking_id>/', payment_views.payment_success, name='payment_success'),
+    path('payment/status/<uuid:booking_id>/', payment_views.check_payment_status, name='check_payment_status'),
     
     # Notifications
     path('api/notifications/', views.get_notifications, name='get_notifications'),

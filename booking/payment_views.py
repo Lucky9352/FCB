@@ -406,3 +406,62 @@ def payment_success(request, booking_id):
         messages.error(request, 'Unable to display booking confirmation')
         return redirect('booking:my_bookings')
 
+
+@customer_required
+@require_http_methods(["GET"])
+def check_payment_status(request, booking_id):
+    """
+    API endpoint to check payment status - used as fallback when webhook verification fails
+    
+    GET /booking/payment/status/<booking_id>/
+    """
+    try:
+        booking = get_object_or_404(
+            Booking,
+            id=booking_id,
+            customer=request.user.customer_profile
+        )
+        
+        # If already confirmed, return success
+        if booking.status == 'CONFIRMED' and booking.payment_status == 'PAID':
+            return JsonResponse({
+                'success': True,
+                'payment_status': booking.payment_status,
+                'booking_status': booking.status,
+                'needs_action': False,
+                'message': 'Payment confirmed successfully'
+            })
+        
+        # Check with Razorpay if we have payment ID
+        if booking.razorpay_payment_id and booking.payment_status != 'PAID':
+            payment_details = razorpay_service.get_payment_details(booking.razorpay_payment_id)
+            
+            if payment_details and payment_details.get('status') == 'captured':
+                booking.payment_status = 'PAID'
+                booking.status = 'CONFIRMED'
+                booking.save(update_fields=['payment_status', 'status'])
+                
+                logger.info(f"Payment status updated via API fallback for booking {booking_id}")
+                
+                return JsonResponse({
+                    'success': True,
+                    'payment_status': 'PAID',
+                    'booking_status': 'CONFIRMED',
+                    'needs_action': False,
+                    'message': 'Payment confirmed successfully'
+                })
+        
+        return JsonResponse({
+            'success': True,
+            'payment_status': booking.payment_status,
+            'booking_status': booking.status,
+            'needs_action': booking.status == 'PENDING',
+            'message': 'Payment still processing' if booking.status == 'PENDING' else 'Payment completed'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error checking payment status: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': 'Internal server error'
+        }, status=500)

@@ -225,6 +225,24 @@ class RazorpayService:
                 'success': False,
                 'error': str(e)
             }
+    
+    def get_payment_details(self, payment_id):
+        """
+        Fetch payment details from Razorpay - used for status checks
+        
+        Args:
+            payment_id: Razorpay payment ID
+            
+        Returns:
+            dict: Payment details or None if error
+        """
+        try:
+            payment = self.client.payment.fetch(payment_id)
+            logger.info(f"Fetched payment details for {payment_id}: status={payment.get('status')}")
+            return payment
+        except Exception as e:
+            logger.error(f"Failed to fetch payment {payment_id}: {str(e)}")
+            return None
 
 
 # Singleton instance
