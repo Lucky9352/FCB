@@ -98,20 +98,40 @@ class TelegramNotificationService:
         if not self.chat_id:
             return {'success': False, 'message': 'Chat ID not configured'}
         
+        # For test messages, bypass the enabled check
+        # Temporarily send message even if notifications are disabled
+        url = f"https://api.telegram.org/bot{self.bot_token}/sendMessage"
+        
         test_text = (
             "🎮 <b>Telegram Notification Test</b>\n\n"
             "✅ Your Gaming Cafe notification system is working!\n\n"
             f"📱 Chat Type: {self.notification_type}\n"
-            f"🔔 Notifications: Enabled\n\n"
+            f"🔔 Notifications: {'Enabled' if self.enabled else 'Disabled'}\n\n"
             f"⏰ Test Time: {datetime.now().strftime('%d %b %Y, %I:%M %p')}"
         )
         
-        success = self._send_message(test_text)
+        payload = {
+            'chat_id': self.chat_id,
+            'text': test_text,
+            'parse_mode': 'HTML',
+            'disable_web_page_preview': True
+        }
         
-        if success:
-            return {'success': True, 'message': 'Test notification sent successfully!'}
-        else:
-            return {'success': False, 'message': 'Failed to send test notification. Check bot token and chat ID.'}
+        try:
+            response = requests.post(url, json=payload, timeout=10)
+            
+            if response.status_code == 200:
+                logger.info(f"Test notification sent successfully to {self.chat_id}")
+                return {'success': True, 'message': 'Test notification sent successfully!'}
+            else:
+                error_msg = response.json().get('description', 'Unknown error')
+                logger.error(f"Telegram API error: {error_msg}")
+                return {'success': False, 'message': f'Telegram API error: {error_msg}'}
+                
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Failed to send test notification: {e}")
+            return {'success': False, 'message': f'Connection error: {str(e)}'}
+
     
     def send_new_booking_notification(self, booking):
         """
