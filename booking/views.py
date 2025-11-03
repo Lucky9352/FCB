@@ -605,15 +605,124 @@ def hybrid_booking_confirm(request, booking_id):
     from .booking_service import BookingService
     available_options = BookingService.get_booking_options(booking.game_slot)
     
+    # Calculate max spots that can be booked
+    max_additional_spots = 0
+    if booking.booking_type == 'SHARED':
+        current_availability = booking.game_slot.availability
+        # Max spots = current spots + available spots (capped at 4 total per booking)
+        max_additional_spots = min(
+            current_availability.available_spots,
+            4 - booking.spots_booked  # Cap at 4 total spots per booking
+        )
+    
     context = {
         'booking': booking,
         'available_options': available_options,
         'is_hybrid': booking.game.booking_type == 'HYBRID',
         'is_private': booking.booking_type == 'PRIVATE',
         'is_shared': booking.booking_type == 'SHARED',
+        'max_total_spots': min(booking.spots_booked + max_additional_spots, 4) if booking.booking_type == 'SHARED' else booking.spots_booked,
+        'can_modify_spots': booking.booking_type == 'SHARED' and max_additional_spots > 0,
     }
     
     return render(request, 'booking/hybrid_confirm.html', context)
+
+
+@customer_required
+def update_booking_spots(request, booking_id):
+    """Update the number of spots for a shared booking"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
+    
+    try:
+        import json
+        from .booking_service import BookingService
+        from django.db import transaction
+        
+        data = json.loads(request.body)
+        new_spots = int(data.get('spots', 0))
+        
+        # Get booking
+        booking = get_object_or_404(
+            Booking,
+            id=booking_id,
+            customer=request.user.customer_profile,
+            status='PENDING'
+        )
+        
+        # Validate it's a shared booking
+        if booking.booking_type != 'SHARED':
+            return JsonResponse({
+                'success': False,
+                'error': 'Can only modify spots for shared bookings'
+            }, status=400)
+        
+        # Validate new spots
+        if new_spots < 1:
+            return JsonResponse({
+                'success': False,
+                'error': 'Must book at least 1 spot'
+            }, status=400)
+        
+        if new_spots > 4:
+            return JsonResponse({
+                'success': False,
+                'error': 'Cannot book more than 4 spots per booking'
+            }, status=400)
+        
+        # Check if spots are available
+        with transaction.atomic():
+            availability = booking.game_slot.availability
+            
+            # Calculate spot difference
+            spot_difference = new_spots - booking.spots_booked
+            
+            if spot_difference > 0:
+                # Increasing spots - check availability
+                if spot_difference > availability.available_spots:
+                    return JsonResponse({
+                        'success': False,
+                        'error': f'Only {availability.available_spots} additional spots available'
+                    }, status=400)
+            
+            # Update booking
+            old_spots = booking.spots_booked
+            booking.spots_booked = new_spots
+            booking.subtotal = booking.price_per_spot * new_spots
+            booking.total_amount = booking.subtotal + booking.platform_fee
+            
+            # Update availability
+            if spot_difference > 0:
+                availability.booked_spots += spot_difference
+            else:
+                availability.booked_spots -= abs(spot_difference)
+            
+            availability.save()
+            booking.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'Booking updated from {old_spots} to {new_spots} spot(s)',
+                'new_total': str(booking.total_amount),
+                'new_subtotal': str(booking.subtotal),
+                'new_spots': new_spots
+            })
+            
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid JSON data'
+        }, status=400)
+    except ValueError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid spot number'
+        }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
 
 
 @customer_required

@@ -8,9 +8,9 @@
 
 ### Test Mode (Development)
 ```env
-RAZORPAY_KEY_ID=rzp_test_Rat3BJ8CMAJh83
-RAZORPAY_KEY_SECRET=iuCEUkHFhzmBXLZZa6BVTv3C
-RAZORPAY_WEBHOOK_SECRET=Prabhav@770jain
+RAZORPAY_KEY_ID=your_test_key_id
+RAZORPAY_KEY_SECRET=your_test_key_secret
+RAZORPAY_WEBHOOK_SECRET=your_webhook_secret
 ```
 
 ### Production (Live Mode)
@@ -26,9 +26,9 @@ RAZORPAY_WEBHOOK_SECRET=whsec_xxxxx
 ## 🗄️ Database (Supabase PostgreSQL)
 
 ```env
-SUPABASE_URL=https://wektxjtwsohaisjpayim.supabase.co
-SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indla3R4anR3c29oYWlzanBheWltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3NzI4NDEsImV4cCI6MjA3NzM0ODg0MX0.kuPH6aiLNxbhO6XYd3uFj-ZGMqKmsm18z58fz2aY8lI
-DATABASE_URL=postgresql://postgres.wektxjtwsohaisjpayim:aadijain@aws-1-ap-south-1.pooler.supabase.com:6543/postgres
+SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_KEY=your_supabase_anon_key
+DATABASE_URL=postgresql://postgres.your-project-ref:your-password@aws-0-region.pooler.supabase.com:6543/postgres
 ```
 
 ---
@@ -36,8 +36,8 @@ DATABASE_URL=postgresql://postgres.wektxjtwsohaisjpayim:aadijain@aws-1-ap-south-
 ## 🔑 Google OAuth (Social Login)
 
 ```env
-GOOGLE_OAUTH_CLIENT_ID=325233701971-k0qpv18co8opur874aguuhq1sdarhok4.apps.googleusercontent.com
-GOOGLE_OAUTH_CLIENT_SECRET=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
+GOOGLE_OAUTH_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_OAUTH_CLIENT_SECRET=your-client-secret
 ```
 
 ---
@@ -45,7 +45,7 @@ GOOGLE_OAUTH_CLIENT_SECRET=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
 ## ⚙️ Django Configuration
 
 ```env
-SECRET_KEY=django-insecure--1qn5na%ea)^-@n7_!cc+#p$n^38(^b0%3zan2b$ezh^vkh3mi
+SECRET_KEY=your-secret-key-here
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1,.vercel.app,forge.tapnex.tech
 ```
@@ -61,17 +61,7 @@ DEFAULT_FROM_EMAIL=noreply@gamingcafe.com
 
 ---
 
-## 💳 Stripe Configuration (Optional - if using Stripe)
-
-```env
-STRIPE_PUBLISHABLE_KEY=your-stripe-publishable-key
-STRIPE_SECRET_KEY=your-stripe-secret-key
-STRIPE_WEBHOOK_SECRET=your-stripe-webhook-secret
-```
-
----
-
-## 🚀 For Vercel Deployment
+##  For Vercel Deployment
 
 ### Required Environment Variables
 
@@ -84,18 +74,18 @@ DEBUG=False
 ALLOWED_HOSTS=.vercel.app,forge.tapnex.tech
 
 # Database
-DATABASE_URL=postgresql://postgres.wektxjtwsohaisjpayim:aadijain@aws-1-ap-south-1.pooler.supabase.com:6543/postgres
-SUPABASE_URL=https://wektxjtwsohaisjpayim.supabase.co
-SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indla3R4anR3c29oYWlzanBheWltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3NzI4NDEsImV4cCI6MjA3NzM0ODg0MX0.kuPH6aiLNxbhO6XYd3uFj-ZGMqKmsm18z58fz2aY8lI
+DATABASE_URL=postgresql://postgres.your-project-ref:your-password@aws-0-region.pooler.supabase.com:6543/postgres
+SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_KEY=your_supabase_anon_key
 
 # Razorpay (CHANGE TO LIVE KEYS IN PRODUCTION)
-RAZORPAY_KEY_ID=rzp_test_Rat3BJ8CMAJh83
-RAZORPAY_KEY_SECRET=iuCEUkHFhzmBXLZZa6BVTv3C
-RAZORPAY_WEBHOOK_SECRET=Prabhav@770jain
+RAZORPAY_KEY_ID=your_test_key_id
+RAZORPAY_KEY_SECRET=your_test_key_secret
+RAZORPAY_WEBHOOK_SECRET=your_webhook_secret
 
 # Google OAuth
-GOOGLE_OAUTH_CLIENT_ID=325233701971-k0qpv18co8opur874aguuhq1sdarhok4.apps.googleusercontent.com
-GOOGLE_OAUTH_CLIENT_SECRET=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
+GOOGLE_OAUTH_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_OAUTH_CLIENT_SECRET=your-client-secret
 
 # Email
 EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
@@ -122,7 +112,7 @@ DEFAULT_FROM_EMAIL=support@tapnex.tech
   - Must be KYC verified
 
 ### 🔐 Webhook Secret
-- **Test Webhook Secret:** `Prabhav@770jain`
+- **Test Webhook Secret:** Get from Razorpay Dashboard when creating webhook
 - **Production:** Get from Razorpay Dashboard after creating webhook
 - Format: `whsec_xxxxxxxxxxxxx`
 

@@ -21,7 +21,6 @@ This platform enables customers to book gaming slots at Forge Gaming Cafe with i
 
 - **Payment Integration**
   - Razorpay payment gateway
-  - Stripe support (optional)
   - Secure payment processing
   - Commission tracking
 
@@ -36,7 +35,7 @@ This platform enables customers to book gaming slots at Forge Gaming Cafe with i
 - **Backend:** Django 5.2.7, Python 3.9+
 - **Database:** PostgreSQL (Supabase)
 - **Frontend:** Tailwind CSS v4
-- **Payment:** Razorpay, Stripe
+- **Payment:** Razorpay
 - **Authentication:** Django Allauth, Google OAuth
 - **Hosting:** Vercel (Serverless)
 - **Real-time:** Supabase Realtime
@@ -239,7 +238,6 @@ The project uses PostgreSQL via Supabase. Configure the connection string in `DA
 ### Payment Gateways
 
 - **Razorpay:** Primary payment processor
-- **Stripe:** Secondary option (optional)
 
 ### OAuth Providers
 

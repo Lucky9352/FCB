@@ -53,6 +53,24 @@
         background-color: #dbeafe;
     }
     
+    /* Spot selector button styles */
+    .spot-select-btn {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .spot-select-btn:hover:not(.active) {
+        transform: scale(1.05);
+        border-color: #3b82f6 !important;
+    }
+    
+    .spot-select-btn.active {
+        background-color: #3b82f6 !important;
+        color: white !important;
+        border-color: #2563eb !important;
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+    
     /* Mobile-specific styles */
     @media (max-width: 768px) {
         .booking-card {
@@ -206,6 +224,49 @@
                         </div>
                     </div>
 
+                    <!-- Modify Spots Section (for Shared Bookings) -->
+                    {% if is_shared and can_modify_spots %}
+                    <div class="border-t pt-6">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-900 flex items-center">
+                            <span class="text-2xl mr-2">👥</span>
+                            Adjust Number of Spots
+                        </h3>
+                        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-6">
+                            <p class="text-gray-700 mb-4">Need to bring more friends? You can increase the number of spots for your booking!</p>
+                            
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-gray-700 font-medium">Current spots:</span>
+                                <span id="currentSpotsDisplay" class="text-2xl font-bold text-blue-600">{{ booking.spots_booked }}</span>
+                            </div>
+                            
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Select total number of spots:</label>
+                            <div class="grid grid-cols-4 gap-3 mb-4">
+                                {% for i in "x"|ljust:max_total_spots %}
+                                <button type="button" 
+                                        onclick="selectSpots({{ forloop.counter }})" 
+                                        class="spot-select-btn {% if forloop.counter == booking.spots_booked %}active{% endif %} 
+                                               bg-white hover:bg-blue-50 border-2 border-gray-300 rounded-lg py-3 px-4 
+                                               font-bold text-lg transition-all hover:border-blue-500"
+                                        data-spots="{{ forloop.counter }}">
+                                    {{ forloop.counter }}
+                                </button>
+                                {% endfor %}
+                            </div>
+                            
+                            <div id="spotUpdateMessage" class="hidden mb-4 p-3 bg-green-100 border border-green-300 rounded-lg text-green-800 text-sm">
+                                <!-- Success message will appear here -->
+                            </div>
+                            
+                            <button id="updateSpotsButton" 
+                                    onclick="updateBookingSpots()" 
+                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled>
+                                Update Booking
+                            </button>
+                        </div>
+                    </div>
+                    {% endif %}
+
                     <!-- Pricing Breakdown -->
                     <div class="border-t pt-6">
                         <h3 class="text-lg font-semibold mb-4 text-gray-900">Pricing Breakdown</h3>
@@ -217,8 +278,8 @@
                             </div>
                             {% else %}
                             <div class="flex justify-between">
-                                <span>{{ booking.spots_booked }} spot{{ booking.spots_booked|pluralize }} × ₹{{ booking.price_per_spot }}</span>
-                                <span>₹{{ booking.subtotal|floatformat:2 }}</span>
+                                <span class="spots-price-display">{{ booking.spots_booked }} spot{{ booking.spots_booked|pluralize }} × ₹{{ booking.price_per_spot }}</span>
+                                <span class="subtotal-display">₹{{ booking.subtotal|floatformat:2 }}</span>
                             </div>
                             {% endif %}
                             
@@ -229,7 +290,7 @@
                             
                             <div class="border-t pt-2 flex justify-between text-lg font-bold text-gray-900">
                                 <span>Total Amount</span>
-                                <span class="text-blue-600">₹{{ booking.total_amount }}</span>
+                                <span class="text-blue-600 total-display">₹{{ booking.total_amount }}</span>
                             </div>
                         </div>
                     </div>
@@ -494,6 +555,132 @@
 </div>
 
 <script>
+// Spot modification variables
+let originalSpots = {{ booking.spots_booked }};
+let selectedNewSpots = {{ booking.spots_booked }};
+const bookingId = "{{ booking.id }}";
+const pricePerSpot = {{ booking.price_per_spot }};
+const platformFee = {{ booking.platform_fee|default:0 }};
+
+// Select number of spots
+function selectSpots(spots) {
+    selectedNewSpots = spots;
+    
+    // Update button states
+    const buttons = document.querySelectorAll('.spot-select-btn');
+    buttons.forEach((btn) => {
+        const btnSpots = parseInt(btn.dataset.spots);
+        if (btnSpots === spots) {
+            btn.classList.add('active', 'bg-blue-500', 'text-white', 'border-blue-600', 'scale-105', 'shadow-lg');
+            btn.classList.remove('bg-white', 'border-gray-300');
+        } else {
+            btn.classList.remove('active', 'bg-blue-500', 'text-white', 'border-blue-600', 'scale-105', 'shadow-lg');
+            btn.classList.add('bg-white', 'border-gray-300');
+        }
+    });
+    
+    // Update displays
+    document.getElementById('currentSpotsDisplay').textContent = spots;
+    
+    // Enable/disable update button based on whether spots changed
+    const updateBtn = document.getElementById('updateSpotsButton');
+    if (spots !== originalSpots) {
+        updateBtn.disabled = false;
+        updateBtn.classList.remove('opacity-50');
+    } else {
+        updateBtn.disabled = true;
+        updateBtn.classList.add('opacity-50');
+    }
+    
+    // Hide previous message
+    document.getElementById('spotUpdateMessage').classList.add('hidden');
+}
+
+// Update booking spots via AJAX
+function updateBookingSpots() {
+    const updateBtn = document.getElementById('updateSpotsButton');
+    const messageDiv = document.getElementById('spotUpdateMessage');
+    
+    // Show loading state
+    updateBtn.innerHTML = '<span class="inline-block mr-2">⏳</span> Updating...';
+    updateBtn.disabled = true;
+    
+    fetch(`/booking/games/update-spots/${bookingId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            spots: selectedNewSpots
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update original spots
+            originalSpots = selectedNewSpots;
+            
+            // Show success message
+            messageDiv.textContent = `✅ ${data.message}`;
+            messageDiv.classList.remove('hidden', 'bg-red-100', 'border-red-300', 'text-red-800');
+            messageDiv.classList.add('bg-green-100', 'border-green-300', 'text-green-800');
+            
+            // Update pricing display
+            updatePricingDisplay(data.new_subtotal, data.new_total, data.new_spots);
+            
+            // Reset button
+            updateBtn.innerHTML = 'Update Booking';
+            updateBtn.disabled = true;
+            updateBtn.classList.add('opacity-50');
+            
+            // Reload page after 2 seconds to refresh all data
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            // Show error message
+            messageDiv.textContent = `❌ ${data.error}`;
+            messageDiv.classList.remove('hidden', 'bg-green-100', 'border-green-300', 'text-green-800');
+            messageDiv.classList.add('bg-red-100', 'border-red-300', 'text-red-800');
+            
+            // Reset button
+            updateBtn.innerHTML = 'Update Booking';
+            updateBtn.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        messageDiv.textContent = `❌ Failed to update booking. Please try again.`;
+        messageDiv.classList.remove('hidden', 'bg-green-100', 'border-green-300', 'text-green-800');
+        messageDiv.classList.add('bg-red-100', 'border-red-300', 'text-red-800');
+        
+        updateBtn.innerHTML = 'Update Booking';
+        updateBtn.disabled = false;
+    });
+}
+
+// Update pricing display
+function updatePricingDisplay(newSubtotal, newTotal, newSpots) {
+    // Update spots in pricing breakdown
+    const spotsPriceElements = document.querySelectorAll('.spots-price-display');
+    spotsPriceElements.forEach(el => {
+        el.textContent = `${newSpots} spot${newSpots > 1 ? 's' : ''} × ₹${pricePerSpot}`;
+    });
+    
+    // Update subtotal
+    const subtotalElements = document.querySelectorAll('.subtotal-display');
+    subtotalElements.forEach(el => {
+        el.textContent = `₹${newSubtotal}`;
+    });
+    
+    // Update total
+    const totalElements = document.querySelectorAll('.total-display');
+    totalElements.forEach(el => {
+        el.textContent = `₹${newTotal}`;
+    });
+}
+
 // Razorpay Payment Integration
 function proceedToPayment() {
     const loadingBtn = event.target;

@@ -9,9 +9,10 @@ Razorpay payment gateway has been successfully integrated into the TapNex Gaming
 ## 🔑 Test Credentials Configured
 
 ```
-API Key ID:     rzp_test_Rat3BJ8CMAJh83
-API Secret:     iuCEUkHFhzmBXLZZa6BVTv3C
+API Key ID:     your_test_key_id
+API Secret:     your_test_key_secret
 ```
+Get your credentials from Razorpay Dashboard > Settings > API Keys
 
 ---
 

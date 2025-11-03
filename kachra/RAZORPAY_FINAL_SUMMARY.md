@@ -34,7 +34,7 @@ https://forge.tapnex.tech/booking/payment/webhook/
 
 **Alert Email:**
 ```
-tapnex.fc@gmail.com
+your-email@example.com
 ```
 
 **Active Events - SELECT ONLY THESE 4:**
@@ -158,9 +158,10 @@ whsec_xxxxxxxxxxxxxxxxxxxxx
 
 ### **Test Credentials:**
 ```
-API Key:    rzp_test_Rat3BJ8CMAJh83
-Secret:     iuCEUkHFhzmBXLZZa6BVTv3C
+API Key:    your_test_key_id
+Secret:     your_test_key_secret
 ```
+Get your credentials from Razorpay Dashboard > Settings > API Keys
 
 ### **Test Cards:**
 ```

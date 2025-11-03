@@ -4,8 +4,9 @@
 
 🔑 TEST CREDENTIALS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-API Key:    rzp_test_Rat3BJ8CMAJh83
-Secret:     iuCEUkHFhzmBXLZZa6BVTv3C
+API Key:    your_test_key_id
+Secret:     your_test_key_secret
+Get from: Razorpay Dashboard > Settings > API Keys
 
 💳 TEST CARDS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -10,9 +10,10 @@ This document provides a comprehensive guide to the Razorpay payment integration
 
 ### Razorpay Test Mode
 ```
-API Key ID:     rzp_test_Rat3BJ8CMAJh83
-API Key Secret: iuCEUkHFhzmBXLZZa6BVTv3C
+API Key ID:     your_test_key_id
+API Key Secret: your_test_key_secret
 ```
+Get your test credentials from Razorpay Dashboard > Settings > API Keys
 
 ### Test Cards for Payment Testing
 ```
@@ -44,8 +45,8 @@ Status: Payment will fail
 #### `gaming_cafe/settings.py`
 ```python
 # Razorpay Configuration
-RAZORPAY_KEY_ID = config('RAZORPAY_KEY_ID', default='rzp_test_Rat3BJ8CMAJh83')
-RAZORPAY_KEY_SECRET = config('RAZORPAY_KEY_SECRET', default='iuCEUkHFhzmBXLZZa6BVTv3C')
+RAZORPAY_KEY_ID = config('RAZORPAY_KEY_ID', default='')
+RAZORPAY_KEY_SECRET = config('RAZORPAY_KEY_SECRET', default='')
 RAZORPAY_WEBHOOK_SECRET = config('RAZORPAY_WEBHOOK_SECRET', default='')
 ```
 

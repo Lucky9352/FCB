@@ -100,6 +100,35 @@
         0%, 100% { opacity: 1; }
         50% { opacity: 0.5; }
     }
+    
+    /* Spot selector button styles */
+    .spot-selector-btn {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .spot-selector-btn:hover {
+        transform: scale(1.05);
+    }
+    
+    .spot-selector-btn.scale-110 {
+        transform: scale(1.1);
+    }
+    
+    /* Modal animation */
+    #spotSelectionModal {
+        animation: modalFadeIn 0.3s ease-out;
+    }
+    
+    @keyframes modalFadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
 </style>
 {% endblock %}
 
@@ -231,6 +260,46 @@
             </div>
         </div>
 
+    </div>
+</div>
+
+<!-- Spot Selection Modal -->
+<div id="spotSelectionModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4" onclick="closeSpotModal(event)">
+    <div class="bg-gradient-to-br from-gaming-secondary to-gaming-accent rounded-2xl max-w-md w-full p-8 border border-white/20" onclick="event.stopPropagation()">
+        <div class="text-center mb-6">
+            <div class="text-6xl mb-4">🎮</div>
+            <h3 class="text-2xl font-bold text-white mb-2">Select Number of Spots</h3>
+            <p class="text-gray-300 text-sm">How many people are joining?</p>
+        </div>
+
+        <!-- Spot Selection Grid -->
+        <div id="spotSelectionGrid" class="grid grid-cols-4 gap-3 mb-6">
+            <!-- Dynamically filled -->
+        </div>
+
+        <!-- Total Price Display -->
+        <div class="bg-white/10 rounded-lg p-4 mb-6 border border-white/20">
+            <div class="flex justify-between items-center">
+                <span class="text-gray-300">Total Price:</span>
+                <span id="totalPriceDisplay" class="text-gaming-highlight text-2xl font-bold">₹0</span>
+            </div>
+            <div class="text-xs text-gray-400 mt-1">
+                <span id="spotsSelectedDisplay">0 spot(s)</span> × <span id="pricePerSpotDisplay">₹0</span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex space-x-3">
+            <button onclick="closeSpotModal()" 
+                    class="flex-1 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg font-medium transition-colors border border-white/20">
+                Cancel
+            </button>
+            <button id="confirmSpotsButton" onclick="confirmSpotSelection()" 
+                    class="flex-1 bg-gaming-highlight hover:bg-gaming-highlight/80 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled>
+                Confirm Booking
+            </button>
+        </div>
     </div>
 </div>
 
@@ -443,7 +512,7 @@ function renderSharedOption(slot, option) {
             </div>
             <div class="text-green-200 text-xs mb-2">${option.description}</div>
             ${isAuthenticated ? `
-                <button onclick="bookSlot('${slot.id}', 'SHARED', 1)" 
+                <button onclick="showSpotSelectionModal('${slot.id}', ${option.available_spots}, ${option.price_per_spot}, ${option.max_spots_per_booking || 4})" 
                         ${disabled ? 'disabled' : ''}
                         class="w-full ${disabled ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'} text-white px-3 py-2 rounded text-sm font-medium transition-colors">
                     ${disabled ? 'Not Available' : 'Book Shared'}
@@ -474,6 +543,96 @@ function showError(message) {
 }
 
 {% if is_authenticated %}
+// Spot selection modal variables
+let selectedSlotId = null;
+let selectedSpots = 0;
+let pricePerSpot = 0;
+let maxSpots = 0;
+
+// Show spot selection modal
+function showSpotSelectionModal(slotId, availableSpots, spotPrice, maxSpotsPerBooking) {
+    selectedSlotId = slotId;
+    pricePerSpot = spotPrice;
+    maxSpots = Math.min(availableSpots, maxSpotsPerBooking);
+    selectedSpots = 0;
+    
+    // Build spot selection grid
+    const grid = document.getElementById('spotSelectionGrid');
+    grid.innerHTML = '';
+    
+    for (let i = 1; i <= maxSpots; i++) {
+        const button = document.createElement('button');
+        button.className = 'spot-selector-btn bg-white/10 hover:bg-white/20 text-white rounded-lg py-4 font-bold text-lg transition-all border-2 border-white/20 hover:border-gaming-highlight';
+        button.textContent = i;
+        button.onclick = () => selectNumberOfSpots(i);
+        grid.appendChild(button);
+    }
+    
+    // Update displays
+    updatePriceDisplay();
+    
+    // Show modal
+    document.getElementById('spotSelectionModal').classList.remove('hidden');
+    document.getElementById('spotSelectionModal').classList.add('flex');
+}
+
+// Select number of spots
+function selectNumberOfSpots(spots) {
+    selectedSpots = spots;
+    
+    // Update button states
+    const buttons = document.querySelectorAll('.spot-selector-btn');
+    buttons.forEach((btn, index) => {
+        if (index + 1 === spots) {
+            btn.classList.add('bg-gaming-highlight', 'border-gaming-highlight', 'scale-110', 'shadow-lg');
+            btn.classList.remove('bg-white/10', 'border-white/20');
+        } else {
+            btn.classList.remove('bg-gaming-highlight', 'border-gaming-highlight', 'scale-110', 'shadow-lg');
+            btn.classList.add('bg-white/10', 'border-white/20');
+        }
+    });
+    
+    // Update price display
+    updatePriceDisplay();
+    
+    // Enable confirm button
+    document.getElementById('confirmSpotsButton').disabled = false;
+}
+
+// Update price display
+function updatePriceDisplay() {
+    const totalPrice = selectedSpots * pricePerSpot;
+    document.getElementById('totalPriceDisplay').textContent = `₹${totalPrice}`;
+    document.getElementById('spotsSelectedDisplay').textContent = `${selectedSpots} spot(s)`;
+    document.getElementById('pricePerSpotDisplay').textContent = `₹${pricePerSpot}`;
+}
+
+// Close spot selection modal
+function closeSpotModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    
+    document.getElementById('spotSelectionModal').classList.add('hidden');
+    document.getElementById('spotSelectionModal').classList.remove('flex');
+    selectedSlotId = null;
+    selectedSpots = 0;
+    pricePerSpot = 0;
+    maxSpots = 0;
+}
+
+// Confirm spot selection and proceed with booking
+function confirmSpotSelection() {
+    if (selectedSpots === 0 || !selectedSlotId) {
+        alert('Please select number of spots');
+        return;
+    }
+    
+    // Close modal
+    closeSpotModal();
+    
+    // Proceed with booking
+    bookSlot(selectedSlotId, 'SHARED', selectedSpots);
+}
+
 // Book a slot
 function bookSlot(slotId, bookingType, spotsRequested) {
     // Show loading overlay

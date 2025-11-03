@@ -22,9 +22,6 @@ GOOGLE_OAUTH_CLIENT_SECRET=
 ```
 EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
 DEFAULT_FROM_EMAIL=noreply@tapnex.tech
-STRIPE_PUBLISHABLE_KEY=
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
 ```
 
 ## How to Get Each Value
@@ -65,9 +62,6 @@ Get from: Google Cloud Console > APIs & Services > Credentials
 
 ### GOOGLE_OAUTH_CLIENT_SECRET
 Get from: Google Cloud Console > APIs & Services > Credentials
-
-### STRIPE Keys (if using Stripe)
-Get from: Stripe Dashboard > Developers > API keys
 
 ## Quick Copy-Paste for Vercel CLI
 

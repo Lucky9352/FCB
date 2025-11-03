@@ -17,6 +17,7 @@ urlpatterns = [
     path('games/<uuid:game_id>/', views.game_detail, name='game_detail'),
     path('games/book/', views.hybrid_booking_create, name='hybrid_booking_create'),
     path('games/confirm/<uuid:booking_id>/', views.hybrid_booking_confirm, name='hybrid_booking_confirm'),
+    path('games/update-spots/<uuid:booking_id>/', views.update_booking_spots, name='update_booking_spots'),
     path('games/cancel/<uuid:booking_id>/', views.cancel_booking, name='cancel_booking'),
     
     # Customer booking management
