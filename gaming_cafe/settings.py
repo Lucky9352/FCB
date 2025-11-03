@@ -219,6 +219,11 @@ RAZORPAY_KEY_ID = config('RAZORPAY_KEY_ID', default='rzp_test_Rat3BJ8CMAJh83')
 RAZORPAY_KEY_SECRET = config('RAZORPAY_KEY_SECRET', default='iuCEUkHFhzmBXLZZa6BVTv3C')
 RAZORPAY_WEBHOOK_SECRET = config('RAZORPAY_WEBHOOK_SECRET', default='Prabhav@770jain')
 
+# Telegram Notification Configuration
+# Note: Database settings override these defaults (set in TapNex Settings page)
+TELEGRAM_BOT_TOKEN = config('TELEGRAM_BOT_TOKEN', default='')
+TELEGRAM_CHAT_ID = config('TELEGRAM_CHAT_ID', default='')
+
 # Company Information for Razorpay Whitelisting
 COMPANY_NAME = 'TapNex Technologies'
 COMPANY_PARENT = 'NEXGEN FC'

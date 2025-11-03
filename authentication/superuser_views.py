@@ -478,6 +478,14 @@ def system_settings(request):
             tapnex_user.phone = request.POST.get('phone', tapnex_user.phone)
             tapnex_user.save()
             messages.success(request, 'Profile updated.')
+        
+        elif action == 'update_telegram':
+            tapnex_user.telegram_bot_token = request.POST.get('telegram_bot_token', '').strip()
+            tapnex_user.telegram_chat_id = request.POST.get('telegram_chat_id', '').strip()
+            tapnex_user.telegram_notification_type = request.POST.get('telegram_notification_type', 'PERSONAL')
+            tapnex_user.telegram_enabled = request.POST.get('telegram_enabled') == 'on'
+            tapnex_user.save()
+            messages.success(request, 'Telegram notification settings updated.')
     
     # Get system statistics
     system_stats = {
@@ -515,3 +523,16 @@ def database_browser(request):
     }
     
     return render(request, 'authentication/database_browser.html', context)
+
+
+@tapnex_superuser_required
+@require_http_methods(["POST"])
+def test_telegram_notification(request):
+    """Test Telegram notification configuration"""
+    from booking.telegram_service import TelegramNotificationService
+    
+    # Reload configuration from database
+    service = TelegramNotificationService()
+    result = service.send_test_message()
+    
+    return JsonResponse(result)

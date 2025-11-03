@@ -79,6 +79,31 @@ class TapNexSuperuser(models.Model):
     )
     phone = models.CharField(validators=[phone_regex], max_length=17, blank=True)
     
+    # Telegram Notification Settings
+    telegram_bot_token = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Telegram Bot API Token from BotFather"
+    )
+    telegram_chat_id = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Telegram Chat ID (personal or group) to receive notifications"
+    )
+    telegram_notification_type = models.CharField(
+        max_length=10,
+        choices=[
+            ('PERSONAL', 'Personal Chat'),
+            ('GROUP', 'Group Chat')
+        ],
+        default='PERSONAL',
+        help_text="Type of Telegram chat for notifications"
+    )
+    telegram_enabled = models.BooleanField(
+        default=False,
+        help_text="Enable/disable Telegram notifications"
+    )
+    
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

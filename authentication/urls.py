@@ -65,4 +65,5 @@ urlpatterns = [
     path('tapnex/system-analytics/', tapnex_views.system_analytics, name='system_analytics'),
     path('tapnex/settings/', superuser_views.system_settings, name='system_settings'),
     path('tapnex/database/', superuser_views.database_browser, name='database_browser'),
+    path('tapnex/test-telegram/', superuser_views.test_telegram_notification, name='test_telegram_notification'),
 ]

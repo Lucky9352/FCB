@@ -150,6 +150,15 @@ def verify_razorpay_payment(request):
         else:
             logger.warning(f"Failed to generate QR code for booking {booking_id}")
         
+        # Send Telegram notification to owner
+        try:
+            from booking.telegram_service import telegram_service
+            telegram_service.send_new_booking_notification(booking)
+            logger.info(f"Telegram notification sent for booking {booking_id}")
+        except Exception as e:
+            logger.error(f"Failed to send Telegram notification for booking {booking_id}: {e}")
+            # Don't fail the payment if notification fails
+        
         # TODO: Send confirmation email/SMS with QR code
         # TODO: Update slot availability
         
