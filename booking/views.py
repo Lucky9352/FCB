@@ -218,20 +218,33 @@ def my_bookings(request):
     
     # Categorize bookings
     now = timezone.now()
-    upcoming = bookings.filter(
-        start_time__gt=now,
-        status__in=['CONFIRMED', 'PENDING']
-    ).order_by('start_time')
     
-    current = bookings.filter(
-        start_time__lte=now,
-        end_time__gte=now,
-        status='IN_PROGRESS'
-    ).first()
+    # Separate old and new bookings for filtering
+    upcoming = []
+    past = []
+    current = None
     
-    past = bookings.filter(
-        Q(end_time__lt=now) | Q(status__in=['COMPLETED', 'CANCELLED', 'NO_SHOW'])
-    ).order_by('-start_time')
+    for booking in bookings:
+        start_dt = booking.start_datetime
+        end_dt = booking.end_datetime
+        
+        if not start_dt or not end_dt:
+            continue  # Skip bookings without valid times
+        
+        # Check for current booking
+        if start_dt <= now <= end_dt and booking.status == 'IN_PROGRESS':
+            if not current:  # Take the first one
+                current = booking
+        # Check for upcoming
+        elif start_dt > now and booking.status in ['CONFIRMED', 'PENDING']:
+            upcoming.append(booking)
+        # Past bookings
+        elif end_dt < now or booking.status in ['COMPLETED', 'CANCELLED', 'NO_SHOW']:
+            past.append(booking)
+    
+    # Sort lists
+    upcoming.sort(key=lambda b: b.start_datetime)
+    past.sort(key=lambda b: b.start_datetime, reverse=True)
     
     context = {
         'upcoming_bookings': upcoming,
