@@ -1,39 +1,157 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Home - TapNex{% endblock %}
+{% block title %}Home - TapNex Gaming Cafe{% endblock %}
 
 {% block content %}
-<div class="text-center">
-    <h1 class="text-4xl font-gaming font-bold text-gaming-highlight mb-8">
-        Welcome to TapNex
-    </h1>
-    
-    <p class="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-        Your seamless gaming cafe booking platform. Book sessions, manage reservations, and enjoy the ultimate gaming experience.
-    </p>
-    
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-        <div class="card">
-            <h3 class="text-xl font-semibold text-gaming-highlight mb-4">Book Sessions</h3>
-            <p class="text-gray-300">Reserve your gaming time slots with ease</p>
-        </div>
+<div class="min-h-screen bg-gradient-to-br from-gaming-primary via-gaming-secondary to-gaming-accent py-12">
+    <!-- Hero Section -->
+    <div class="text-center mb-12">
+        <h1 class="text-5xl font-gaming font-bold text-white mb-4">
+            Welcome to TapNex Gaming Cafe
+        </h1>
         
-        <div class="card">
-            <h3 class="text-xl font-semibold text-gaming-highlight mb-4">Manage Bookings</h3>
-            <p class="text-gray-300">View and modify your reservations</p>
-        </div>
+        <p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto px-4">
+            Your ultimate gaming destination. Book sessions, enjoy premium gaming setups, and experience the best gaming cafe in town.
+        </p>
         
-        <div class="card">
-            <h3 class="text-xl font-semibold text-gaming-highlight mb-4">Premium Experience</h3>
-            <p class="text-gray-300">High-end gaming setups and comfortable environment</p>
+        {% if not user.is_authenticated %}
+        <div class="flex flex-wrap justify-center gap-4">
+            <a href="{% url 'authentication:customer_login' %}" class="bg-gaming-highlight hover:bg-gaming-highlight/80 text-white px-8 py-3 rounded-lg text-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg">
+                Login to Book
+            </a>
+            <a href="#games" class="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/30 px-8 py-3 rounded-lg text-lg font-semibold transition-all duration-200">
+                Browse Games
+            </a>
+        </div>
+        {% else %}
+        <div class="flex flex-wrap justify-center gap-4">
+            <a href="{% url 'authentication:customer_dashboard' %}" class="bg-gaming-highlight hover:bg-gaming-highlight/80 text-white px-8 py-3 rounded-lg text-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg">
+                Go to Dashboard
+            </a>
+            <a href="#games" class="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/30 px-8 py-3 rounded-lg text-lg font-semibold transition-all duration-200">
+                Browse Games
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Features Section -->
+    <div class="max-w-7xl mx-auto px-4 mb-16">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-gaming-highlight/50 transition-all duration-300 transform hover:scale-105">
+                <div class="text-gaming-highlight text-4xl mb-4">🎮</div>
+                <h3 class="text-xl font-semibold text-white mb-3">Premium Gaming</h3>
+                <p class="text-gray-300">High-end gaming setups with latest hardware and comfortable environment</p>
+            </div>
+            
+            <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-gaming-highlight/50 transition-all duration-300 transform hover:scale-105">
+                <div class="text-gaming-highlight text-4xl mb-4">📅</div>
+                <h3 class="text-xl font-semibold text-white mb-3">Easy Booking</h3>
+                <p class="text-gray-300">Book your favorite games and time slots with just a few clicks</p>
+            </div>
+            
+            <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-gaming-highlight/50 transition-all duration-300 transform hover:scale-105">
+                <div class="text-gaming-highlight text-4xl mb-4">💰</div>
+                <h3 class="text-xl font-semibold text-white mb-3">Best Prices</h3>
+                <p class="text-gray-300">Competitive pricing with flexible options for private and shared bookings</p>
+            </div>
         </div>
     </div>
     
+    <!-- Available Games Section -->
+    <div id="games" class="max-w-7xl mx-auto px-4">
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-white mb-2">Available Games & Activities</h2>
+            <p class="text-gray-300">Explore our collection of games and book your next gaming session</p>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for game in games %}
+            <a href="{% url 'booking:game_detail' game.id %}" class="group bg-white/10 backdrop-blur-lg rounded-xl overflow-hidden border border-white/20 hover:border-gaming-highlight/50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
+                <!-- Game Image -->
+                <div class="h-48 bg-gradient-to-br from-gaming-highlight/30 to-gaming-accent/30 relative overflow-hidden">
+                    {% if game.image %}
+                    <img src="{{ game.image.url }}" alt="{{ game.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                    {% else %}
+                    <div class="flex items-center justify-center h-full">
+                        <div class="text-white text-center">
+                            <div class="text-5xl mb-2">🎮</div>
+                            <div class="text-lg font-semibold">{{ game.name }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Booking Type Badge -->
+                    <div class="absolute top-3 right-3">
+                        {% if game.booking_type == 'HYBRID' %}
+                        <span class="bg-green-500/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-medium">
+                            Private + Shared
+                        </span>
+                        {% else %}
+                        <span class="bg-blue-500/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-medium">
+                            Private Only
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Game Info -->
+                <div class="p-5">
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-gaming-highlight transition-colors">
+                        {{ game.name }}
+                    </h3>
+                    <p class="text-gray-300 text-sm mb-4 line-clamp-2">
+                        {{ game.description|truncatewords:12 }}
+                    </p>
+                    
+                    <!-- Game Details -->
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-400">Capacity:</span>
+                            <span class="text-white font-medium">{{ game.capacity }} player{{ game.capacity|pluralize }}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-400">Duration:</span>
+                            <span class="text-white font-medium">{{ game.slot_duration_minutes }} min</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-400">Price:</span>
+                            <span class="text-gaming-highlight font-bold">₹{{ game.private_price }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- View Details Button -->
+                    <div class="pt-3 border-t border-white/10">
+                        <span class="text-gaming-highlight font-semibold text-sm group-hover:underline flex items-center">
+                            View Details & Book
+                            <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+            </a>
+            {% empty %}
+            <div class="col-span-full text-center py-16">
+                <div class="text-gray-400 text-6xl mb-4">🎮</div>
+                <p class="text-gray-300 text-lg">No games available at the moment.</p>
+                <p class="text-gray-400 text-sm mt-2">Please check back later!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Call to Action -->
     {% if not user.is_authenticated %}
-    <div class="mt-12">
-        <a href="{% url 'authentication:customer_login' %}" class="btn-primary text-lg px-8 py-3">
-            Get Started
-        </a>
+    <div class="max-w-4xl mx-auto px-4 mt-16 text-center">
+        <div class="bg-gradient-to-r from-gaming-highlight to-gaming-accent rounded-2xl p-8 shadow-2xl">
+            <h2 class="text-3xl font-bold text-white mb-4">Ready to Start Gaming?</h2>
+            <p class="text-white/90 mb-6">Login now to book your favorite games and enjoy exclusive benefits!</p>
+            <a href="{% url 'authentication:customer_login' %}" class="inline-block bg-white text-gaming-primary px-8 py-3 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-all duration-200 transform hover:scale-105">
+                Login Now
+            </a>
+        </div>
     </div>
     {% endif %}
 </div>

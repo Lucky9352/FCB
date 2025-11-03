@@ -27,6 +27,7 @@ from authentication.policy_views import (
     contact_view,
     about_view
 )
+from django.views.generic import TemplateView
 
 urlpatterns = [
     # Django Admin is disabled - use /accounts/tapnex/dashboard/ instead
@@ -35,6 +36,7 @@ urlpatterns = [
     path('accounts/', include('authentication.urls')),
     path('accounts/', include('allauth.urls')),
     path('booking/', include('booking.urls')),
+    path('api/', include('booking.api_urls')),  # REST API endpoints
     path('', home_view, name='home'),
     
     # Policy pages
@@ -43,7 +45,16 @@ urlpatterns = [
     path('refund-policy/', refund_policy_view, name='refund_policy'),
     path('contact/', contact_view, name='contact'),
     path('about/', about_view, name='about'),
+    
+    # Loading and Error Pages (for testing/preview)
+    path('loading/', TemplateView.as_view(template_name='loading.html'), name='loading'),
+    path('loading-test/', TemplateView.as_view(template_name='loading_test.html'), name='loading_test'),
 ]
+
+# Custom error handlers
+handler404 = 'gaming_cafe.views.custom_404'
+handler500 = 'gaming_cafe.views.custom_500'
+handler403 = 'gaming_cafe.views.custom_403'
 
 # Serve media files in development
 if settings.DEBUG:

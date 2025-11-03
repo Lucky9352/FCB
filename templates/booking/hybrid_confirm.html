@@ -4,13 +4,17 @@
 {% block title %}Confirm Booking - Gaming Cafe{% endblock %}
 
 {% block extra_css %}
+<!-- Razorpay Checkout Script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <style>
     .booking-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
     .booking-details {
         backdrop-filter: blur(10px);
-        background: rgba(255, 255, 255, 0.95);
+        background: rgb(255, 255, 255);
+        color: #111827;
     }
     .capacity-indicator {
         display: inline-flex;
@@ -102,9 +106,9 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-32 lg:pb-0">
         <!-- Booking Details -->
         <div class="lg:col-span-2">
-            <div class="booking-card rounded-lg p-8 text-white mb-6">
-                <div class="booking-details rounded-lg p-6 text-gray-900">
-                    <h2 class="text-2xl font-bold mb-6">{{ booking.game.name }}</h2>
+            <div class="booking-card rounded-lg p-8 mb-6">
+                <div class="booking-details rounded-lg p-6">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-900">{{ booking.game.name }}</h2>
                     
                     <!-- Game Image -->
                     <div class="flex items-start space-x-6 mb-6">
@@ -145,7 +149,7 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-500 mb-1">Date & Time</label>
-                                <div class="text-lg font-semibold">
+                                <div class="text-lg font-semibold text-gray-900">
                                     {{ booking.game_slot.date|date:"l, F d, Y" }}
                                 </div>
                                 <div class="text-gray-600">
@@ -155,7 +159,7 @@
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-500 mb-1">Duration</label>
-                                <div class="text-lg font-semibold">{{ booking.game.slot_duration_minutes }} minutes</div>
+                                <div class="text-lg font-semibold text-gray-900">{{ booking.game.slot_duration_minutes }} minutes</div>
                             </div>
                         </div>
                         
@@ -169,9 +173,9 @@
                                             <div class="capacity-dot {% if forloop.counter0 < booking.spots_booked %}your-booking{% elif forloop.counter0 < booking.game_slot.availability.booked_spots %}booked{% else %}available{% endif %}"></div>
                                             {% endfor %}
                                         </div>
-                                        <div class="text-sm text-gray-600">
-                                            <div class="font-medium">Your booking: {{ booking.spots_booked }} spot{{ booking.spots_booked|pluralize }}</div>
-                                            <div>Total capacity: {{ booking.game.capacity }} player{{ booking.game.capacity|pluralize }}</div>
+                                        <div class="text-sm text-gray-700">
+                                            <div class="font-medium text-gray-900">Your booking: {{ booking.spots_booked }} spot{{ booking.spots_booked|pluralize }}</div>
+                                            <div class="text-gray-600">Total capacity: {{ booking.game.capacity }} player{{ booking.game.capacity|pluralize }}</div>
                                         </div>
                                     </div>
                                     
@@ -195,7 +199,7 @@
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-500 mb-1">Booking ID</label>
-                                <div class="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
+                                <div class="text-sm font-mono bg-gray-100 px-2 py-1 rounded text-gray-900">
                                     {{ booking.id|truncatechars:8 }}...
                                 </div>
                             </div>
@@ -204,8 +208,8 @@
 
                     <!-- Pricing Breakdown -->
                     <div class="border-t pt-6">
-                        <h3 class="text-lg font-semibold mb-4">Pricing Breakdown</h3>
-                        <div class="space-y-2">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-900">Pricing Breakdown</h3>
+                        <div class="space-y-2 text-gray-900">
                             {% if is_private %}
                             <div class="flex justify-between">
                                 <span>Private booking ({{ booking.game.capacity }} players)</span>
@@ -223,12 +227,61 @@
                                 <span>₹0</span>
                             </div>
                             
-                            <div class="border-t pt-2 flex justify-between text-lg font-bold">
+                            <div class="border-t pt-2 flex justify-between text-lg font-bold text-gray-900">
                                 <span>Total Amount</span>
                                 <span class="text-blue-600">₹{{ booking.total_amount }}</span>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Contact Information Section -->
+                    {% if not booking.customer.phone %}
+                    <div class="border-t pt-6">
+                        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-6">
+                            <div class="flex items-start space-x-3 mb-4">
+                                <div class="flex-shrink-0">
+                                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-lg font-bold text-gray-900 mb-1">📱 Contact Information Required</h4>
+                                    <p class="text-sm text-gray-700">We'll send booking updates to this number</p>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <label class="block text-sm font-semibold text-gray-800">
+                                    Mobile Number <span class="text-red-500">*</span>
+                                </label>
+                                <div class="flex items-center space-x-2">
+                                    <span class="inline-flex items-center px-3 py-2.5 rounded-lg border-2 border-gray-300 bg-gray-100 text-gray-700 font-semibold">
+                                        +91
+                                    </span>
+                                    <input 
+                                        type="tel" 
+                                        id="phone_number" 
+                                        name="phone_number"
+                                        placeholder="9876543210"
+                                        pattern="[0-9]{10}"
+                                        maxlength="10"
+                                        required
+                                        class="flex-1 px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 font-medium"
+                                    />
+                                </div>
+                                <p class="text-xs text-gray-600 flex items-start space-x-1">
+                                    <svg class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span>Enter 10-digit mobile number. This will be saved for future bookings.</span>
+                                </p>
+                                <p id="phone_error" class="text-sm font-semibold text-red-600 hidden bg-red-50 border border-red-200 rounded-lg p-2"></p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -291,7 +344,7 @@
                         </div>
                         <div class="text-xs text-gray-500 mt-1">
                             {% if is_private %}
-                            (Would have been ₹{{ booking.game.shared_price|floatformat:0 }} × {{ booking.spots_booked }} = ₹{{ booking.game.shared_price|mul:booking.spots_booked|floatformat:0 }})
+                            (Would have been ₹{{ booking.game.shared_price|floatformat:0 }} × {{ booking.spots_booked }} = ₹{% widthratio booking.game.shared_price 1 booking.spots_booked %})
                             {% else %}
                             ({{ booking.game.capacity }} players included)
                             {% endif %}
@@ -324,7 +377,7 @@
         <!-- Payment Section -->
         <div class="lg:col-span-1">
             <!-- Mobile Booking Summary (visible on mobile) -->
-            <div class="lg:hidden bg-white border-t border-gray-200 fixed bottom-0 left-0 right-0 p-4 z-40">
+            <div class="lg:hidden bg-white border-t border-gray-200 rounded-lg shadow-md p-4 mb-6">
                 <div class="flex items-center justify-between mb-3">
                     <div>
                         <div class="font-semibold">{{ booking.game.name }}</div>
@@ -336,13 +389,18 @@
                     </div>
                 </div>
                 <button onclick="proceedToPayment()" 
-                        class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                    Proceed to Payment
+                        class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
+                    <span class="inline-flex items-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                        </svg>
+                        Proceed to Payment
+                    </span>
                 </button>
             </div>
             
             <!-- Desktop Payment Section -->
-            <div class="hidden lg:block bg-white rounded-lg shadow-md p-6 sticky top-8">
+            <div class="hidden lg:block bg-white rounded-lg shadow-md p-6">
                 <h3 class="text-xl font-semibold mb-6">Payment Method</h3>
                 
                 <!-- Payment Options -->
@@ -404,23 +462,30 @@
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="space-y-3">
+                <div class="space-y-4">
                     <button onclick="proceedToPayment()" 
-                            class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                        Proceed to Payment
+                            class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
+                        <span class="inline-flex items-center justify-center">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                            </svg>
+                            Proceed to Payment
+                        </span>
                     </button>
                     
                     <button onclick="cancelBooking()" 
-                            class="w-full border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+                            class="w-full border-2 border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-100 hover:border-gray-400 transition-all">
                         Cancel Booking
                     </button>
                 </div>
 
                 <!-- Security Badge -->
                 <div class="mt-6 text-center">
-                    <div class="inline-flex items-center space-x-2 text-sm text-gray-500">
-                        <span>🔒</span>
-                        <span>Secured by SSL encryption</span>
+                    <div class="inline-flex items-center space-x-2 text-sm text-gray-600 bg-green-50 px-4 py-2 rounded-full border border-green-200">
+                        <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="font-medium">Secure Payment via Razorpay</span>
                     </div>
                 </div>
             </div>
@@ -429,40 +494,190 @@
 </div>
 
 <script>
+// Razorpay Payment Integration
 function proceedToPayment() {
-    // For now, simulate payment
-    if (confirm('Proceed with payment of ₹{{ booking.total_amount }}?')) {
-        // Simulate payment processing
-        const loadingBtn = event.target;
-        loadingBtn.innerHTML = 'Processing...';
-        loadingBtn.disabled = true;
+    const loadingBtn = event.target;
+    
+    {% if not booking.customer.phone %}
+    // Validate phone number if not already saved
+    const phoneInput = document.getElementById('phone_number');
+    const phoneError = document.getElementById('phone_error');
+    
+    if (!phoneInput) {
+        // Phone already saved, proceed directly
+        proceedToRazorpay(loadingBtn);
+        return;
+    }
+    
+    const phone = phoneInput.value.trim();
+    
+    // Validate phone number
+    if (!phone) {
+        phoneError.textContent = 'Phone number is required';
+        phoneError.classList.remove('hidden');
+        phoneInput.focus();
+        return;
+    }
+    
+    if (!/^[0-9]{10}$/.test(phone)) {
+        phoneError.textContent = 'Please enter a valid 10-digit mobile number';
+        phoneError.classList.remove('hidden');
+        phoneInput.focus();
+        return;
+    }
+    
+    phoneError.classList.add('hidden');
+    loadingBtn.innerHTML = '<span class="inline-block mr-2">⏳</span> Saving Contact...';
+    loadingBtn.disabled = true;
+    
+    // Save phone number to customer profile
+    fetch('/accounts/update-phone/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            phone: '+91' + phone
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Phone saved, proceed to payment
+            proceedToRazorpay(loadingBtn);
+        } else {
+            loadingBtn.innerHTML = 'Proceed to Payment';
+            loadingBtn.disabled = false;
+            phoneError.textContent = data.error || 'Failed to save phone number';
+            phoneError.classList.remove('hidden');
+        }
+    })
+    .catch(error => {
+        loadingBtn.innerHTML = 'Proceed to Payment';
+        loadingBtn.disabled = false;
+        phoneError.textContent = 'Error saving phone number. Please try again.';
+        phoneError.classList.remove('hidden');
+    });
+    {% else %}
+    // Phone already saved, proceed directly
+    proceedToRazorpay(loadingBtn);
+    {% endif %}
+}
+
+function proceedToRazorpay(loadingBtn) {
+    loadingBtn.innerHTML = '<span class="inline-block mr-2">⏳</span> Creating Order...';
+    loadingBtn.disabled = true;
+    
+    // Create Razorpay order
+    fetch('/booking/payment/create-order/{{ booking.id }}/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to create order');
+        }
         
-        // Simulate payment API call
+        // Initialize Razorpay checkout
+        const options = {
+            key: data.key,
+            amount: data.amount,
+            currency: data.currency,
+            name: 'NEXGEN FC',
+            description: '{{ booking.game.name }} - {{ booking.booking_type }} Booking',
+            order_id: data.order_id,
+            prefill: {
+                name: data.customer_name,
+                email: data.customer_email,
+                contact: data.customer_phone
+            },
+            theme: {
+                color: '#3b82f6'
+            },
+            handler: function(response) {
+                // Payment successful - verify signature
+                verifyPayment(response, data.booking_id);
+            },
+            modal: {
+                ondismiss: function() {
+                    // User closed the payment modal - redirect to cancelled page
+                    window.location.href = '/booking/payment/cancelled/{{ booking.id }}/';
+                }
+            }
+        };
+        
+        const rzp = new Razorpay(options);
+        
+        rzp.on('payment.failed', function(response) {
+            console.error('Payment failed:', response.error);
+            // Redirect to cancelled page on payment failure
+            window.location.href = '/booking/payment/cancelled/{{ booking.id }}/';
+        });
+        
+        rzp.open();
+        
+        // Reset button if Razorpay modal doesn't open
         setTimeout(() => {
-            fetch('/booking/simulate-payment/{{ booking.id }}/', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.href = data.redirect_url;
-                } else {
-                    alert('Payment failed: ' + data.error);
-                    loadingBtn.innerHTML = 'Proceed to Payment';
-                    loadingBtn.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Payment failed. Please try again.');
+            if (loadingBtn.disabled && loadingBtn.innerHTML.includes('Creating Order')) {
                 loadingBtn.innerHTML = 'Proceed to Payment';
                 loadingBtn.disabled = false;
-            });
-        }, 2000);
-    }
+            }
+        }, 3000);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to initiate payment: ' + error.message);
+        loadingBtn.innerHTML = 'Proceed to Payment';
+        loadingBtn.disabled = false;
+    });
+}
+
+function verifyPayment(razorpayResponse, bookingId) {
+    // Show verification message
+    document.body.innerHTML = `
+        <div class="min-h-screen flex items-center justify-center bg-gray-50">
+            <div class="text-center">
+                <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Verifying Payment...</h2>
+                <p class="text-gray-600">Please wait while we confirm your booking</p>
+            </div>
+        </div>
+    `;
+    
+    // Verify payment with backend
+    fetch('/booking/payment/verify/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            razorpay_order_id: razorpayResponse.razorpay_order_id,
+            razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+            razorpay_signature: razorpayResponse.razorpay_signature,
+            booking_id: bookingId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Redirect to secure success page
+            window.location.href = '/booking/payment/success/' + bookingId + '/';
+        } else {
+            alert('Payment verification failed: ' + data.error);
+            window.location.href = '/booking/payment/cancelled/' + bookingId + '/';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to verify payment. Please contact support with payment ID: ' + razorpayResponse.razorpay_payment_id);
+        window.location.href = '/booking/payment/cancelled/' + bookingId + '/';
+    });
 }
 
 function cancelBooking() {

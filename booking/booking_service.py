@@ -257,13 +257,15 @@ class BookingService:
             RealTimeService.broadcast_availability_update(booking.game_slot.id)
     
     @staticmethod
-    def confirm_booking_payment(booking, payment_id):
+    def confirm_booking_payment(booking, payment_id=None, razorpay_payment_id=None, razorpay_order_id=None):
         """
         Confirm booking payment and update status
         
         Args:
             booking: Booking instance
-            payment_id: Payment gateway transaction ID
+            payment_id: Payment gateway transaction ID (deprecated, use razorpay_payment_id)
+            razorpay_payment_id: Razorpay payment ID
+            razorpay_order_id: Razorpay order ID
         """
         with transaction.atomic():
             if booking.status != 'PENDING':
@@ -271,8 +273,18 @@ class BookingService:
             
             old_status = booking.status
             booking.status = 'CONFIRMED'
-            booking.payment_id = payment_id
-            booking.payment_status = 'COMPLETED'
+            
+            # Support both old and new payment ID fields
+            if razorpay_payment_id:
+                booking.razorpay_payment_id = razorpay_payment_id
+                booking.payment_status = 'PAID'
+            elif payment_id:
+                booking.payment_id = payment_id
+                booking.payment_status = 'COMPLETED'
+            
+            if razorpay_order_id:
+                booking.razorpay_order_id = razorpay_order_id
+            
             booking.save()
             
             # Create booking history record
@@ -281,7 +293,7 @@ class BookingService:
                 booking=booking,
                 previous_status=old_status,
                 new_status='CONFIRMED',
-                reason=f'Payment confirmed - ID: {payment_id}'
+                reason=f'Payment confirmed - Razorpay Payment ID: {razorpay_payment_id or payment_id}'
             )
             
             # Send confirmation notification

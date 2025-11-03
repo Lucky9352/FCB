@@ -1,0 +1,151 @@
+╔════════════════════════════════════════════════════════════════════╗
+║              RAZORPAY WEBHOOK CONFIGURATION CHECKLIST              ║
+║                     (Payment Only - No Refunds)                    ║
+╚════════════════════════════════════════════════════════════════════╝
+
+📋 WEBHOOK SETUP FORM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Webhook URL:
+┌────────────────────────────────────────────────────────────────┐
+│ https://forge.tapnex.tech/booking/payment/webhook/            │
+└────────────────────────────────────────────────────────────────┘
+
+Secret: (Will be generated after creating webhook)
+┌────────────────────────────────────────────────────────────────┐
+│ [Leave empty - Razorpay will generate this]                   │
+└────────────────────────────────────────────────────────────────┘
+
+Alert Email:
+┌────────────────────────────────────────────────────────────────┐
+│ tapnex.fc@gmail.com                                            │
+└────────────────────────────────────────────────────────────────┘
+
+Active Events: (Select ONLY the following)
+┌────────────────────────────────────────────────────────────────┐
+│                                                                │
+│  Payment Events                                                │
+│  ☑ payment.authorized      ← SELECT THIS                      │
+│  ☑ payment.failed          ← SELECT THIS                      │
+│  ☑ payment.captured        ← SELECT THIS                      │
+│  ☐ payment.dispute.created                                     │
+│  ☐ payment.dispute.won                                         │
+│  ☐ payment.dispute.lost                                        │
+│  ☐ payment.dispute.closed                                      │
+│                                                                │
+│  Order Events                                                  │
+│  ☑ order.paid              ← SELECT THIS                      │
+│  ☐ order.notification.delivered                                │
+│  ☐ order.notification.failed                                   │
+│                                                                │
+│  Refund Events  ⚠️ DO NOT SELECT ANY REFUND EVENTS             │
+│  ☐ refund.speed_changed    ← DO NOT SELECT                    │
+│  ☐ refund.processed        ← DO NOT SELECT                    │
+│  ☐ refund.failed           ← DO NOT SELECT                    │
+│  ☐ refund.created          ← DO NOT SELECT                    │
+│                                                                │
+│  Other Events (Optional - Not Required)                        │
+│  ☐ settlement.processed                                        │
+│  ☐ invoice.paid                                                │
+│  ☐ payout.processed                                            │
+│                                                                │
+└────────────────────────────────────────────────────────────────┘
+
+✅ REQUIRED SELECTIONS (Total: 4 events)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. ☑ payment.authorized
+2. ☑ payment.captured
+3. ☑ payment.failed
+4. ☑ order.paid
+
+❌ DO NOT SELECT (These are NOT supported)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✗ refund.processed
+✗ refund.failed
+✗ refund.created
+✗ refund.speed_changed
+
+⚠️ IMPORTANT POLICY NOTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚫 NO REFUNDS POLICY
+   • All bookings are FINAL
+   • No cancellations permitted
+   • Rescheduling allowed ONCE only
+   • Payment is non-refundable
+
+📋 AFTER CREATING WEBHOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Copy the Webhook Secret
+   Format: whsec_xxxxxxxxxxxxxxxxxxxxx
+
+2. Add to Vercel Environment Variables:
+   ┌──────────────────────────────────────────────────────────┐
+   │ Variable Name:  RAZORPAY_WEBHOOK_SECRET                  │
+   │ Value:          whsec_xxxxxxxxxxxxxxxxxxxxx              │
+   │ Environment:    Production (& Preview if needed)         │
+   └──────────────────────────────────────────────────────────┘
+
+3. Redeploy Your Application
+
+4. Test Webhook:
+   - Click "Send Test Webhook" in Razorpay Dashboard
+   - Select event: payment.captured
+   - Verify webhook is received successfully
+
+🔍 HOW TO VERIFY WEBHOOK IS WORKING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Method 1: Check Webhook Logs in Razorpay
+  Dashboard → Settings → Webhooks → Your Webhook → Logs
+  ✅ Should show 200 OK responses
+
+Method 2: Make Test Payment
+  1. Create a booking on your website
+  2. Complete payment with test card: 4111 1111 1111 1111
+  3. Check if booking status changes to CONFIRMED
+  4. Check webhook logs in Razorpay
+
+Method 3: Send Test Webhook
+  1. In Razorpay Dashboard, select your webhook
+  2. Click "Send Test Webhook"
+  3. Choose event: payment.captured
+  4. Send and verify 200 OK response
+
+🎯 QUICK CHECKLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+□ Webhook URL set to: https://forge.tapnex.tech/booking/payment/webhook/
+□ Alert email set to: tapnex.fc@gmail.com
+□ Selected exactly 4 events (payment.authorized, payment.captured, 
+  payment.failed, order.paid)
+□ Did NOT select any refund events
+□ Copied webhook secret
+□ Added RAZORPAY_WEBHOOK_SECRET to Vercel
+□ Redeployed application
+□ Tested with "Send Test Webhook"
+□ Verified 200 OK response in webhook logs
+□ Made test payment and confirmed booking updated
+
+✅ STATUS INDICATORS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+When webhook is working correctly, you should see:
+
+Payment Flow:
+  Customer pays → payment.authorized → payment.captured → Booking CONFIRMED
+
+In Webhook Logs:
+  200 OK - Webhook delivered successfully
+  
+In Your Application:
+  Booking status: CONFIRMED
+  Payment status: PAID
+
+📞 SUPPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Razorpay Support:    support@razorpay.com
+Webhook Docs:        https://razorpay.com/docs/webhooks/
+Dashboard:           https://dashboard.razorpay.com
+
+╔════════════════════════════════════════════════════════════════════╗
+║  Remember: Only select PAYMENT events - NO refund events needed!  ║
+╚════════════════════════════════════════════════════════════════════╝

@@ -4,9 +4,10 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
 from django.db.models import Q
+from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta
 from authentication.decorators import customer_required
-from .models import GamingStation, Booking, Notification
+from .models import GamingStation, Booking, Notification, Game
 from .notifications import NotificationService, InAppNotification
 from authentication.models import Customer
 import json
@@ -38,7 +39,8 @@ def booking_selection(request):
             'time': f"{hour:02d}:00",
             'display': f"{hour % 12 or 12}:00 {'AM' if hour < 12 else 'PM'}",
             'datetime': timezone.make_aware(
-                datetime.combine(selected_date, datetime.min.time().replace(hour=hour))
+                datetime.combine(selected_date, datetime.min.time().replace(hour=hour)),
+                timezone=timezone.get_current_timezone()
             )
         })
     
@@ -167,7 +169,8 @@ def get_availability(request):
         time_slots.append({
             'time': f"{hour:02d}:00",
             'datetime': timezone.make_aware(
-                datetime.combine(selected_date, datetime.min.time().replace(hour=hour))
+                datetime.combine(selected_date, datetime.min.time().replace(hour=hour)),
+                timezone=timezone.get_current_timezone()
             )
         })
     
@@ -242,13 +245,25 @@ def my_bookings(request):
 
 @customer_required
 def booking_success(request, booking_id):
-    """Booking success page with animations and notifications"""
+    """
+    Booking success page with animations and notifications
+    SECURITY: Only accessible for CONFIRMED bookings with verified payment
+    """
     booking = get_object_or_404(
         Booking, 
         id=booking_id, 
-        customer=request.user.customer_profile,
-        status='CONFIRMED'
+        customer=request.user.customer_profile
     )
+    
+    # SECURITY CHECK: Prevent access to success page without payment verification
+    if booking.status != 'CONFIRMED':
+        messages.error(request, 'This booking is not confirmed. Please complete the payment first.')
+        return redirect('booking:hybrid_booking_confirm', booking_id=booking_id)
+    
+    # SECURITY CHECK: Verify payment exists (either razorpay_payment_id or old payment_id)
+    if not booking.razorpay_payment_id and not booking.payment_id:
+        messages.error(request, 'Payment verification required.')
+        return redirect('booking:hybrid_booking_confirm', booking_id=booking_id)
     
     context = {
         'booking': booking,
@@ -371,7 +386,7 @@ def mark_notification_read(request, notification_id):
 
 @customer_required
 def game_selection(request):
-    """Game selection interface with hybrid booking options"""
+    """Game selection interface with hybrid booking options - PUBLIC ACCESS"""
     from .models import Game
     from .booking_service import BookingService
     from .auto_slot_generator import auto_generate_slots_all_games
@@ -420,7 +435,40 @@ def hybrid_booking_create(request):
     """Create a hybrid booking (private or shared) with enhanced validation"""
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
+            print(f"📥 Booking request received")
+            print(f"User: {request.user}")
+            print(f"Authenticated: {request.user.is_authenticated}")
+            print(f"Request body: {request.body[:200]}")
+            
+            # Check if user is authenticated
+            if not request.user.is_authenticated:
+                print("❌ User not authenticated")
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Authentication required',
+                    'details': 'Please log in to create a booking',
+                    'redirect_url': f'/accounts/login/?next={request.path}'
+                }, status=401)
+            
+            # Check if user has customer profile
+            if not hasattr(request.user, 'customer_profile'):
+                print(f"❌ User {request.user} has no customer_profile")
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Customer profile required',
+                    'details': 'Only customers can create bookings',
+                }, status=403)
+            
+            # Parse JSON body
+            try:
+                data = json.loads(request.body)
+            except json.JSONDecodeError as e:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Invalid JSON',
+                    'details': f'Failed to parse request body: {str(e)}'
+                }, status=400)
+            
             game_slot_id = data.get('game_slot_id')
             booking_type = data.get('booking_type')  # 'PRIVATE' or 'SHARED'
             spots_requested = int(data.get('spots_requested', 1))
@@ -492,6 +540,8 @@ def hybrid_booking_create(request):
                 spots_requested=spots_requested
             )
             
+            print(f"✅ Booking created: {booking.id}")
+            
             return JsonResponse({
                 'success': True,
                 'booking_id': str(booking.id),
@@ -507,6 +557,7 @@ def hybrid_booking_create(request):
             })
             
         except ValidationError as e:
+            print(f"❌ Validation Error: {str(e)}")
             return JsonResponse({
                 'success': False,
                 'error': 'Booking validation failed',
@@ -514,6 +565,9 @@ def hybrid_booking_create(request):
                 'error_type': 'validation'
             }, status=400)
         except Exception as e:
+            print(f"❌ System Error: {type(e).__name__}: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return JsonResponse({
                 'success': False,
                 'error': 'Booking creation failed',
@@ -651,3 +705,40 @@ def cancel_booking(request, booking_id):
             return JsonResponse({'error': str(e)}, status=400)
     
     return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+def game_detail(request, game_id):
+    """
+    Game detail page - PUBLIC ACCESS
+    Shows full game information - slots loaded via AJAX for performance
+    Users can view without login, but need to login to book
+    
+    OPTIMIZED VERSION: Only loads game details, slots fetched via API
+    """
+    from datetime import timedelta
+    
+    # Get the game (optimized query)
+    game = get_object_or_404(Game, id=game_id, is_active=True)
+    
+    # Get selected date (default to today)
+    selected_date = request.GET.get('date', timezone.now().date().isoformat())
+    try:
+        selected_date = datetime.fromisoformat(selected_date).date()
+    except ValueError:
+        selected_date = timezone.now().date()
+    
+    # Generate date range for navigation (7 days)
+    date_range = [selected_date + timedelta(days=i) for i in range(7)]
+    
+    # Lightweight context - no slot processing on initial load
+    context = {
+        'game': game,
+        'selected_date': selected_date,
+        'date_range': date_range,
+        'today': timezone.now().date(),
+        'is_authenticated': request.user.is_authenticated,
+        'use_ajax_loading': True,  # Flag to enable AJAX loading in template
+    }
+    
+    return render(request, 'booking/game_detail.html', context)
+

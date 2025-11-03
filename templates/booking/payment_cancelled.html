@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment Cancelled - NEXGEN FC{% endblock %}
+
+{% block extra_css %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .warning-pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: .8;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center px-4 py-12">
+    <div class="max-w-2xl w-full">
+        <!-- Main Card -->
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden fade-in-up">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-orange-500 to-red-500 px-8 py-12 text-center">
+                <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 warning-pulse">
+                    <svg class="w-14 h-14 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <h1 class="text-4xl font-bold text-white mb-3">Payment Cancelled</h1>
+                <p class="text-orange-100 text-lg">Your booking has not been confirmed</p>
+            </div>
+            
+            <!-- Content -->
+            <div class="px-8 py-10">
+                <div class="text-center mb-8">
+                    <p class="text-gray-700 text-lg mb-4">
+                        You have cancelled the payment process. Your booking has not been confirmed and the slot is still available for others.
+                    </p>
+                    <div class="bg-orange-50 border-l-4 border-orange-500 p-4 text-left">
+                        <div class="flex items-start">
+                            <svg class="w-6 h-6 text-orange-500 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                            <div>
+                                <p class="text-sm font-medium text-orange-800">Important Information</p>
+                                <p class="text-sm text-orange-700 mt-1">
+                                    Your booking slot will be automatically cancelled and released back to the available pool. No charges have been made to your account.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if booking %}
+                <!-- Booking Details -->
+                <div class="bg-gray-50 rounded-lg p-6 mb-8">
+                    <h3 class="font-semibold text-gray-900 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        Cancelled Booking Details
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-500">Game:</span>
+                            <span class="ml-2 font-medium text-gray-900">{{ booking.game.name }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Type:</span>
+                            <span class="ml-2 font-medium text-gray-900">{{ booking.get_booking_type_display }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Date & Time:</span>
+                            <span class="ml-2 font-medium text-gray-900">{{ booking.game_slot.date|date:"M d, Y" }} at {{ booking.game_slot.start_time|time:"H:i" }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Amount:</span>
+                            <span class="ml-2 font-medium text-gray-900">₹{{ booking.total_amount }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- What Happens Next -->
+                <div class="mb-8">
+                    <h3 class="font-semibold text-gray-900 mb-4">What happens next?</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="text-gray-700">Your booking will be automatically cancelled within a few minutes</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="text-gray-700">No charges have been made to your payment method</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="text-gray-700">You can book again at any time if the slot is still available</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="{% url 'booking:game_selection' %}" 
+                       class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 rounded-xl font-semibold text-center hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
+                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        Book Another Game
+                    </a>
+                    <a href="{% url 'booking:my_bookings' %}" 
+                       class="flex-1 border-2 border-gray-300 text-gray-700 px-6 py-4 rounded-xl font-semibold text-center hover:bg-gray-50 hover:border-gray-400 transition-all">
+                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        View My Bookings
+                    </a>
+                </div>
+
+                <!-- Help Section -->
+                <div class="mt-8 text-center">
+                    <p class="text-sm text-gray-500 mb-2">Need help or have questions?</p>
+                    <a href="{% url 'contact' %}" class="text-blue-600 hover:text-blue-700 font-medium text-sm">
+                        Contact Support →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-cleanup pending booking after 5 minutes
+setTimeout(() => {
+    fetch('/booking/cleanup-pending/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        }
+    });
+}, 5 * 60 * 1000);
+</script>
+
+{% csrf_token %}
+{% endblock %}

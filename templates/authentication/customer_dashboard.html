@@ -89,18 +89,16 @@
     <!-- Quick Booking Section -->
     <div class="mb-8">
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold text-white">Quick Book</h2>
-            <a href="{% url 'booking:game_selection' %}" class="text-gaming-highlight hover:text-gaming-highlight/80 font-medium transition-colors duration-200">
-                View All Games →
-            </a>
+            <h2 class="text-2xl font-bold text-white">Available Games</h2>
+            <p class="text-gray-300 text-sm">Book your favorite games</p>
         </div>
         
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {% for game in available_games %}
-            <div class="station-card">
+            <a href="{% url 'booking:game_detail' game.id %}" class="group station-card">
                 <div class="flex items-start justify-between mb-3">
                     <div>
-                        <h3 class="text-white font-semibold">{{ game.name }}</h3>
+                        <h3 class="text-white font-semibold group-hover:text-gaming-highlight transition-colors">{{ game.name }}</h3>
                         <p class="text-gray-300 text-sm">{{ game.slot_duration_minutes }} min slots</p>
                     </div>
                     <div class="flex items-center space-x-1">
@@ -111,7 +109,7 @@
                 
                 {% if game.image %}
                 <div class="mb-3 rounded-lg overflow-hidden">
-                    <img src="{{ game.image.url }}" alt="{{ game.name }}" class="w-full h-24 object-cover">
+                    <img src="{{ game.image.url }}" alt="{{ game.name }}" class="w-full h-24 object-cover group-hover:scale-110 transition-transform duration-300">
                 </div>
                 {% else %}
                 <div class="mb-3 bg-gradient-to-br from-gaming-highlight/20 to-gaming-accent/20 rounded-lg h-24 flex items-center justify-center">
@@ -121,25 +119,26 @@
                 </div>
                 {% endif %}
                 
-                <div class="flex items-center justify-between">
+                <div class="mb-3">
+                    <p class="text-gray-400 text-xs line-clamp-2">{{ game.description|truncatewords:10 }}</p>
+                </div>
+                
+                <div class="flex items-center justify-between pt-3 border-t border-white/10">
                     <div>
                         <span class="text-gaming-highlight font-bold text-sm">₹{{ game.private_price }}</span>
                         <span class="text-gray-400 text-xs"> private</span>
                     </div>
-                    <a href="{% url 'booking:game_selection' %}" class="bg-gaming-highlight hover:bg-gaming-highlight/80 text-white px-3 py-1 rounded-lg text-sm font-medium transition-colors duration-200 inline-block text-center">
+                    <span class="bg-gaming-highlight hover:bg-gaming-highlight/80 text-white px-3 py-1 rounded-lg text-sm font-medium transition-colors duration-200 inline-block text-center">
                         Book Now
-                    </a>
+                    </span>
                 </div>
-            </div>
+            </a>
             {% empty %}
             <div class="col-span-full text-center py-8">
                 <svg class="w-12 h-12 mx-auto mb-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"></path>
                 </svg>
                 <p class="text-gray-300">No games available at the moment.</p>
-                <a href="{% url 'booking:game_selection' %}" class="mt-4 inline-block bg-gaming-highlight hover:bg-gaming-highlight/80 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200">
-                    Browse All Games
-                </a>
             </div>
             {% endfor %}
         </div>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}TapNex - Gaming Cafe Booking Platform{% endblock %}</title>
+    <title>{% block title %}NEXGEN FC - Gaming Cafe Booking Platform{% endblock %}</title>
     
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
@@ -15,8 +15,98 @@
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     
     {% block extra_css %}{% endblock %}
+    
+    <!-- Preloader Styles -->
+    <style>
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        #preloader.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .preloader-content {
+            text-align: center;
+        }
+        
+        .preloader-spinner {
+            width: 80px;
+            height: 80px;
+            border: 6px solid rgba(102, 126, 234, 0.2);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+        }
+        
+        .preloader-logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: pulse-logo 2s ease-in-out infinite;
+        }
+        
+        .preloader-text {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .preloader-dots span {
+            animation: blink-dot 1.4s infinite both;
+        }
+        
+        .preloader-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .preloader-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse-logo {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        @keyframes blink-dot {
+            0%, 80%, 100% { opacity: 0; }
+            40% { opacity: 1; }
+        }
+    </style>
 </head>
 <body class="min-h-screen bg-gaming-primary flex flex-col">
+    
+    <!-- Page Preloader -->
+    <div id="preloader">
+        <div class="preloader-content">
+            <div class="preloader-logo">🎮</div>
+            <div class="preloader-spinner"></div>
+            <div class="preloader-text">
+                TapNex<span class="preloader-dots">
+                    <span>.</span><span>.</span><span>.</span>
+                </span>
+            </div>
+            <p style="color: #9ca3af; font-size: 0.875rem;">Loading your gaming experience</p>
+        </div>
+    </div>
+    
     <!-- Navigation -->
     <nav class="bg-gaming-secondary shadow-lg border-b border-gaming-accent">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -427,5 +517,33 @@
     </script>
 
     {% block extra_js %}{% endblock %}
+    
+    <!-- Loading Overlay Component -->
+    {% include 'components/loading_overlay.html' %}
+    
+    <!-- Preloader Script -->
+    <script>
+        // Hide preloader when page is fully loaded
+        window.addEventListener('load', function() {
+            const preloader = document.getElementById('preloader');
+            preloader.classList.add('fade-out');
+            
+            // Remove from DOM after fade animation
+            setTimeout(() => {
+                preloader.style.display = 'none';
+            }, 500);
+        });
+        
+        // Fallback: Hide preloader after 3 seconds if load event doesn't fire
+        setTimeout(() => {
+            const preloader = document.getElementById('preloader');
+            if (preloader && !preloader.classList.contains('fade-out')) {
+                preloader.classList.add('fade-out');
+                setTimeout(() => {
+                    preloader.style.display = 'none';
+                }, 500);
+            }
+        }, 3000);
+    </script>
 </body>
 </html>

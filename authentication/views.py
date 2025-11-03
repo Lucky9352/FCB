@@ -126,8 +126,16 @@ def profile_redirect_view(request):
 
 
 def home_view(request):
-    """Home page view with role-based navigation"""
-    return render(request, 'home.html')
+    """Home page view with all available games (public access)"""
+    from booking.models import Game
+    
+    # Get all active games
+    games = Game.objects.filter(is_active=True).order_by('name')
+    
+    context = {
+        'games': games,
+    }
+    return render(request, 'home.html', context)
 
 
 def debug_user_view(request):
@@ -141,3 +149,51 @@ def debug_user_view(request):
         })
     else:
         return redirect('authentication:customer_login')
+
+
+@login_required
+def update_phone_number(request):
+    """Update customer phone number"""
+    from django.http import JsonResponse
+    import json
+    
+    if request.method == 'POST':
+        try:
+            # Check if user has customer profile
+            if not hasattr(request.user, 'customer_profile'):
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Customer profile not found'
+                }, status=403)
+            
+            data = json.loads(request.body)
+            phone = data.get('phone', '').strip()
+            
+            # Validate phone number
+            if not phone:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Phone number is required'
+                }, status=400)
+            
+            # Update customer phone
+            customer = request.user.customer_profile
+            customer.phone = phone
+            customer.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Phone number updated successfully',
+                'phone': phone
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'error': 'Invalid request method'
+    }, status=405)

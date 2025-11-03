@@ -280,7 +280,17 @@
 <script>
 let selectedBooking = null;
 
+// Check if user is authenticated
+const isAuthenticated = {{ request.user.is_authenticated|lower }};
+
 function selectBookingOption(slotId, bookingType, availableSpots) {
+    // Check authentication first
+    if (!isAuthenticated) {
+        // Redirect to login with next parameter
+        window.location.href = "{% url 'authentication:customer_login' %}?next=" + encodeURIComponent(window.location.pathname);
+        return;
+    }
+    
     // Get slot details
     fetch(`/booking/api/slot-availability/${slotId}/`)
         .then(response => response.json())

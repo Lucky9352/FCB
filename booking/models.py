@@ -130,13 +130,17 @@ class GameSlot(models.Model):
     
     @property
     def start_datetime(self):
-        """Get full datetime for slot start"""
-        return datetime.combine(self.date, self.start_time)
+        """Get full datetime for slot start (timezone-aware)"""
+        from django.utils import timezone
+        naive_dt = datetime.combine(self.date, self.start_time)
+        return timezone.make_aware(naive_dt, timezone=timezone.get_current_timezone())
     
     @property
     def end_datetime(self):
-        """Get full datetime for slot end"""
-        return datetime.combine(self.date, self.end_time)
+        """Get full datetime for slot end (timezone-aware)"""
+        from django.utils import timezone
+        naive_dt = datetime.combine(self.date, self.end_time)
+        return timezone.make_aware(naive_dt, timezone=timezone.get_current_timezone())
 
 
 class SlotAvailability(models.Model):
@@ -339,8 +343,13 @@ class Booking(models.Model):
     
     # Status and Payment
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
-    payment_id = models.CharField(max_length=100, blank=True, help_text="Payment gateway transaction ID")
+    payment_id = models.CharField(max_length=100, blank=True, help_text="Payment gateway transaction ID (DEPRECATED)")
     payment_status = models.CharField(max_length=20, blank=True, help_text="Payment status from gateway")
+    
+    # Razorpay Payment Fields
+    razorpay_order_id = models.CharField(max_length=100, blank=True, help_text="Razorpay order ID")
+    razorpay_payment_id = models.CharField(max_length=100, blank=True, help_text="Razorpay payment ID")
+    razorpay_signature = models.CharField(max_length=500, blank=True, help_text="Razorpay payment signature")
     
     # Additional Information
     notes = models.TextField(blank=True, help_text="Additional notes for the booking")
@@ -419,8 +428,12 @@ class Booking(models.Model):
         is_new = self.pk is None
         old_status = None
         if not is_new:
-            old_booking = Booking.objects.get(pk=self.pk)
-            old_status = old_booking.status
+            # Only get old booking if it exists (updating existing booking)
+            try:
+                old_booking = Booking.objects.get(pk=self.pk)
+                old_status = old_booking.status
+            except Booking.DoesNotExist:
+                pass
         
         super().save(*args, **kwargs)
         

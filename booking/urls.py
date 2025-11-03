@@ -1,5 +1,6 @@
 from django.urls import path, include
 from . import views
+from . import payment_views
 
 app_name = 'booking'
 
@@ -12,6 +13,7 @@ urlpatterns = [
     
     # NEW HYBRID BOOKING SYSTEM
     path('games/', views.game_selection, name='game_selection'),
+    path('games/<uuid:game_id>/', views.game_detail, name='game_detail'),
     path('games/book/', views.hybrid_booking_create, name='hybrid_booking_create'),
     path('games/confirm/<uuid:booking_id>/', views.hybrid_booking_confirm, name='hybrid_booking_confirm'),
     path('games/cancel/<uuid:booking_id>/', views.cancel_booking, name='cancel_booking'),
@@ -22,13 +24,20 @@ urlpatterns = [
     # Booking actions (OLD)
     path('simulate-payment/<uuid:booking_id>/', views.simulate_payment, name='simulate_payment'),
     
+    # RAZORPAY PAYMENT INTEGRATION
+    path('payment/create-order/<uuid:booking_id>/', payment_views.create_razorpay_order, name='create_razorpay_order'),
+    path('payment/verify/', payment_views.verify_razorpay_payment, name='verify_razorpay_payment'),
+    path('payment/webhook/', payment_views.razorpay_webhook, name='razorpay_webhook'),
+    path('payment/cancelled/<uuid:booking_id>/', payment_views.payment_cancelled, name='payment_cancelled'),
+    path('payment/success/<uuid:booking_id>/', payment_views.payment_success, name='payment_success'),
+    
     # Notifications
     path('api/notifications/', views.get_notifications, name='get_notifications'),
     path('api/notifications/<int:notification_id>/read/', views.mark_notification_read, name='mark_notification_read'),
     
     # AJAX endpoints
     path('api/availability/', views.get_availability, name='get_availability'),
-    path('api/slot-availability/<uuid:game_slot_id>/', views.get_slot_availability, name='get_slot_availability'),
+    path('api/slot-availability/<int:game_slot_id>/', views.get_slot_availability, name='get_slot_availability'),
     
     # Game Management URLs
     path('games/manage/', include('booking.game_management_urls', namespace='game_management')),

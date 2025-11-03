@@ -41,7 +41,7 @@ def customer_dashboard(request):
     # Get available games for quick booking
     available_games = Game.objects.filter(
         is_active=True
-    ).order_by('name')[:6]
+    ).order_by('name')  # Show ALL games, not just 6
     
     # Get booking statistics
     total_bookings = customer.bookings.count()
