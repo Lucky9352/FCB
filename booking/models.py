@@ -333,10 +333,23 @@ class Booking(models.Model):
         null=True,
         blank=True
     )
+    platform_fee = models.DecimalField(
+        max_digits=8, 
+        decimal_places=2,
+        default=0.00,
+        help_text="Platform fee charged for this booking"
+    )
+    subtotal = models.DecimalField(
+        max_digits=8, 
+        decimal_places=2,
+        help_text="Subtotal (price_per_spot * spots_booked) before platform fee",
+        null=True,
+        blank=True
+    )
     total_amount = models.DecimalField(
         max_digits=8, 
         decimal_places=2,
-        help_text="Total amount for the booking (price_per_spot * spots_booked)",
+        help_text="Total amount for the booking (subtotal + platform_fee)",
         null=True,
         blank=True
     )
@@ -350,6 +363,38 @@ class Booking(models.Model):
     razorpay_order_id = models.CharField(max_length=100, blank=True, help_text="Razorpay order ID")
     razorpay_payment_id = models.CharField(max_length=100, blank=True, help_text="Razorpay payment ID")
     razorpay_signature = models.CharField(max_length=500, blank=True, help_text="Razorpay payment signature")
+    
+    # QR Code Verification Fields
+    verification_token = models.CharField(
+        max_length=100, 
+        unique=False,  # Allow blank/empty tokens for non-QR bookings
+        db_index=True,
+        blank=True,
+        help_text="Unique token for QR code verification"
+    )
+    qr_code = models.ImageField(
+        upload_to='booking_qr_codes/', 
+        blank=True, 
+        null=True,
+        help_text="Generated QR code for booking verification"
+    )
+    is_verified = models.BooleanField(
+        default=False,
+        help_text="Whether booking has been verified by scanning QR code"
+    )
+    verified_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Timestamp when booking was verified"
+    )
+    verified_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='verified_bookings',
+        help_text="Owner/staff who verified the booking"
+    )
     
     # Additional Information
     notes = models.TextField(blank=True, help_text="Additional notes for the booking")
@@ -414,15 +459,24 @@ class Booking(models.Model):
         return duration.total_seconds() / 3600
     
     def calculate_total_amount(self):
-        """Calculate total amount based on spots and price per spot"""
-        total = Decimal(str(self.price_per_spot)) * Decimal(str(self.spots_booked))
+        """Calculate total amount based on spots, price per spot, and platform fee"""
+        subtotal = Decimal(str(self.price_per_spot)) * Decimal(str(self.spots_booked))
+        total = subtotal + Decimal(str(self.platform_fee))
         return total.quantize(Decimal('0.01'))
+    
+    def calculate_subtotal(self):
+        """Calculate subtotal (before platform fee)"""
+        subtotal = Decimal(str(self.price_per_spot)) * Decimal(str(self.spots_booked))
+        return subtotal.quantize(Decimal('0.01'))
     
     def save(self, *args, **kwargs):
         """Override save to calculate total amount and update availability"""
-        # Calculate total amount if not set
-        if not self.total_amount and self.price_per_spot and self.spots_booked:
-            self.total_amount = self.calculate_total_amount()
+        # Calculate subtotal and total amount if not set
+        if self.price_per_spot and self.spots_booked:
+            if not self.subtotal:
+                self.subtotal = self.calculate_subtotal()
+            if not self.total_amount:
+                self.total_amount = self.calculate_total_amount()
         
         # Update slot availability when booking is confirmed
         is_new = self.pk is None

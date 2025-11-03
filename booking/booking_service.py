@@ -191,6 +191,24 @@ class BookingService:
             # Save availability changes
             availability.save()
             
+            # Get platform fee from TapNex superuser settings
+            from authentication.models import TapNexSuperuser
+            try:
+                tapnex_user = TapNexSuperuser.objects.first()
+                if tapnex_user:
+                    # Calculate platform fee based on type
+                    if tapnex_user.platform_fee_type == 'PERCENT':
+                        platform_fee = (total_price * tapnex_user.platform_fee) / 100
+                    else:  # FIXED
+                        platform_fee = tapnex_user.platform_fee
+                else:
+                    platform_fee = Decimal('0.00')
+            except:
+                platform_fee = Decimal('0.00')
+            
+            # Calculate final total with platform fee
+            final_total = total_price + platform_fee
+            
             # Create the booking
             booking = Booking.objects.create(
                 customer=customer,
@@ -199,7 +217,9 @@ class BookingService:
                 booking_type=booking_type,
                 spots_booked=spots_booked,
                 price_per_spot=price_per_spot,
-                total_amount=total_price,
+                subtotal=total_price,
+                platform_fee=platform_fee,
+                total_amount=final_total,
                 status='PENDING'
             )
             

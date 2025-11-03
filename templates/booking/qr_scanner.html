@@ -1,0 +1,440 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}QR Scanner - Booking Verification{% endblock %}
+
+{% block extra_css %}
+<style>
+    #scanner-container {
+        position: relative;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    #video {
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        background: #000;
+    }
+    
+    #canvas {
+        display: none;
+    }
+    
+    .scan-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 250px;
+        height: 250px;
+        border: 3px solid #10b981;
+        border-radius: 12px;
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+        pointer-events: none;
+    }
+    
+    .scan-corners {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+    }
+    
+    .scan-corner-tl {
+        top: -3px;
+        left: -3px;
+        border-top: 5px solid #10b981;
+        border-left: 5px solid #10b981;
+        border-top-left-radius: 12px;
+    }
+    
+    .scan-corner-tr {
+        top: -3px;
+        right: -3px;
+        border-top: 5px solid #10b981;
+        border-right: 5px solid #10b981;
+        border-top-right-radius: 12px;
+    }
+    
+    .scan-corner-bl {
+        bottom: -3px;
+        left: -3px;
+        border-bottom: 5px solid #10b981;
+        border-left: 5px solid #10b981;
+        border-bottom-left-radius: 12px;
+    }
+    
+    .scan-corner-br {
+        bottom: -3px;
+        right: -3px;
+        border-bottom: 5px solid #10b981;
+        border-right: 5px solid #10b981;
+        border-bottom-right-radius: 12px;
+    }
+    
+    .scan-line {
+        position: absolute;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #10b981, transparent);
+        animation: scan 2s linear infinite;
+    }
+    
+    @keyframes scan {
+        0%, 100% { top: 0; }
+        50% { top: calc(100% - 3px); }
+    }
+    
+    .pulse-ring {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gaming-primary via-gaming-secondary to-gaming-accent py-8">
+    <div class="container mx-auto px-4">
+        <!-- Header -->
+        <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 mb-8 border border-white/20">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-white mb-2">QR Code Scanner</h1>
+                    <p class="text-gray-300">Scan customer booking QR codes for verification</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="{% url 'booking:active_bookings' %}" 
+                       class="bg-gaming-highlight/20 hover:bg-gaming-highlight/30 text-gaming-highlight border border-gaming-highlight/40 px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+                        View Active Bookings
+                    </a>
+                    <a href="{% url 'authentication:owner_dashboard' %}" 
+                       class="text-gaming-highlight hover:text-gaming-highlight/80 font-medium transition-colors duration-200">
+                        ← Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Scanner Section -->
+            <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-white mb-2">Camera Scanner</h2>
+                    <p class="text-gray-300 text-sm">Position the QR code within the frame</p>
+                </div>
+                
+                <div id="scanner-container" class="mb-6">
+                    <video id="video" playsinline></video>
+                    <canvas id="canvas" hidden></canvas>
+                    <div class="scan-overlay">
+                        <div class="scan-corners scan-corner-tl"></div>
+                        <div class="scan-corners scan-corner-tr"></div>
+                        <div class="scan-corners scan-corner-bl"></div>
+                        <div class="scan-corners scan-corner-br"></div>
+                        <div class="scan-line"></div>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <button id="startButton" 
+                            onclick="startScanner()"
+                            class="flex-1 bg-gaming-highlight hover:bg-gaming-highlight/80 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200">
+                        <svg class="w-5 h-5 inline mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+                        </svg>
+                        Start Scanner
+                    </button>
+                    <button id="stopButton" 
+                            onclick="stopScanner()"
+                            class="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-400/30 hover:border-red-400/50 px-6 py-3 rounded-lg font-medium transition-colors duration-200 hidden">
+                        <svg class="w-5 h-5 inline mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd"></path>
+                        </svg>
+                        Stop Scanner
+                    </button>
+                </div>
+                
+                <div id="scanStatus" class="mt-4 text-center text-gray-300 text-sm">
+                    Click "Start Scanner" to begin
+                </div>
+            </div>
+
+            <!-- Verification Result Section -->
+            <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+                <h2 class="text-xl font-bold text-white mb-6">Verification Result</h2>
+                
+                <div id="resultContainer" class="hidden">
+                    <div id="resultContent">
+                        <!-- Result will be injected here -->
+                    </div>
+                </div>
+                
+                <div id="emptyState" class="text-center py-12">
+                    <svg class="w-16 h-16 mx-auto mb-4 text-gray-400 pulse-ring" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 2V5h1v1H5zM3 13a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1v-3zm2 2v-1h1v1H5zM13 3a1 1 0 00-1 1v3a1 1 0 001 1h3a1 1 0 001-1V4a1 1 0 00-1-1h-3zm1 2v1h1V5h-1z" clip-rule="evenodd"></path>
+                        <path d="M11 4a1 1 0 10-2 0v1a1 1 0 002 0V4zM10 7a1 1 0 011 1v1h2a1 1 0 110 2h-3a1 1 0 01-1-1V8a1 1 0 011-1zM16 9a1 1 0 100 2 1 1 0 000-2zM9 13a1 1 0 011-1h1a1 1 0 110 2v2a1 1 0 11-2 0v-3zM7 11a1 1 0 100-2H4a1 1 0 100 2h3zM17 13a1 1 0 01-1 1h-2a1 1 0 110-2h2a1 1 0 011 1zM16 17a1 1 0 100-2h-3a1 1 0 100 2h3z"></path>
+                    </svg>
+                    <h3 class="text-white font-medium text-lg mb-2">Waiting for QR Scan</h3>
+                    <p class="text-gray-300">Scan a booking QR code to verify</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- jsQR Library from CDN -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+
+<script>
+let video = document.getElementById('video');
+let canvas = document.getElementById('canvas');
+let context = canvas.getContext('2d');
+let scanning = false;
+let stream = null;
+let lastScannedCode = null;
+let scanCooldown = false;
+
+async function startScanner() {
+    try {
+        // Request camera permission
+        stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: 'environment' } // Use back camera on mobile
+        });
+        
+        video.srcObject = stream;
+        video.setAttribute('playsinline', true);
+        video.play();
+        
+        scanning = true;
+        document.getElementById('startButton').classList.add('hidden');
+        document.getElementById('stopButton').classList.remove('hidden');
+        document.getElementById('scanStatus').textContent = 'Scanner active - Position QR code in frame';
+        
+        requestAnimationFrame(tick);
+    } catch (err) {
+        console.error('Error accessing camera:', err);
+        document.getElementById('scanStatus').textContent = 'Camera access denied. Please allow camera permissions.';
+        document.getElementById('scanStatus').classList.add('text-red-400');
+    }
+}
+
+function stopScanner() {
+    scanning = false;
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+    video.srcObject = null;
+    document.getElementById('startButton').classList.remove('hidden');
+    document.getElementById('stopButton').classList.add('hidden');
+    document.getElementById('scanStatus').textContent = 'Scanner stopped';
+    document.getElementById('scanStatus').classList.remove('text-red-400');
+}
+
+function tick() {
+    if (!scanning) return;
+    
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvas.height = video.videoHeight;
+        canvas.width = video.videoWidth;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        let imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        let code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: 'dontInvert',
+        });
+        
+        if (code && code.data) {
+            // Avoid scanning the same code repeatedly
+            if (code.data !== lastScannedCode && !scanCooldown) {
+                lastScannedCode = code.data;
+                scanCooldown = true;
+                handleQRCode(code.data);
+                
+                // Reset cooldown after 3 seconds
+                setTimeout(() => {
+                    scanCooldown = false;
+                    lastScannedCode = null;
+                }, 3000);
+            }
+        }
+    }
+    
+    requestAnimationFrame(tick);
+}
+
+async function handleQRCode(qrData) {
+    document.getElementById('scanStatus').textContent = 'QR Code detected! Verifying...';
+    document.getElementById('scanStatus').classList.add('text-gaming-highlight');
+    
+    // Play success sound (optional)
+    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjOR1/K+byMFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjOR1/K+byMF');
+    audio.play().catch(() => {});
+    
+    try {
+        const response = await fetch('{% url "booking:verify_booking_qr" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ token: qrData })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showSuccessResult(result.booking, result.message);
+        } else {
+            showErrorResult(result.message);
+        }
+    } catch (error) {
+        console.error('Verification error:', error);
+        showErrorResult('Network error. Please try again.');
+    }
+    
+    document.getElementById('scanStatus').textContent = 'Ready to scan next QR code';
+    document.getElementById('scanStatus').classList.remove('text-gaming-highlight');
+}
+
+function showSuccessResult(booking, message) {
+    const resultContainer = document.getElementById('resultContainer');
+    const emptyState = document.getElementById('emptyState');
+    const resultContent = document.getElementById('resultContent');
+    
+    emptyState.classList.add('hidden');
+    resultContainer.classList.remove('hidden');
+    
+    const statusColor = booking.is_verified ? 'green' : 'yellow';
+    const statusText = booking.is_verified ? 'Verified ✓' : 'Just Verified ✓';
+    
+    resultContent.innerHTML = `
+        <div class="bg-green-500/20 border border-green-400/40 rounded-lg p-4 mb-6">
+            <div class="flex items-center space-x-2 text-green-300">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="font-bold text-lg">${message}</span>
+            </div>
+        </div>
+        
+        <div class="space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b border-white/20">
+                <span class="text-gray-400">Customer</span>
+                <span class="text-white font-semibold">${booking.customer_name}</span>
+            </div>
+            <div class="flex justify-between items-center pb-3 border-b border-white/20">
+                <span class="text-gray-400">Phone</span>
+                <span class="text-white">${booking.customer_phone}</span>
+            </div>
+            <div class="flex justify-between items-center pb-3 border-b border-white/20">
+                <span class="text-gray-400">Game/Station</span>
+                <span class="text-white font-semibold">${booking.game_name}</span>
+            </div>
+            <div class="flex justify-between items-center pb-3 border-b border-white/20">
+                <span class="text-gray-400">Date</span>
+                <span class="text-white">${booking.date}</span>
+            </div>
+            <div class="flex justify-between items-center pb-3 border-b border-white/20">
+                <span class="text-gray-400">Time</span>
+                <span class="text-white">${booking.start_time} - ${booking.end_time}</span>
+            </div>
+            <div class="flex justify-between items-center pb-3 border-b border-white/20">
+                <span class="text-gray-400">Duration</span>
+                <span class="text-white">${booking.duration_hours} hour(s)</span>
+            </div>
+            <div class="flex justify-between items-center pb-3 border-b border-white/20">
+                <span class="text-gray-400">Amount Paid</span>
+                <span class="text-gaming-highlight font-bold text-lg">₹${booking.total_amount}</span>
+            </div>
+            <div class="flex justify-between items-center pb-3 border-b border-white/20">
+                <span class="text-gray-400">Booking Type</span>
+                <span class="text-white">${booking.booking_type}</span>
+            </div>
+            <div class="flex justify-between items-center pb-3 border-b border-white/20">
+                <span class="text-gray-400">Spots</span>
+                <span class="text-white">${booking.spots_booked}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-gray-400">Status</span>
+                <span class="bg-${statusColor}-500/20 text-${statusColor}-300 px-3 py-1 rounded-full text-sm border border-${statusColor}-400/30">
+                    ${statusText}
+                </span>
+            </div>
+        </div>
+        
+        ${booking.status_code === 'IN_PROGRESS' ? `
+        <button onclick="completeBooking('${booking.id}')" 
+                class="w-full mt-6 bg-gaming-highlight hover:bg-gaming-highlight/80 text-white py-3 px-6 rounded-lg font-medium transition-colors duration-200">
+            Mark as Completed
+        </button>
+        ` : ''}
+    `;
+}
+
+function showErrorResult(message) {
+    const resultContainer = document.getElementById('resultContainer');
+    const emptyState = document.getElementById('emptyState');
+    const resultContent = document.getElementById('resultContent');
+    
+    emptyState.classList.add('hidden');
+    resultContainer.classList.remove('hidden');
+    
+    resultContent.innerHTML = `
+        <div class="bg-red-500/20 border border-red-400/40 rounded-lg p-6 text-center">
+            <svg class="w-16 h-16 mx-auto mb-4 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+            </svg>
+            <h3 class="text-red-300 font-bold text-lg mb-2">Verification Failed</h3>
+            <p class="text-red-200">${message}</p>
+        </div>
+    `;
+    
+    // Reset after 3 seconds
+    setTimeout(() => {
+        resultContainer.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+    }, 5000);
+}
+
+async function completeBooking(bookingId) {
+    try {
+        const response = await fetch(`/booking/complete/${bookingId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('Booking marked as completed!');
+            document.getElementById('resultContainer').classList.add('hidden');
+            document.getElementById('emptyState').classList.remove('hidden');
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error completing booking:', error);
+        alert('Network error. Please try again.');
+    }
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+    }
+});
+</script>
+{% endblock %}

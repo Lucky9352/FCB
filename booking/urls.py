@@ -1,6 +1,7 @@
 from django.urls import path, include
 from . import views
 from . import payment_views
+from . import verification_views
 
 app_name = 'booking'
 
@@ -31,6 +32,12 @@ urlpatterns = [
     path('payment/cancelled/<uuid:booking_id>/', payment_views.payment_cancelled, name='payment_cancelled'),
     path('payment/success/<uuid:booking_id>/', payment_views.payment_success, name='payment_success'),
     path('payment/status/<uuid:booking_id>/', payment_views.check_payment_status, name='check_payment_status'),
+    
+    # QR CODE VERIFICATION (Owner/Staff)
+    path('qr-scanner/', verification_views.qr_scanner_view, name='qr_scanner'),
+    path('verify-qr/', verification_views.verify_booking_qr, name='verify_booking_qr'),
+    path('complete/<uuid:booking_id>/', verification_views.complete_booking, name='complete_booking'),
+    path('active-bookings/', verification_views.active_bookings_view, name='active_bookings'),
     
     # Notifications
     path('api/notifications/', views.get_notifications, name='get_notifications'),

@@ -15,6 +15,7 @@ from authentication.decorators import customer_required
 from .models import Booking
 from .razorpay_service import razorpay_service
 from .booking_service import BookingService
+from .qr_service import QRCodeService
 import json
 import logging
 
@@ -142,14 +143,22 @@ def verify_razorpay_payment(request):
         
         logger.info(f"Payment verified successfully for booking {booking_id}")
         
-        # TODO: Send confirmation email/SMS
+        # Generate QR code for booking verification
+        qr_generated = QRCodeService.generate_qr_code(booking)
+        if qr_generated:
+            logger.info(f"QR code generated for booking {booking_id}")
+        else:
+            logger.warning(f"Failed to generate QR code for booking {booking_id}")
+        
+        # TODO: Send confirmation email/SMS with QR code
         # TODO: Update slot availability
         
         return JsonResponse({
             'success': True,
             'message': 'Payment verified successfully',
             'booking_id': str(booking.id),
-            'status': booking.status
+            'status': booking.status,
+            'qr_generated': qr_generated
         })
         
     except Exception as e:
