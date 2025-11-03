@@ -396,6 +396,12 @@ class Booking(models.Model):
         help_text="Owner/staff who verified the booking"
     )
     
+    # Notification Tracking
+    owner_notified = models.BooleanField(
+        default=False,
+        help_text="Whether owner has been notified via Telegram about this booking"
+    )
+    
     # Additional Information
     notes = models.TextField(blank=True, help_text="Additional notes for the booking")
     
