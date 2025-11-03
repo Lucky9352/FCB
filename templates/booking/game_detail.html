@@ -621,10 +621,28 @@ function closeSpotModal(event) {
 
 // Confirm spot selection and proceed with booking
 function confirmSpotSelection() {
-    if (selectedSpots === 0 || !selectedSlotId) {
-        alert('Please select number of spots');
+    // Comprehensive validation
+    if (!selectedSlotId) {
+        console.error('confirmSpotSelection: selectedSlotId is null');
+        alert('Slot information missing. Please close and try again.');
         return;
     }
+    
+    if (selectedSpots === 0 || selectedSpots < 1) {
+        alert('Please select at least 1 spot');
+        return;
+    }
+    
+    if (selectedSpots > maxSpots) {
+        alert(`Cannot book more than ${maxSpots} spots`);
+        return;
+    }
+    
+    console.log('✅ Spot selection confirmed:', {
+        slotId: selectedSlotId,
+        spots: selectedSpots,
+        maxSpots: maxSpots
+    });
     
     // Close modal
     closeSpotModal();
@@ -635,6 +653,36 @@ function confirmSpotSelection() {
 
 // Book a slot
 function bookSlot(slotId, bookingType, spotsRequested) {
+    // Comprehensive validation before making request
+    if (!slotId) {
+        console.error('bookSlot called without slotId');
+        alert('Slot information missing. Please try again.');
+        if (typeof hideLoading === 'function') hideLoading();
+        return;
+    }
+    
+    if (!bookingType || !['PRIVATE', 'SHARED'].includes(bookingType)) {
+        console.error('bookSlot called with invalid bookingType:', bookingType);
+        alert('Invalid booking type. Please try again.');
+        if (typeof hideLoading === 'function') hideLoading();
+        return;
+    }
+    
+    if (!spotsRequested || spotsRequested < 1) {
+        console.error('bookSlot called with invalid spotsRequested:', spotsRequested);
+        alert('Invalid number of spots. Please try again.');
+        if (typeof hideLoading === 'function') hideLoading();
+        return;
+    }
+    
+    const bookingData = {
+        game_slot_id: slotId,
+        booking_type: bookingType,
+        spots_requested: spotsRequested
+    };
+    
+    console.log('✅ Sending booking request:', bookingData);
+    
     // Show loading overlay
     if (typeof showLoading === 'function') {
         showLoading('Creating your booking...');
@@ -647,11 +695,7 @@ function bookSlot(slotId, bookingType, spotsRequested) {
             'Content-Type': 'application/json',
             'X-CSRFToken': csrfToken
         },
-        body: JSON.stringify({
-            game_slot_id: slotId,
-            booking_type: bookingType,
-            spots_requested: spotsRequested
-        })
+        body: JSON.stringify(bookingData)
     })
     .then(response => {
         if (!response.ok) {
@@ -669,11 +713,21 @@ function bookSlot(slotId, bookingType, spotsRequested) {
             if (typeof hideLoading === 'function') {
                 hideLoading();
             }
+            
+            // Build error message
+            let errorMessage = data.error || 'Booking failed';
+            if (data.details) {
+                errorMessage += '\n\n' + data.details;
+            }
+            if (data.parsed) {
+                console.error('Server received:', data.parsed);
+            }
+            
             // If authentication required, redirect to login
             if (data.redirect_url && data.error === 'Authentication required') {
                 window.location.href = data.redirect_url;
             } else {
-                alert(data.error || 'Booking failed. Please try again.');
+                alert(errorMessage);
                 console.error('Booking error:', data);
             }
         }
@@ -682,7 +736,7 @@ function bookSlot(slotId, bookingType, spotsRequested) {
         if (typeof hideLoading === 'function') {
             hideLoading();
         }
-        console.error('Error:', error);
+        console.error('Network/fetch error:', error);
         alert(error.message || 'An error occurred. Please try again.');
     });
 }

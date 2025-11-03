@@ -259,8 +259,9 @@
                             class="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors">
                         Cancel
                     </button>
-                    <button onclick="confirmBooking()" 
-                            class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                    <button id="confirmBookingBtn" onclick="confirmBooking(event)" 
+                            class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled>
                         Book Now
                     </button>
                 </div>
@@ -316,12 +317,18 @@ function selectBookingOption(slotId, bookingType, availableSpots) {
 function showBookingModal(slotData) {
     const modal = document.getElementById('bookingModal');
     const details = document.getElementById('bookingDetails');
+    const confirmBtn = document.getElementById('confirmBookingBtn');
     
     const option = slotData.booking_options.find(opt => opt.type === selectedBooking.bookingType);
     
     if (!option) {
         alert('Booking option not found');
         return;
+    }
+    
+    // Enable the confirm button now that we have valid data
+    if (confirmBtn) {
+        confirmBtn.disabled = false;
     }
     
     const isPrivate = selectedBooking.bookingType === 'PRIVATE';
@@ -401,8 +408,17 @@ function showBookingModal(slotData) {
 }
 
 function closeBookingModal() {
-    document.getElementById('bookingModal').classList.add('hidden');
+    const modal = document.getElementById('bookingModal');
+    const confirmBtn = document.getElementById('confirmBookingBtn');
+    
+    modal.classList.add('hidden');
     selectedBooking = null;
+    selectedSpots = 1;
+    
+    // Disable the confirm button when closing
+    if (confirmBtn) {
+        confirmBtn.disabled = true;
+    }
 }
 
 let selectedSpots = 1;
@@ -424,10 +440,27 @@ function selectSpots(spots) {
     document.getElementById('totalPrice').textContent = `Total: ₹${totalPrice} (${spots} spot${spots > 1 ? 's' : ''})`;
 }
 
-function confirmBooking() {
-    if (!selectedBooking) return;
+function confirmBooking(event) {
+    // Comprehensive validation before allowing booking
+    if (!selectedBooking) {
+        console.error('confirmBooking called but selectedBooking is null');
+        alert('No booking selected. Please try again.');
+        return;
+    }
+    
+    if (!selectedBooking.slotId || !selectedBooking.bookingType) {
+        console.error('confirmBooking called with incomplete data:', selectedBooking);
+        alert('Booking data incomplete. Please close and try again.');
+        return;
+    }
     
     const spotsRequested = selectedBooking.bookingType === 'SHARED' ? selectedSpots : selectedBooking.slotData.availability.total_capacity;
+    
+    // Validate spots
+    if (!spotsRequested || spotsRequested < 1) {
+        alert('Invalid number of spots selected');
+        return;
+    }
     
     const bookingData = {
         game_slot_id: selectedBooking.slotId,
@@ -435,8 +468,22 @@ function confirmBooking() {
         spots_requested: spotsRequested
     };
     
+    // Final validation - ensure all required fields are present
+    if (!bookingData.game_slot_id || !bookingData.booking_type || !bookingData.spots_requested) {
+        console.error('Booking data validation failed:', bookingData);
+        alert('Missing required booking information. Please try again.');
+        return;
+    }
+    
+    console.log('✅ Sending booking request:', bookingData);
+    
     // Show loading state
-    const confirmBtn = event.target;
+    const confirmBtn = event ? event.target : document.getElementById('confirmBookingBtn');
+    if (!confirmBtn) {
+        console.error('Could not find confirm button');
+        return;
+    }
+    
     const originalText = confirmBtn.textContent;
     confirmBtn.textContent = 'Creating Booking...';
     confirmBtn.disabled = true;
@@ -466,6 +513,9 @@ function confirmBooking() {
             if (data.details) {
                 errorMessage += '\n\nDetails: ' + data.details;
             }
+            if (data.parsed) {
+                console.error('Server received:', data.parsed);
+            }
             
             alert('Booking failed: ' + errorMessage);
             
@@ -476,17 +526,19 @@ function confirmBooking() {
             // If availability changed, refresh the modal
             if (data.error_type === 'validation') {
                 closeBookingModal();
-                selectBookingOption(selectedBooking.slotId, selectedBooking.bookingType, selectedBooking.availableSpots);
+                // Optionally reload to get fresh data
             }
         }
     })
     .catch(error => {
-        console.error('Error:', error);
+        console.error('Network/fetch error:', error);
         alert('Booking failed due to a network error. Please check your connection and try again.');
         
         // Reset button
-        confirmBtn.textContent = originalText;
-        confirmBtn.disabled = false;
+        if (confirmBtn) {
+            confirmBtn.textContent = originalText;
+            confirmBtn.disabled = false;
+        }
     });
 }
 

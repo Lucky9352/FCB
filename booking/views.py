@@ -11,6 +11,9 @@ from .models import GamingStation, Booking, Notification, Game
 from .notifications import NotificationService, InAppNotification
 from authentication.models import Customer
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @customer_required
@@ -488,10 +491,16 @@ def hybrid_booking_create(request):
             
             # Validate inputs
             if not all([game_slot_id, booking_type]):
+                logger.warning(f"Missing required fields for booking request. Parsed data: game_slot_id={game_slot_id}, booking_type={booking_type}, spots_requested={spots_requested}")
                 return JsonResponse({
                     'success': False,
                     'error': 'Missing required fields',
-                    'details': 'Game slot ID and booking type are required'
+                    'details': 'Game slot ID and booking type are required',
+                    'parsed': {
+                        'game_slot_id': game_slot_id,
+                        'booking_type': booking_type,
+                        'spots_requested': spots_requested
+                    }
                 }, status=400)
             
             if booking_type not in ['PRIVATE', 'SHARED']:
