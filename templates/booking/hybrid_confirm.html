@@ -116,7 +116,7 @@
                             {% if booking.game.image %}
                             <img src="{{ booking.game.image.url }}" alt="{{ booking.game.name }}" class="w-full h-full object-cover rounded-lg">
                             {% else %}
-                            <div class="text-white text-2xl">🎮</div>
+                            <img src="{% static 'images/logo.png' %}" alt="TapNex Logo" class="w-20 h-20 object-contain p-2">
                             {% endif %}
                         </div>
                         

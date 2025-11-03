@@ -11,7 +11,7 @@ Gaming Station: {{ booking.gaming_station.name }} ({{ booking.gaming_station.get
 Date: {{ booking.start_time|date:"l, F j, Y" }}
 Time: {{ booking.start_time|date:"g:i A" }} - {{ booking.end_time|date:"g:i A" }}
 Duration: {{ booking.duration_hours|floatformat:1 }} hour{{ booking.duration_hours|floatformat:1|add:"0"|length|add:"-1"|slice:"1:" }}s
-Total Amount: ${{ booking.total_amount }}
+Total Amount: ₹{{ booking.total_amount }}
 
 WHAT TO EXPECT:
 ===============

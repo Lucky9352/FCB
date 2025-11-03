@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Owner Dashboard{% endblock %} - {{ cafe_owner.cafe_name }}</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/logo.png' %}">
+    
     <!-- Tailwind CSS CDN (primary) -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -40,8 +44,8 @@
             <div class="p-4 border-b border-white/20">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center font-bold text-xl">
-                            {{ cafe_owner.cafe_name|first }}
+                        <div class="w-10 h-10 flex items-center justify-center">
+                            <img src="{% static 'images/logo.png' %}" alt="TapNex Logo" class="w-full h-full object-contain">
                         </div>
                         <div class="sidebar-text">
                             <h2 class="font-bold text-sm">{{ cafe_owner.cafe_name }}</h2>

@@ -97,7 +97,7 @@
                     </div>
                     <div class="booking-detail-row">
                         <span class="text-gray-300">Hourly Rate</span>
-                        <span class="text-white font-medium">${{ booking.hourly_rate }}</span>
+                        <span class="text-white font-medium">₹{{ booking.hourly_rate }}</span>
                     </div>
                 </div>
             </div>
@@ -144,16 +144,16 @@
                 <div class="space-y-3 mb-6">
                     <div class="flex justify-between items-center">
                         <span class="text-gray-300">Subtotal</span>
-                        <span class="text-white">${{ booking.total_amount }}</span>
+                        <span class="text-white">₹{{ booking.total_amount }}</span>
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-gray-300">Tax</span>
-                        <span class="text-white">$0.00</span>
+                        <span class="text-white">₹0.00</span>
                     </div>
                     <div class="border-t border-white/20 pt-3">
                         <div class="flex justify-between items-center text-lg font-bold">
                             <span class="text-white">Total</span>
-                            <span class="text-gaming-highlight">${{ booking.total_amount }}</span>
+                            <span class="text-gaming-highlight">₹{{ booking.total_amount }}</span>
                         </div>
                     </div>
                 </div>

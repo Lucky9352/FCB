@@ -39,7 +39,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">Today's Revenue</p>
-                        <p class="text-2xl font-bold text-gray-900">${{ real_time_metrics.today.revenue }}</p>
+                        <p class="text-2xl font-bold text-gray-900">₹{{ real_time_metrics.today.revenue }}</p>
                         <p class="text-sm text-gray-500">{{ real_time_metrics.today.bookings }} bookings</p>
                     </div>
                 </div>
@@ -54,7 +54,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">Today's Commission</p>
-                        <p class="text-2xl font-bold text-gray-900">${{ real_time_metrics.today.commission }}</p>
+                        <p class="text-2xl font-bold text-gray-900">₹{{ real_time_metrics.today.commission }}</p>
                         <p class="text-sm text-gray-500">{{ real_time_metrics.settings.commission_rate }}% rate</p>
                     </div>
                 </div>
@@ -69,7 +69,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">Month Revenue</p>
-                        <p class="text-2xl font-bold text-gray-900">${{ real_time_metrics.month.revenue }}</p>
+                        <p class="text-2xl font-bold text-gray-900">₹{{ real_time_metrics.month.revenue }}</p>
                         <p class="text-sm text-gray-500">{{ real_time_metrics.month.bookings }} bookings</p>
                     </div>
                 </div>
@@ -99,24 +99,24 @@
                 <div class="space-y-4">
                     <div class="flex justify-between items-center">
                         <span class="text-gray-600">Gross Revenue</span>
-                        <span class="font-semibold text-gray-900">${{ revenue_analytics.totals.gross_revenue }}</span>
+                        <span class="font-semibold text-gray-900">₹{{ revenue_analytics.totals.gross_revenue }}</span>
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-gray-600">Commission ({{ revenue_analytics.settings.commission_rate }}%)</span>
-                        <span class="font-semibold text-blue-600">${{ revenue_analytics.totals.commission_amount }}</span>
+                        <span class="font-semibold text-blue-600">₹{{ revenue_analytics.totals.commission_amount }}</span>
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-gray-600">Platform Fees</span>
-                        <span class="font-semibold text-blue-600">${{ revenue_analytics.totals.platform_fees }}</span>
+                        <span class="font-semibold text-blue-600">₹{{ revenue_analytics.totals.platform_fees }}</span>
                     </div>
                     <hr class="border-gray-200">
                     <div class="flex justify-between items-center">
                         <span class="text-gray-900 font-semibold">Total Commission</span>
-                        <span class="font-bold text-green-600">${{ revenue_analytics.totals.total_commission }}</span>
+                        <span class="font-bold text-green-600">₹{{ revenue_analytics.totals.total_commission }}</span>
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-gray-600">Net Payout to Cafe</span>
-                        <span class="font-semibold text-gray-900">${{ revenue_analytics.totals.net_payout }}</span>
+                        <span class="font-semibold text-gray-900">₹{{ revenue_analytics.totals.net_payout }}</span>
                     </div>
                 </div>
             </div>
@@ -127,11 +127,11 @@
                 <div class="space-y-4">
                     <div class="flex justify-between items-center">
                         <span class="text-gray-600">Current Month</span>
-                        <span class="font-semibold text-gray-900">${{ growth_metrics.current_month_revenue }}</span>
+                        <span class="font-semibold text-gray-900">₹{{ growth_metrics.current_month_revenue }}</span>
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-gray-600">Previous Month</span>
-                        <span class="font-semibold text-gray-900">${{ growth_metrics.previous_month_revenue }}</span>
+                        <span class="font-semibold text-gray-900">₹{{ growth_metrics.previous_month_revenue }}</span>
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-gray-600">Growth</span>
@@ -142,7 +142,7 @@
                     <div class="flex justify-between items-center">
                         <span class="text-gray-600">Growth Amount</span>
                         <span class="font-semibold {% if growth_metrics.growth_amount >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
-                            {% if growth_metrics.growth_amount >= 0 %}+{% endif %} ${{ growth_metrics.growth_amount }}
+                            {% if growth_metrics.growth_amount >= 0 %}+{% endif %} ₹{{ growth_metrics.growth_amount }}
                         </span>
                     </div>
                 </div>
@@ -168,12 +168,12 @@
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ game_name }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ stats.bookings }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">${{ stats.revenue }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">₹{{ stats.revenue }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ stats.private_bookings }} (${{ stats.private_revenue }})
+                                {{ stats.private_bookings }} (₹{{ stats.private_revenue }})
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ stats.shared_bookings }} (${{ stats.shared_revenue }})
+                                {{ stats.shared_bookings }} (₹{{ stats.shared_revenue }})
                             </td>
                         </tr>
                         {% empty %}
@@ -294,7 +294,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
-                                ${{ booking.total_amount|default:"0.00" }}
+                                ₹{{ booking.total_amount|default:"0.00" }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 <span class="px-2 py-1 text-xs font-medium rounded-full 

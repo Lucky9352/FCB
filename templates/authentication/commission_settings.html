@@ -32,11 +32,11 @@
                     <p class="text-sm text-gray-600">Commission Rate</p>
                 </div>
                 <div class="text-center">
-                    <p class="text-3xl font-bold text-green-600">${{ tapnex_user.platform_fee }}</p>
+                    <p class="text-3xl font-bold text-green-600">₹{{ tapnex_user.platform_fee }}</p>
                     <p class="text-sm text-gray-600">Platform Fee</p>
                 </div>
                 <div class="text-center">
-                    <p class="text-3xl font-bold text-purple-600">${{ current_commission.total_commission }}</p>
+                    <p class="text-3xl font-bold text-purple-600">₹{{ current_commission.total_commission }}</p>
                     <p class="text-sm text-gray-600">Total Commission (Last 7 Days)</p>
                 </div>
             </div>
@@ -51,24 +51,24 @@
                     <div class="space-y-2">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Gross Revenue</span>
-                            <span class="font-semibold">${{ recent_revenue }}</span>
+                            <span class="font-semibold">₹{{ recent_revenue }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Commission ({{ tapnex_user.commission_rate }}%)</span>
-                            <span class="font-semibold text-blue-600">${{ current_commission.commission_amount }}</span>
+                            <span class="font-semibold text-blue-600">₹{{ current_commission.commission_amount }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Platform Fees</span>
-                            <span class="font-semibold text-blue-600">${{ current_commission.platform_fee }}</span>
+                            <span class="font-semibold text-blue-600">₹{{ current_commission.platform_fee }}</span>
                         </div>
                         <hr class="border-gray-200">
                         <div class="flex justify-between">
                             <span class="font-semibold text-gray-900">Total TapNex Revenue</span>
-                            <span class="font-bold text-green-600">${{ current_commission.total_commission }}</span>
+                            <span class="font-bold text-green-600">₹{{ current_commission.total_commission }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Net Payout to Cafe</span>
-                            <span class="font-semibold text-gray-900">${{ current_commission.net_payout }}</span>
+                            <span class="font-semibold text-gray-900">₹{{ current_commission.net_payout }}</span>
                         </div>
                     </div>
                 </div>
@@ -81,15 +81,15 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Average Booking Value</span>
-                            <span class="font-semibold">${{ recent_revenue|floatformat:2 }}</span>
+                            <span class="font-semibold">₹{{ recent_revenue|floatformat:2 }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Commission per Booking</span>
                             <span class="font-semibold text-blue-600">
                                 {% if recent_bookings_count > 0 %}
-                                    ${% widthratio current_commission.total_commission 1 recent_bookings_count %}
+                                    ₹{% widthratio current_commission.total_commission 1 recent_bookings_count %}
                                 {% else %}
-                                    $0.00
+                                    ₹0.00
                                 {% endif %}
                             </span>
                         </div>

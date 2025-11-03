@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,10 +28,12 @@
             border-bottom: 2px solid #dc3545;
         }
         .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #e94560;
             margin-bottom: 10px;
+            text-align: center;
+        }
+        .logo img {
+            max-width: 100px;
+            height: auto;
         }
         .booking-details {
             background-color: #f8f9fa;
@@ -83,7 +86,9 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">🎮 Gaming Cafe</div>
+            <div class="logo">
+                <img src="{{ request.scheme }}://{{ request.get_host }}{% static 'images/logo.png' %}" alt="TapNex Logo">
+            </div>
             <h1 style="color: #dc3545; margin: 0;">Booking Cancelled</h1>
         </div>
         
