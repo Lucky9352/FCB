@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 40" class="tn-logo-monochrome">
+  <!-- Letter T -->
+  <g fill="currentColor">
+    <!-- T horizontal bar -->
+    <rect x="5" y="5" width="20" height="5" rx="2.5"/>
+    <!-- T vertical bar -->
+    <rect x="12.5" y="5" width="5" height="30" rx="2.5"/>
+  </g>
+  
+  <!-- Letter N -->
+  <g fill="currentColor">
+    <!-- N left vertical -->
+    <rect x="35" y="5" width="5" height="30" rx="2.5"/>
+    <!-- N diagonal -->
+    <rect x="38" y="10" width="5" height="20" rx="2.5" transform="rotate(20 40.5 20)"/>
+    <!-- N right vertical -->
+    <rect x="55" y="5" width="5" height="30" rx="2.5"/>
+  </g>
+</svg>

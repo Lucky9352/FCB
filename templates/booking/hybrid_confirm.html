@@ -6,127 +6,464 @@
 {% block extra_css %}
 <!-- Razorpay Checkout Script -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<link rel="stylesheet" href="{% static 'css/booking-modal.css' %}">
 
 <style>
-    .booking-card {
+    /* Enhanced Booking Confirmation Styles */
+    body {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
     }
+    
+    .booking-confirmation-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        margin: 2rem auto;
+        max-width: 1200px;
+    }
+    
+    .confirmation-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 24px 24px 0 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .confirmation-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        opacity: 0.3;
+    }
+    
+    .confirmation-header-content {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .booking-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        margin: 2rem;
+        overflow: hidden;
+    }
+    
     .booking-details {
-        backdrop-filter: blur(10px);
-        background: rgb(255, 255, 255);
+        padding: 2rem;
         color: #111827;
     }
+    
+    .game-info-section {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .game-info-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z'/%3E%3C/g%3E%3C/svg%3E") repeat;
+        opacity: 0.2;
+    }
+    
+    .game-info-content {
+        position: relative;
+        z-index: 1;
+    }
+    
     .capacity-indicator {
         display: inline-flex;
         align-items: center;
-        gap: 4px;
-    }
-    .capacity-dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-    }
-    .capacity-dot.booked {
-        background-color: #ef4444;
-    }
-    .capacity-dot.your-booking {
-        background-color: #3b82f6;
-        animation: pulse 2s infinite;
-    }
-    .capacity-dot.available {
-        background-color: #10b981;
-    }
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-    }
-    .payment-option {
-        transition: all 0.2s ease;
-        cursor: pointer;
-    }
-    .payment-option:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .payment-option.selected {
-        border-color: #3b82f6;
-        background-color: #dbeafe;
+        gap: 6px;
+        flex-wrap: wrap;
     }
     
-    /* Spot selector button styles */
+    .capacity-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .capacity-dot.booked {
+        background-color: #ef4444;
+        box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+    }
+    
+    .capacity-dot.your-booking {
+        background-color: #3b82f6;
+        animation: pulse-booking 2s infinite;
+        box-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
+    }
+    
+    .capacity-dot.available {
+        background-color: #10b981;
+        box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+    }
+    
+    @keyframes pulse-booking {
+        0%, 100% { 
+            transform: scale(1);
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
+        }
+        50% { 
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+        }
+    }
+    
+    .payment-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin: 2rem;
+        position: sticky;
+        top: 2rem;
+    }
+    
+    .payment-option {
+        transition: all 0.3s ease;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        border: 2px solid rgba(0, 0, 0, 0.1);
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .payment-option:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        border-color: #3b82f6;
+    }
+    
+    .payment-option.selected {
+        border-color: #3b82f6;
+        background: #dbeafe;
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
+    }
+    
+    .pricing-breakdown {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .pricing-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .pricing-row:last-child {
+        border-bottom: none;
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: #3b82f6;
+        padding-top: 1rem;
+        margin-top: 0.5rem;
+        border-top: 2px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .success-checkmark {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #10b981;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2rem;
+        margin: 0 auto 1rem;
+        animation: success-bounce 0.6s ease-out;
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+    }
+    
+    @keyframes success-bounce {
+        0% { transform: scale(0); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+    
+    .confirmation-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.9);
+        color: #374151;
+        border: 2px solid #d1d5db;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-secondary:hover {
+        background: #f3f4f6;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Spot selector enhanced styles */
     .spot-select-btn {
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1rem;
+        font-weight: 600;
+        cursor: pointer;
     }
     
     .spot-select-btn:hover:not(.active) {
         transform: scale(1.05);
-        border-color: #3b82f6 !important;
+        border-color: #3b82f6;
+        background: #f8faff;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
     }
     
     .spot-select-btn.active {
-        background-color: #3b82f6 !important;
-        color: white !important;
-        border-color: #2563eb !important;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        border-color: #2563eb;
         transform: scale(1.05);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
     }
     
-    /* Mobile-specific styles */
+    /* Mobile responsive enhancements */
     @media (max-width: 768px) {
-        .booking-card {
-            margin: 0 -1rem;
+        .booking-confirmation-container {
+            margin: 1rem;
+            border-radius: 16px;
         }
         
-        .booking-details {
-            padding: 1rem;
+        .confirmation-header {
+            padding: 1.5rem;
+            border-radius: 16px 16px 0 0;
+        }
+        
+        .booking-card,
+        .payment-section {
+            margin: 1rem;
+            padding: 1.5rem;
         }
         
         .capacity-indicator {
-            flex-wrap: wrap;
-            gap: 2px;
+            gap: 4px;
         }
         
         .capacity-dot {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
+        }
+        
+        .confirmation-actions {
+            flex-direction: column;
         }
         
         .payment-option {
             padding: 1rem;
-        }
-        
-        .grid-cols-1.md\\:grid-cols-2 {
-            grid-template-columns: 1fr;
+            min-height: 60px;
         }
     }
     
-    /* Touch-friendly buttons */
-    @media (hover: none) and (pointer: coarse) {
-        .payment-option {
-            min-height: 60px;
+    /* Loading states */
+    .loading-spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    /* Progress indicator */
+    .progress-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+    }
+    
+    .progress-step {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .progress-step.active {
+        color: white;
+    }
+    
+    .progress-step.completed {
+        color: #10b981;
+    }
+    
+    .progress-step-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.875rem;
+    }
+    
+    .progress-step:not(.active):not(.completed) .progress-step-icon {
+        background: rgba(255, 255, 255, 0.2);
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .progress-step.active .progress-step-icon {
+        background: white;
+        color: #3b82f6;
+        animation: pulse-white 2s infinite;
+    }
+    
+    .progress-step.completed .progress-step-icon {
+        background: #10b981;
+        color: white;
+    }
+    
+    @keyframes pulse-white {
+        0%, 100% { 
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
         }
-        
-        button {
-            min-height: 48px;
+        50% { 
+            box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
         }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <!-- Header -->
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Confirm Your Booking</h1>
-        <p class="text-gray-600">Review your booking details and proceed to payment</p>
+<div class="booking-confirmation-container">
+    <!-- Enhanced Header with Progress -->
+    <div class="confirmation-header">
+        <div class="confirmation-header-content">
+            <!-- Progress Indicator -->
+            <div class="progress-indicator">
+                <div class="progress-step completed">
+                    <div class="progress-step-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20,6 9,17 4,12"></polyline>
+                        </svg>
+                    </div>
+                    <span>Select Game</span>
+                </div>
+                <div class="progress-step completed">
+                    <div class="progress-step-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20,6 9,17 4,12"></polyline>
+                        </svg>
+                    </div>
+                    <span>Choose Time</span>
+                </div>
+                <div class="progress-step active">
+                    <div class="progress-step-icon">3</div>
+                    <span>Confirm & Pay</span>
+                </div>
+            </div>
+            
+            <h1 class="text-3xl font-bold mb-2">Confirm Your Booking</h1>
+            <p class="opacity-90">Review your booking details and proceed to secure payment</p>
+        </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-32 lg:pb-0">
         <!-- Booking Details -->
         <div class="lg:col-span-2">
-            <div class="booking-card rounded-lg p-8 mb-6">
-                <div class="booking-details rounded-lg p-6">
-                    <h2 class="text-2xl font-bold mb-6 text-gray-900">{{ booking.game.name }}</h2>
+            <div class="booking-card">
+                <div class="booking-details">
+                    <!-- Game Info Section -->
+                    <div class="game-info-section">
+                        <div class="game-info-content">
+                            <h2 class="text-2xl font-bold mb-2">{{ booking.game.name }}</h2>
+                            <p class="opacity-90">{{ booking.game.description|truncatewords:20 }}</p>
+                        </div>
+                    </div>
                     
                     <!-- Game Image -->
                     <div class="flex items-start space-x-6 mb-6">
@@ -243,7 +580,7 @@
                             <div class="grid grid-cols-4 gap-3 mb-4">
                                 {% for i in "x"|ljust:max_total_spots %}
                                 <button type="button" 
-                                        onclick="selectSpots({{ forloop.counter }})" 
+                                        onclick="selectSpots('{{ forloop.counter }}')" 
                                         class="spot-select-btn {% if forloop.counter == booking.spots_booked %}active{% endif %} 
                                                bg-white hover:bg-blue-50 border-2 border-gray-300 rounded-lg py-3 px-4 
                                                font-bold text-lg transition-all hover:border-blue-500"
@@ -267,30 +604,49 @@
                     </div>
                     {% endif %}
 
-                    <!-- Pricing Breakdown -->
-                    <div class="border-t pt-6">
-                        <h3 class="text-lg font-semibold mb-4 text-gray-900">Pricing Breakdown</h3>
-                        <div class="space-y-2 text-gray-900">
+                    <!-- Enhanced Pricing Breakdown -->
+                    <div class="pricing-breakdown">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-900 flex items-center">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2">
+                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                            </svg>
+                            Pricing Breakdown
+                        </h3>
+                        <div class="space-y-0">
                             {% if is_private %}
-                            <div class="flex justify-between">
+                            <div class="pricing-row">
                                 <span>Private booking ({{ booking.game.capacity }} players)</span>
-                                <span>₹{{ booking.subtotal|default:booking.game.private_price }}</span>
+                                <span class="font-semibold">₹{{ booking.subtotal|default:booking.game.private_price }}</span>
                             </div>
                             {% else %}
-                            <div class="flex justify-between">
+                            <div class="pricing-row">
                                 <span class="spots-price-display">{{ booking.spots_booked }} spot{{ booking.spots_booked|pluralize }} × ₹{{ booking.price_per_spot }}</span>
-                                <span class="subtotal-display">₹{{ booking.subtotal|floatformat:2 }}</span>
+                                <span class="subtotal-display font-semibold">₹{{ booking.subtotal|floatformat:2 }}</span>
                             </div>
                             {% endif %}
                             
-                            <div class="flex justify-between text-sm text-gray-600">
-                                <span>Platform fee</span>
-                                <span>₹{{ booking.platform_fee|floatformat:2|default:"0.00" }}</span>
+                            <div class="pricing-row">
+                                <span class="flex items-center">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-1">
+                                        <path d="M9 12l2 2 4-4"/>
+                                        <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"/>
+                                        <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"/>
+                                    </svg>
+                                    Platform fee
+                                </span>
+                                <span class="font-semibold">₹{{ booking.platform_fee|floatformat:2|default:"0.00" }}</span>
                             </div>
                             
-                            <div class="border-t pt-2 flex justify-between text-lg font-bold text-gray-900">
-                                <span>Total Amount</span>
-                                <span class="text-blue-600 total-display">₹{{ booking.total_amount }}</span>
+                            <div class="pricing-row">
+                                <span class="flex items-center">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-1">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="8.5" cy="7" r="4"/>
+                                        <path d="m22 2-5 10-5-5 10-5z"/>
+                                    </svg>
+                                    Total Amount
+                                </span>
+                                <span class="total-display">₹{{ booking.total_amount }}</span>
                             </div>
                         </div>
                     </div>
@@ -405,7 +761,9 @@
                         </div>
                         <div class="text-xs text-gray-500 mt-1">
                             {% if is_private %}
-                            (Would have been ₹{{ booking.game.shared_price|floatformat:0 }} × {{ booking.spots_booked }} = ₹{% widthratio booking.game.shared_price 1 booking.spots_booked %})
+                            {% with total_shared_cost=booking.game.shared_price|floatformat:0 %}
+                            (Would have been ₹{{ total_shared_cost }} × {{ booking.spots_booked }})
+                            {% endwith %}
                             {% else %}
                             ({{ booking.game.capacity }} players included)
                             {% endif %}
@@ -435,108 +793,140 @@
             </div>
         </div>
 
-        <!-- Payment Section -->
+        <!-- Enhanced Payment Section -->
         <div class="lg:col-span-1">
             <!-- Mobile Booking Summary (visible on mobile) -->
-            <div class="lg:hidden bg-white border-t border-gray-200 rounded-lg shadow-md p-4 mb-6">
-                <div class="flex items-center justify-between mb-3">
+            <div class="lg:hidden payment-section mb-6">
+                <div class="flex items-center justify-between mb-4">
                     <div>
-                        <div class="font-semibold">{{ booking.game.name }}</div>
+                        <div class="font-semibold text-lg">{{ booking.game.name }}</div>
                         <div class="text-sm text-gray-600">{{ booking.spots_booked }} spot{{ booking.spots_booked|pluralize }} • {{ booking.game_slot.date|date:"M d" }}</div>
                     </div>
                     <div class="text-right">
-                        <div class="font-bold text-lg text-blue-600">₹{{ booking.total_amount }}</div>
-                        <div class="text-xs text-gray-500">Total</div>
+                        <div class="font-bold text-xl text-blue-600">₹{{ booking.total_amount }}</div>
+                        <div class="text-xs text-gray-500">Total Amount</div>
                     </div>
                 </div>
-                <button onclick="proceedToPayment()" 
-                        class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
-                    <span class="inline-flex items-center">
-                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                
+                <div class="confirmation-actions">
+                    <button onclick="proceedToPayment()" class="btn-primary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                         </svg>
-                        Proceed to Payment
-                    </span>
-                </button>
+                        Secure Payment
+                    </button>
+                </div>
+                
+                <!-- Security Notice -->
+                <div class="mt-4 text-center">
+                    <div class="inline-flex items-center space-x-2 text-sm text-gray-600 bg-green-50 px-4 py-2 rounded-full border border-green-200">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12l2 2 4-4"/>
+                            <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"/>
+                        </svg>
+                        <span class="font-medium">256-bit SSL Encrypted</span>
+                    </div>
+                </div>
             </div>
             
             <!-- Desktop Payment Section -->
-            <div class="hidden lg:block bg-white rounded-lg shadow-md p-6">
-                <h3 class="text-xl font-semibold mb-6">Payment Method</h3>
+            <div class="hidden lg:block payment-section">
+                <h3 class="text-xl font-semibold mb-6 flex items-center">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2">
+                        <path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                    </svg>
+                    Payment Method
+                </h3>
                 
-                <!-- Payment Options -->
+                <!-- Enhanced Payment Options -->
                 <div class="space-y-3 mb-6">
-                    <div class="payment-option border-2 border-gray-200 rounded-lg p-4 selected">
+                    <div class="payment-option selected">
                         <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xl">
                                 💳
                             </div>
-                            <div>
-                                <div class="font-medium">Credit/Debit Card</div>
-                                <div class="text-sm text-gray-500">Visa, Mastercard, RuPay</div>
+                            <div class="flex-1">
+                                <div class="font-semibold text-gray-900">Credit/Debit Card</div>
+                                <div class="text-sm text-gray-600">Visa, Mastercard, RuPay • Instant processing</div>
+                            </div>
+                            <div class="text-green-600">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="20,6 9,17 4,12"></polyline>
+                                </svg>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="payment-option border-2 border-gray-200 rounded-lg p-4">
+                    <div class="payment-option">
                         <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white text-xl">
                                 📱
                             </div>
-                            <div>
-                                <div class="font-medium">UPI</div>
-                                <div class="text-sm text-gray-500">PhonePe, GPay, Paytm</div>
+                            <div class="flex-1">
+                                <div class="font-semibold text-gray-900">UPI Payment</div>
+                                <div class="text-sm text-gray-600">PhonePe, GPay, Paytm • Quick & secure</div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="payment-option border-2 border-gray-200 rounded-lg p-4">
+                    <div class="payment-option">
                         <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xl">
                                 🏦
                             </div>
-                            <div>
-                                <div class="font-medium">Net Banking</div>
-                                <div class="text-sm text-gray-500">All major banks</div>
+                            <div class="flex-1">
+                                <div class="font-semibold text-gray-900">Net Banking</div>
+                                <div class="text-sm text-gray-600">All major banks • Secure transfer</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Order Summary -->
-                <div class="bg-gray-50 rounded-lg p-4 mb-6">
-                    <h4 class="font-semibold mb-3">Order Summary</h4>
-                    <div class="space-y-2 text-sm">
-                        <div class="flex justify-between">
-                            <span>{{ booking.game.name }}</span>
-                            <span>₹{{ booking.total_amount }}</span>
+                <!-- Enhanced Order Summary -->
+                <div class="pricing-breakdown mb-6">
+                    <h4 class="font-semibold mb-3 flex items-center">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2">
+                            <path d="M9 11H5a2 2 0 0 0-2 2v3c0 1.1.9 2 2 2h4m6-6h4a2 2 0 0 1 2 2v3c0 1.1-.9 2-2 2h-4m-6 0V9a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2"/>
+                        </svg>
+                        Booking Summary
+                    </h4>
+                    <div class="space-y-0">
+                        <div class="pricing-row">
+                            <span class="font-medium">{{ booking.game.name }}</span>
+                            <span class="font-semibold">₹{{ booking.total_amount }}</span>
                         </div>
-                        <div class="flex justify-between text-gray-600">
-                            <span>{{ booking.game_slot.date|date:"M d" }} • {{ booking.game_slot.start_time|time:"H:i" }}</span>
-                            <span>{{ booking.spots_booked }} spot{{ booking.spots_booked|pluralize }}</span>
+                        <div class="pricing-row">
+                            <span class="text-gray-600">{{ booking.game_slot.date|date:"M d" }} • {{ booking.game_slot.start_time|time:"H:i" }}</span>
+                            <span class="text-gray-600">{{ booking.spots_booked }} spot{{ booking.spots_booked|pluralize }}</span>
                         </div>
-                        <div class="border-t pt-2 flex justify-between font-semibold">
-                            <span>Total</span>
+                        <div class="pricing-row">
+                            <span class="flex items-center">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-1">
+                                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                                </svg>
+                                Total Amount
+                            </span>
                             <span>₹{{ booking.total_amount }}</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="space-y-4">
-                    <button onclick="proceedToPayment()" 
-                            class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
-                        <span class="inline-flex items-center justify-center">
-                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                            </svg>
-                            Proceed to Payment
-                        </span>
+                <!-- Enhanced Action Buttons -->
+                <div class="confirmation-actions">
+                    <button onclick="proceedToPayment()" class="btn-primary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12l2 2 4-4"/>
+                            <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"/>
+                        </svg>
+                        Secure Payment
                     </button>
                     
-                    <button onclick="cancelBooking()" 
-                            class="w-full border-2 border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-100 hover:border-gray-400 transition-all">
-                        Cancel Booking
+                    <button onclick="cancelBooking()" class="btn-secondary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                        Cancel
                     </button>
                 </div>
 
@@ -556,11 +946,11 @@
 
 <script>
 // Spot modification variables
-let originalSpots = {{ booking.spots_booked }};
-let selectedNewSpots = {{ booking.spots_booked }};
+let originalSpots = '{{ booking.spots_booked }}';
+let selectedNewSpots = '{{ booking.spots_booked }}';
 const bookingId = "{{ booking.id }}";
-const pricePerSpot = {{ booking.price_per_spot }};
-const platformFee = {{ booking.platform_fee|default:0 }};
+const pricePerSpot = '{{ booking.price_per_spot }}';
+const platformFee = '{{ booking.platform_fee|default:0 }}';
 
 // Select number of spots
 function selectSpots(spots) {
@@ -682,10 +1072,42 @@ function updatePricingDisplay(newSubtotal, newTotal, newSpots) {
 }
 
 // Razorpay Payment Integration
+// Enhanced success state display
+function showSuccessState(button) {
+    button.innerHTML = `
+        <div class="success-checkmark">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20,6 9,17 4,12"></polyline>
+            </svg>
+        </div>
+        Payment Successful!
+    `;
+    button.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+    button.style.boxShadow = '0 8px 25px rgba(16, 185, 129, 0.4)';
+}
+
+// Enhanced loading state
+function showLoadingState(button, message) {
+    button.innerHTML = `
+        <div class="loading-spinner"></div>
+        ${message}
+    `;
+    button.disabled = true;
+}
+
+// Reset button state
+function resetButtonState(button, originalContent) {
+    button.innerHTML = originalContent;
+    button.disabled = false;
+    button.style.background = '';
+    button.style.boxShadow = '';
+}
+
 function proceedToPayment() {
     const loadingBtn = event.target;
+    const originalContent = loadingBtn.innerHTML;
     
-    {% if not booking.customer.phone %}
+    '{% if not booking.customer.phone %}'
     // Validate phone number if not already saved
     const phoneInput = document.getElementById('phone_number');
     const phoneError = document.getElementById('phone_error');
@@ -714,8 +1136,7 @@ function proceedToPayment() {
     }
     
     phoneError.classList.add('hidden');
-    loadingBtn.innerHTML = '<span class="inline-block mr-2">⏳</span> Saving Contact...';
-    loadingBtn.disabled = true;
+    showLoadingState(loadingBtn, 'Saving Contact...');
     
     // Save phone number to customer profile
     fetch('/accounts/update-phone/', {
@@ -734,27 +1155,24 @@ function proceedToPayment() {
             // Phone saved, proceed to payment
             proceedToRazorpay(loadingBtn);
         } else {
-            loadingBtn.innerHTML = 'Proceed to Payment';
-            loadingBtn.disabled = false;
+            resetButtonState(loadingBtn, originalContent);
             phoneError.textContent = data.error || 'Failed to save phone number';
             phoneError.classList.remove('hidden');
         }
     })
     .catch(error => {
-        loadingBtn.innerHTML = 'Proceed to Payment';
-        loadingBtn.disabled = false;
+        resetButtonState(loadingBtn, originalContent);
         phoneError.textContent = 'Error saving phone number. Please try again.';
         phoneError.classList.remove('hidden');
     });
-    {% else %}
+    '{% else %}'
     // Phone already saved, proceed directly
     proceedToRazorpay(loadingBtn);
-    {% endif %}
+    '{% endif %}'
 }
 
 function proceedToRazorpay(loadingBtn) {
-    loadingBtn.innerHTML = '<span class="inline-block mr-2">⏳</span> Creating Order...';
-    loadingBtn.disabled = true;
+    showLoadingState(loadingBtn, 'Creating Secure Order...');
     
     // Create Razorpay order
     fetch('/booking/payment/create-order/{{ booking.id }}/', {
@@ -810,17 +1228,15 @@ function proceedToRazorpay(loadingBtn) {
         
         // Reset button if Razorpay modal doesn't open
         setTimeout(() => {
-            if (loadingBtn.disabled && loadingBtn.innerHTML.includes('Creating Order')) {
-                loadingBtn.innerHTML = 'Proceed to Payment';
-                loadingBtn.disabled = false;
+            if (loadingBtn.disabled && loadingBtn.innerHTML.includes('Creating')) {
+                resetButtonState(loadingBtn, originalContent);
             }
         }, 3000);
     })
     .catch(error => {
         console.error('Error:', error);
         alert('Failed to initiate payment: ' + error.message);
-        loadingBtn.innerHTML = 'Proceed to Payment';
-        loadingBtn.disabled = false;
+        resetButtonState(loadingBtn, originalContent);
     });
 }
 
@@ -976,7 +1392,7 @@ function updateCapacityDisplay() {
                 const capacityDots = document.querySelectorAll('.capacity-dot');
                 capacityDots.forEach((dot, index) => {
                     dot.className = 'capacity-dot ';
-                    if (index < {{ booking.spots_booked }}) {
+                    if (index < '{{ booking.spots_booked }}') {
                         dot.className += 'your-booking';
                     } else if (index < data.availability.booked_spots) {
                         dot.className += 'booked';
@@ -986,8 +1402,8 @@ function updateCapacityDisplay() {
                 });
                 
                 // Show notification if capacity changed
-                const currentBookedSpots = data.availability.booked_spots - {{ booking.spots_booked }};
-                if (currentBookedSpots !== {{ booking.game_slot.availability.booked_spots|default:0 }} - {{ booking.spots_booked }}) {
+                const currentBookedSpots = data.availability.booked_spots - '{{ booking.spots_booked }}';
+                if (currentBookedSpots !== '{{ booking.game_slot.availability.booked_spots|default:0 }}' - '{{ booking.spots_booked }}') {
                     showCapacityChangeNotification(data.availability);
                 }
             }
@@ -1024,8 +1440,8 @@ function showCapacityChangeNotification(availability) {
     }, 3000);
 }
 
-// Update capacity every 20 seconds
-setInterval(updateCapacityDisplay, 20000);
+// Update capacity every 60 seconds (optimized from 20s)
+setInterval(updateCapacityDisplay, 60000);
 
 // Update on page focus (when user returns to tab)
 document.addEventListener('visibilitychange', () => {

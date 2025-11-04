@@ -1,0 +1,70 @@
+{% load static %}
+
+{# TapNex Arena Logo Component #}
+{# Usage: {% include 'components/logo.html' with variant='full' size='md' link='/' animated=True %} #}
+
+{% with variant=variant|default:'full' size=size|default:'md' link=link animated=animated class=class %}
+
+<{% if link %}a href="{{ link }}"{% else %}div{% endif %} 
+   class="logo logo--{{ size }} logo--{{ variant }} {% if animated %}logo--animated{% endif %} {{ class }}"
+   {% if link %}aria-label="TapNex Arena - Home"{% endif %}>
+   
+   {# Logo Image - Using existing TN.png #}
+   <img src="{% static 'images/TN.png' %}" 
+        alt="TapNex Arena Logo" 
+        class="logo__image"
+        onerror="this.style.display='none'"
+        loading="lazy">
+   
+   {# Logo Text #}
+   {% if variant == 'full' or variant == 'text-only' %}
+   <span class="logo__text">TapNex</span>
+   {% endif %}
+   
+</{% if link %}a{% else %}div{% endif %}>
+
+{% endwith %}
+
+{# Fallback for missing logo image #}
+<style>
+.logo__image {
+    /* Ensure the existing TN.png logo displays properly */
+    max-width: 100%;
+    height: auto;
+    display: block !important;
+    object-fit: contain;
+}
+
+.logo__image[src*="TN.png"] {
+    /* Specific styling for TN logo */
+    filter: brightness(1.1);
+}
+
+/* Ensure logo text is always visible */
+.logo__text {
+    display: inline-block !important;
+    white-space: nowrap;
+}
+
+/* Fallback SVG logo if image fails to load */
+.logo__image:not([src]),
+.logo__image[src=""] {
+    display: none !important;
+}
+
+.logo__image:not([src]) + .logo__text::before,
+.logo__image[src=""] + .logo__text::before {
+    content: "TN";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--color-accent-cyan), var(--color-accent-orange));
+    color: white;
+    font-weight: var(--font-weight-bold);
+    border-radius: var(--radius-lg);
+    margin-right: var(--space-2);
+    font-size: var(--font-size-lg);
+}
+</style>

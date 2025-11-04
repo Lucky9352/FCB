@@ -1,0 +1,350 @@
+/**
+ * TapNex Arena Logo System
+ * Responsive logo component with animations and variants
+ */
+
+/* ===== LOGO COMPONENT BASE ===== */
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  transition: all var(--duration-300) var(--ease-out);
+}
+
+.logo:hover {
+  text-decoration: none;
+}
+
+/* ===== LOGO IMAGE ===== */
+
+.logo__image {
+  display: block !important;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  transition: all var(--duration-300) var(--ease-out);
+  max-width: 100%;
+}
+
+/* Logo Sizes */
+.logo--xs .logo__image { height: 24px; width: auto; }
+.logo--sm .logo__image { height: 32px; width: auto; }
+.logo--md .logo__image { height: 40px; width: auto; }
+.logo--lg .logo__image { height: 48px; width: auto; }
+.logo--xl .logo__image { height: 64px; width: auto; }
+.logo--2xl .logo__image { height: 80px; width: auto; }
+
+/* ===== LOGO TEXT ===== */
+
+.logo__text {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-bold);
+  color: white;
+  transition: all var(--duration-300) var(--ease-out);
+}
+
+/* Logo Text Sizes */
+.logo--xs .logo__text { font-size: var(--font-size-sm); }
+.logo--sm .logo__text { font-size: var(--font-size-base); }
+.logo--md .logo__text { font-size: var(--font-size-lg); }
+.logo--lg .logo__text { font-size: var(--font-size-xl); }
+.logo--xl .logo__text { font-size: var(--font-size-2xl); }
+.logo--2xl .logo__text { font-size: var(--font-size-3xl); }
+
+/* ===== LOGO VARIANTS ===== */
+
+/* Simple variant - just image */
+.logo--simple .logo__text {
+  display: none;
+}
+
+/* Text only variant */
+.logo--text-only .logo__image {
+  display: none;
+}
+
+/* Full variant - image + text (default behavior - shows both) */
+.logo--full .logo__image,
+.logo--full .logo__text {
+  display: initial;
+}
+
+/* ===== LOGO ANIMATIONS ===== */
+
+.logo--animated .logo__image {
+  animation: logo-pulse 3s ease-in-out infinite;
+}
+
+.logo:hover .logo__image {
+  transform: scale(1.05);
+}
+
+.logo:hover .logo__text {
+  color: var(--color-accent-cyan);
+}
+
+@keyframes logo-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+/* ===== NAVIGATION LOGO ===== */
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.nav-logo .logo {
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav-logo .logo__image {
+  display: block !important;
+  height: 40px !important;
+  width: auto !important;
+}
+
+.nav-logo__text {
+  font-family: var(--font-display);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: white;
+  transition: color var(--duration-300) var(--ease-out);
+}
+
+.nav-logo:hover .nav-logo__text {
+  color: var(--color-accent-cyan);
+}
+
+/* ===== RESPONSIVE LOGO BEHAVIOR ===== */
+
+.logo-wrapper--responsive {
+  display: flex;
+  align-items: center;
+}
+
+.logo-wrapper--responsive .logo__image {
+  display: block !important;
+}
+
+/* Mobile: Show only image */
+@media (max-width: 640px) {
+  .logo-wrapper--responsive .logo__text,
+  .nav-logo__text {
+    display: none;
+  }
+  
+  .logo-wrapper--responsive .logo__image {
+    height: 32px !important;
+    width: auto !important;
+  }
+  
+  .nav-logo .logo__image {
+    height: 32px !important;
+    width: auto !important;
+  }
+}
+
+/* Tablet: Show image + abbreviated text */
+@media (min-width: 641px) and (max-width: 768px) {
+  .nav-logo__text::after {
+    content: " Arena";
+  }
+  
+  .nav-logo .logo__image {
+    height: 36px !important;
+    width: auto !important;
+  }
+}
+
+/* Desktop: Show full text */
+@media (min-width: 769px) {
+  .logo-wrapper--responsive .logo__text,
+  .nav-logo__text {
+    display: block;
+  }
+  
+  .nav-logo .logo__image {
+    height: 40px !important;
+    width: auto !important;
+  }
+}
+
+/* ===== HERO LOGO STYLES ===== */
+
+.hero-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-8);
+  animation: hero-logo-entrance 1s ease-out;
+}
+
+.hero-logo .logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.hero-logo .logo__image {
+  height: 80px !important;
+  width: auto !important;
+  filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.3));
+  display: block !important;
+}
+
+.hero-logo .logo__text {
+  font-size: var(--font-size-4xl);
+  background: linear-gradient(135deg, var(--color-accent-cyan), var(--color-accent-orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-left: var(--space-4);
+  display: inline-block !important;
+}
+
+@keyframes hero-logo-entrance {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ===== LOADING LOGO STYLES ===== */
+
+.loading-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.loading-logo .logo__image {
+  height: 64px !important;
+  width: auto !important;
+  display: block !important;
+  animation: loading-logo-pulse 2s ease-in-out infinite;
+}
+
+.loading-logo .logo__text {
+  font-size: var(--font-size-2xl);
+  color: white;
+  opacity: 0.8;
+  display: inline-block !important;
+}
+
+/* Preloader Logo Styles */
+.preloader-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.preloader-logo .logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.preloader-logo .logo__image {
+  height: 64px !important;
+  width: auto !important;
+  display: block !important;
+  filter: drop-shadow(0 0 15px rgba(0, 212, 255, 0.5));
+}
+
+.preloader-logo .logo__text {
+  font-size: var(--font-size-3xl);
+  color: white;
+  display: inline-block !important;
+}
+
+@keyframes loading-logo-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
+}
+
+/* ===== FAVICON AND TOUCH ICONS ===== */
+
+.favicon-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-primary-600), var(--color-accent-cyan));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.favicon-logo .logo__image {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) invert(1);
+}
+
+/* ===== ACCESSIBILITY ===== */
+
+.logo__image {
+  alt: "TapNex Arena Logo";
+}
+
+/* Ensure proper labeling for screen readers */
+.logo[aria-label]:focus {
+  outline: 2px solid var(--color-accent-cyan);
+  outline-offset: 2px;
+}
+
+/* ===== PRINT STYLES ===== */
+
+@media print {
+  .logo__image {
+    filter: none;
+  }
+  
+  .logo__text,
+  .nav-logo__text {
+    color: black !important;
+    background: none !important;
+    -webkit-text-fill-color: black !important;
+  }
+  
+  .hero-logo .logo__image {
+    filter: none;
+  }
+}
+
+/* ===== REDUCED MOTION SUPPORT ===== */
+
+@media (prefers-reduced-motion: reduce) {
+  .logo--animated .logo__image,
+  .hero-logo,
+  .loading-logo .logo__image {
+    animation: none;
+  }
+  
+  .logo:hover .logo__image {
+    transform: none;
+  }
+}

@@ -323,7 +323,7 @@
 </div>
 
 <script>
-// Auto-refresh real-time metrics every 30 seconds
+// Auto-refresh real-time metrics every 60 seconds (optimized from 30s)
 setInterval(function() {
     fetch('{% url "authentication:ajax_revenue_data" %}')
         .then(response => response.json())
@@ -332,6 +332,6 @@ setInterval(function() {
             console.log('Updated metrics:', data);
         })
         .catch(error => console.error('Error updating metrics:', error));
-}, 30000);
+}, 60000);
 </script>
 {% endblock %}

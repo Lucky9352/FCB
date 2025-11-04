@@ -2,6 +2,7 @@ from django.urls import path, include
 from . import views
 from . import payment_views
 from . import verification_views
+from . import api_realtime
 
 app_name = 'booking'
 
@@ -47,6 +48,10 @@ urlpatterns = [
     # AJAX endpoints
     path('api/availability/', views.get_availability, name='get_availability'),
     path('api/slot-availability/<int:game_slot_id>/', views.get_slot_availability, name='get_slot_availability'),
+    
+    # Real-time API endpoints
+    path('api/stations/status/', api_realtime.station_status_api, name='station_status_api'),
+    path('api/stations/update/', api_realtime.StationUpdateView.as_view(), name='station_update_api'),
     
     # Game Management URLs
     path('games/manage/', include('booking.game_management_urls', namespace='game_management')),

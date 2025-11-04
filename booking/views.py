@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.db.models import Q
 from django.core.exceptions import ValidationError
+from django.core.cache import cache
 from datetime import datetime, timedelta
 from authentication.decorators import customer_required
 from .models import GamingStation, Booking, Notification, Game
@@ -361,11 +362,25 @@ def cancel_booking(request, booking_id):
 
 @customer_required
 def get_notifications(request):
-    """Get user's notifications"""
-    notifications = request.user.notifications.filter(is_read=False).order_by('-created_at')[:10]
+    """Get user's notifications with caching for performance"""
+    user_id = request.user.id
+    cache_key = f'notifications_user_{user_id}'
+    
+    # Try to get from cache first (10 second cache)
+    cached_data = cache.get(cache_key)
+    if cached_data:
+        return JsonResponse(cached_data)
+    
+    # Optimized query - get unread notifications with single database hit
+    notifications = request.user.notifications.filter(
+        is_read=False
+    ).select_related('booking').order_by('-created_at')[:10]
+    
+    # Convert to list to get count without extra query
+    notifications_list = list(notifications)
     
     notification_data = []
-    for notification in notifications:
+    for notification in notifications_list:
         notification_data.append({
             'id': notification.id,
             'title': notification.title,
@@ -375,10 +390,15 @@ def get_notifications(request):
             'booking_id': str(notification.booking.id) if notification.booking else None
         })
     
-    return JsonResponse({
+    response_data = {
         'notifications': notification_data,
-        'unread_count': notifications.count()
-    })
+        'unread_count': len(notifications_list)
+    }
+    
+    # Cache for 10 seconds to reduce database load
+    cache.set(cache_key, response_data, 10)
+    
+    return JsonResponse(response_data)
 
 
 @customer_required
@@ -392,6 +412,11 @@ def mark_notification_read(request, notification_id):
                 user=request.user
             )
             notification.mark_as_read()
+            
+            # Invalidate cache when notification is marked as read
+            cache_key = f'notifications_user_{request.user.id}'
+            cache.delete(cache_key)
+            
             return JsonResponse({'success': True})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)

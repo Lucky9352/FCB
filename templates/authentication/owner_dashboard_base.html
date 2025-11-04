@@ -214,12 +214,12 @@
             sidebarOverlay.classList.add('hidden');
         });
 
-        // Auto-refresh data every 30 seconds for real-time updates
+        // Auto-refresh data every 60 seconds for real-time updates (optimized from 30s)
         setInterval(() => {
             if (typeof refreshDashboardData === 'function') {
                 refreshDashboardData();
             }
-        }, 30000);
+        }, 60000);
     </script>
 
     {% block extra_js %}
