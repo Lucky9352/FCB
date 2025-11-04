@@ -1,120 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}TapNex Arena - Gaming Cafe Booking Platform{% endblock %}</title>
+    <meta name="description" content="{% block description %}Premium gaming cafe booking platform with state-of-the-art gaming stations, competitive pricing, and seamless booking experience.{% endblock %}">
+    <meta name="keywords" content="gaming cafe, esports, gaming stations, book gaming pc, competitive gaming">
+    <meta name="author" content="TapNex Arena">
+    <title>{% block title %}TapNex Arena - Premium Gaming Cafe Booking Platform{% endblock %}</title>
     
     {% load static %}
     
-    <!-- Modern Design System 2.0 -->
-    <link rel="stylesheet" href="{% static 'css/modern-design-tokens.css' %}">
-    <link rel="stylesheet" href="{% static 'css/modern-components.css' %}">
-    <link rel="stylesheet" href="{% static 'css/modern-navigation.css' %}">
-    
-    <!-- TapNex Arena Design System (Legacy Support) -->
-    <link rel="stylesheet" href="{% static 'css/design-system.css' %}">
+    <!-- Modern Design System v2.0 -->
+    <link rel="stylesheet" href="{% static 'css/design-system-v2.css' %}">
+    <link rel="stylesheet" href="{% static 'css/animations.css' %}">
     
     <!-- Tailwind Output -->
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
     
-    <!-- Google Fonts - Inter -->
+    <!-- Google Fonts - Inter & Orbitron -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Bootstrap Icons (Legacy Support) -->
+    <!-- Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
     <link rel="apple-touch-icon" href="{% static 'images/logo.png' %}">
     
-    {% block extra_css %}{% endblock %}
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#667eea">
     
-    <!-- Preloader Styles -->
-    <style>
-        #preloader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.5s ease-out;
-        }
-        
-        #preloader.fade-out {
-            opacity: 0;
-            pointer-events: none;
-        }
-        
-        .preloader-content {
-            text-align: center;
-        }
-        
-        .preloader-spinner {
-            width: 80px;
-            height: 80px;
-            border: 6px solid rgba(102, 126, 234, 0.2);
-            border-top-color: #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 2rem;
-        }
-        
-        .preloader-logo {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 1rem;
-            animation: pulse-logo 2s ease-in-out infinite;
-        }
-        
-        .preloader-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-        
-        .preloader-text {
-            color: white;
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-        
-        .preloader-dots span {
-            animation: blink-dot 1.4s infinite both;
-        }
-        
-        .preloader-dots span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-        
-        .preloader-dots span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        @keyframes pulse-logo {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-        }
-        
-        @keyframes blink-dot {
-            0%, 80%, 100% { opacity: 0; }
-            40% { opacity: 1; }
-        }
-    </style>
+    {% block extra_css %}{% endblock %}
 </head>
-<body class="min-h-screen bg-gaming-primary flex flex-col">
+<body class="min-h-screen flex flex-col">
     
     <!-- Page Preloader -->
     <div id="preloader">
@@ -122,310 +42,369 @@
             <div class="preloader-logo">
                 {% include 'components/logo.html' with variant='full' size='xl' animated=True %}
             </div>
-            <div class="preloader-spinner"></div>
-            <div class="preloader-text">
-                TapNex<span class="preloader-dots">
-                    <span>.</span><span>.</span><span>.</span>
-                </span>
+            <div class="spinner"></div>
+            <div class="text-white text-xl font-semibold mt-6">
+                TapNex<span class="dots-loading"><span>.</span><span>.</span><span>.</span></span>
             </div>
-            <p style="color: #9ca3af; font-size: 0.875rem;">Loading your gaming experience</p>
+            <p class="text-gray-400 text-sm mt-2">Loading your gaming experience</p>
         </div>
     </div>
     
-    <!-- Navigation -->
-    <nav class="bg-gaming-secondary shadow-lg border-b border-gaming-accent w-full">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <!-- Logo and Brand -->
-                <div class="nav-logo">
-                    {% include 'components/logo.html' with variant='simple' size='md' link='/' class='logo-wrapper--responsive' %}
-                    <span class="nav-logo__text">Arena</span>
+    <!-- Modern Navigation -->
+    <nav class="navbar fixed top-0 left-0 right-0 z-50 bg-dark-500/80 backdrop-filter backdrop-blur-lg border-b border-white/10 transition-all duration-300">
+        <div class="container mx-auto">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <div class="flex items-center gap-3">
+                    <a href="{% url 'home' %}" class="flex items-center gap-2 group">
+                        {% include 'components/logo.html' with variant='simple' size='md' %}
+                        <span class="text-white text-xl font-bold font-gaming hidden sm:block group-hover:text-primary-400 transition-colors">
+                            TapNex<span class="gradient-text-neon">Arena</span>
+                        </span>
+                    </a>
                 </div>
                 
                 <!-- Desktop Navigation -->
-                <div class="hidden md:flex items-center space-x-6">
+                <div class="hidden lg:flex items-center gap-8">
                     {% if user.is_authenticated %}
-                        <!-- Role-based navigation -->
                         {% if user.is_superuser %}
-                            <a href="{% url 'authentication:tapnex_dashboard' %}" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200">
-                                Superuser Dashboard
+                            <a href="{% url 'authentication:tapnex_dashboard' %}" class="text-gray-300 hover:text-white transition-colors">
+                                <i class="bi bi-speedometer2 mr-2"></i>Dashboard
                             </a>
-                        {% endif %}
-                        
-                        {% if user.customer %}
-                            <a href="{% url 'authentication:customer_dashboard' %}" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200">
-                                Dashboard
+                        {% elif user.customer %}
+                            <a href="{% url 'authentication:customer_dashboard' %}" class="text-gray-300 hover:text-white transition-colors">
+                                <i class="bi bi-grid-fill mr-2"></i>Dashboard
                             </a>
-                            <a href="{% url 'booking:game_selection' %}" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200">
-                                Book Games
+                            <a href="{% url 'booking:game_selection' %}" class="text-gray-300 hover:text-white transition-colors">
+                                <i class="bi bi-controller mr-2"></i>Book Games
                             </a>
-                            <a href="{% url 'booking:my_bookings' %}" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200">
-                                My Bookings
+                            <a href="{% url 'booking:my_bookings' %}" class="text-gray-300 hover:text-white transition-colors">
+                                <i class="bi bi-calendar-check mr-2"></i>My Bookings
                             </a>
                         {% elif user.cafeowner %}
-                            <a href="{% url 'authentication:cafe_owner_dashboard' %}" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200">
+                            <a href="{% url 'authentication:cafe_owner_dashboard' %}" class="text-gray-300 hover:text-white transition-colors">
                                 Dashboard
-                            </a>
-                            <a href="#" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200">
-                                Manage Bookings
-                            </a>
-                            <a href="#" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200">
-                                Stations
                             </a>
                         {% endif %}
                         
                         <!-- User Menu -->
-                        <div class="flex items-center space-x-3">
-                            <!-- Notifications Bell (for customers) -->
+                        <div class="flex items-center gap-4">
+                            <!-- Notifications (for customers) -->
                             {% if user.customer_profile %}
                             <div class="relative">
-                                <button id="notifications-button" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200 relative">
-                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
-                                    </svg>
-                                    <span id="notification-badge" class="absolute -top-1 -right-1 bg-gaming-highlight text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+                                <button id="notifications-button" class="relative text-gray-300 hover:text-white transition-colors">
+                                    <i class="bi bi-bell text-xl"></i>
+                                    <span id="notification-badge" class="absolute -top-1 -right-1 bg-error text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden font-semibold">0</span>
                                 </button>
                                 
                                 <!-- Notifications Dropdown -->
-                                <div id="notifications-dropdown" class="absolute right-0 mt-2 w-80 bg-gaming-secondary border border-gaming-accent rounded-lg shadow-lg z-50 hidden">
-                                    <div class="p-4 border-b border-gaming-accent">
+                                <div id="notifications-dropdown" class="absolute right-0 mt-4 w-80 glass-strong rounded-xl shadow-2xl hidden animate-fade-in-down">
+                                    <div class="p-4 border-b border-white/10">
                                         <h3 class="text-white font-semibold">Notifications</h3>
                                     </div>
-                                    <div id="notifications-list" class="max-h-64 overflow-y-auto">
-                                        <div class="p-4 text-center text-gray-400">
-                                            <svg class="w-8 h-8 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
-                                            </svg>
-                                            <p class="text-sm">No new notifications</p>
-                                        </div>
-                                    </div>
+                                    <div id="notifications-list" class="max-h-96 overflow-y-auto"></div>
                                 </div>
                             </div>
                             {% endif %}
                             
-                            {% if user.customer and user.customer.avatar_url %}
-                                <img src="{{ user.customer.avatar_url }}" alt="Profile" class="w-8 h-8 rounded-full border-2 border-gaming-accent">
-                            {% else %}
-                                <div class="w-8 h-8 bg-gaming-accent rounded-full flex items-center justify-center">
-                                    <span class="text-white text-sm font-medium">
-                                        {{ user.first_name.0|default:user.username.0|upper }}
-                                    </span>
-                                </div>
-                            {% endif %}
-                            <span class="text-gray-300 text-sm">
-                                {% if user.first_name %}
-                                    {{ user.first_name }}
+                            <!-- User Avatar & Name -->
+                            <div class="flex items-center gap-3">
+                                {% if user.customer and user.customer.avatar_url %}
+                                    <img src="{{ user.customer.avatar_url }}" alt="Profile" class="w-10 h-10 rounded-full border-2 border-primary-500 hover:border-secondary-500 transition-colors">
                                 {% else %}
-                                    {{ user.username }}
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-600 to-secondary-600 flex items-center justify-center text-white font-semibold hover-glow">
+                                        {{ user.first_name.0|default:user.username.0|upper }}
+                                    </div>
                                 {% endif %}
-                            </span>
-                            <a href="{% url 'authentication:logout' %}" class="btn-secondary text-sm">Logout</a>
+                                <div class="hidden xl:block">
+                                    <p class="text-white text-sm font-medium">
+                                        {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}
+                                    </p>
+                                    <p class="text-gray-400 text-xs">{{ user.email|truncatechars:20 }}</p>
+                                </div>
+                            </div>
+                            
+                            <a href="{% url 'authentication:logout' %}" class="btn btn-secondary btn-sm">
+                                <i class="bi bi-box-arrow-right"></i>
+                                <span class="hidden xl:inline">Logout</span>
+                            </a>
                         </div>
                     {% else %}
-                        <a href="{% url 'authentication:customer_login' %}" class="text-gray-300 hover:text-gaming-highlight transition-colors duration-200">
-                            Customer Login
-                        </a>
-                        <a href="{% url 'authentication:customer_login' %}" class="btn-primary">Get Started</a>
+                        <a href="{% url 'home' %}#features" class="text-gray-300 hover:text-white transition-colors">Features</a>
+                        <a href="{% url 'contact' %}" class="text-gray-300 hover:text-white transition-colors">Contact</a>
+                        <a href="{% url 'authentication:customer_login' %}" class="btn btn-ghost btn-sm">Login</a>
+                        <a href="{% url 'authentication:customer_login' %}" class="btn btn-primary btn-sm btn-ripple">Get Started</a>
                     {% endif %}
                 </div>
 
-                <!-- Mobile menu button -->
-                <div class="md:hidden">
-                    <button type="button" 
-                            class="mobile-menu-button text-gray-300 hover:text-gaming-highlight focus:outline-none focus:text-gaming-highlight transition-colors duration-200"
-                            aria-controls="mobile-menu" 
-                            aria-expanded="false">
-                        <span class="sr-only">Open main menu</span>
-                        <!-- Hamburger icon -->
-                        <svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                        <!-- Close icon (hidden by default) -->
-                        <svg class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mobile Navigation Menu -->
-        <div class="md:hidden hidden" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 bg-gaming-secondary border-t border-gaming-accent">
-                {% if user.is_authenticated %}
-                    <!-- Mobile User Info -->
-                    <div class="px-3 py-2 border-b border-gaming-accent mb-2">
-                        <div class="flex items-center space-x-3">
-                            {% if user.customer and user.customer.avatar_url %}
-                                <img src="{{ user.customer.avatar_url }}" alt="Profile" class="w-10 h-10 rounded-full border-2 border-gaming-accent">
-                            {% else %}
-                                <div class="w-10 h-10 bg-gaming-accent rounded-full flex items-center justify-center">
-                                    <span class="text-white font-medium">
-                                        {{ user.first_name.0|default:user.username.0|upper }}
-                                    </span>
-                                </div>
-                            {% endif %}
-                            <div>
-                                <p class="text-white font-medium">
-                                    {% if user.first_name %}
-                                        {{ user.first_name }} {{ user.last_name }}
-                                    {% else %}
-                                        {{ user.username }}
-                                    {% endif %}
-                                </p>
-                                <p class="text-gray-400 text-sm">{{ user.email }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Role-based mobile navigation -->
-                    {% if user.is_superuser %}
-                        <a href="{% url 'authentication:tapnex_dashboard' %}" class="block px-3 py-2 text-gray-300 hover:text-gaming-highlight hover:bg-gaming-accent/20 rounded-md transition-colors duration-200">
-                            Superuser Dashboard
-                        </a>
-                    {% endif %}
-                    
-                    {% if user.customer %}
-                        <a href="{% url 'authentication:customer_dashboard' %}" class="block px-3 py-2 text-gray-300 hover:text-gaming-highlight hover:bg-gaming-accent/20 rounded-md transition-colors duration-200">
-                            Dashboard
-                        </a>
-                        <a href="#" class="block px-3 py-2 text-gray-300 hover:text-gaming-highlight hover:bg-gaming-accent/20 rounded-md transition-colors duration-200">
-                            Book Now
-                        </a>
-                        <a href="#" class="block px-3 py-2 text-gray-300 hover:text-gaming-highlight hover:bg-gaming-accent/20 rounded-md transition-colors duration-200">
-                            My Bookings
-                        </a>
-                    {% elif user.cafeowner %}
-                        <a href="{% url 'authentication:cafe_owner_dashboard' %}" class="block px-3 py-2 text-gray-300 hover:text-gaming-highlight hover:bg-gaming-accent/20 rounded-md transition-colors duration-200">
-                            Dashboard
-                        </a>
-                        <a href="#" class="block px-3 py-2 text-gray-300 hover:text-gaming-highlight hover:bg-gaming-accent/20 rounded-md transition-colors duration-200">
-                            Manage Bookings
-                        </a>
-                        <a href="#" class="block px-3 py-2 text-gray-300 hover:text-gaming-highlight hover:bg-gaming-accent/20 rounded-md transition-colors duration-200">
-                            Stations
-                        </a>
-                    {% endif %}
-                    
-                    <a href="{% url 'authentication:logout' %}" class="block px-3 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-md transition-colors duration-200">
-                        Logout
-                    </a>
-                {% else %}
-                    <a href="{% url 'authentication:customer_login' %}" class="block px-3 py-2 text-gray-300 hover:text-gaming-highlight hover:bg-gaming-accent/20 rounded-md transition-colors duration-200">
-                        Customer Login
-                    </a>
-                    <div class="px-3 py-2">
-                        <a href="{% url 'authentication:customer_login' %}" class="btn-primary w-full text-center block">Get Started</a>
-                    </div>
-                {% endif %}
+                <!-- Mobile Menu Toggle -->
+                <button class="lg:hidden mobile-menu-toggle text-white text-2xl">
+                    <i class="bi bi-list"></i>
+                </button>
             </div>
         </div>
     </nav>
 
-    <!-- Messages -->
+    <!-- Mobile Menu -->
+    <div class="mobile-menu fixed top-0 right-0 bottom-0 w-80 bg-dark-400 transform translate-x-full transition-transform duration-300 z-50 lg:hidden">
+        <div class="flex flex-col h-full">
+            <!-- Mobile Menu Header -->
+            <div class="flex items-center justify-between p-6 border-b border-white/10">
+                <span class="text-white font-bold text-lg">Menu</span>
+                <button class="mobile-menu-close text-white text-2xl">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <!-- Mobile Menu Content -->
+            <div class="flex-1 overflow-y-auto p-6">
+                {% if user.is_authenticated %}
+                    <!-- User Info -->
+                    <div class="flex items-center gap-3 mb-6 pb-6 border-b border-white/10">
+                        {% if user.customer and user.customer.avatar_url %}
+                            <img src="{{ user.customer.avatar_url }}" alt="Profile" class="w-12 h-12 rounded-full border-2 border-primary-500">
+                        {% else %}
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-600 to-secondary-600 flex items-center justify-center text-white font-semibold">
+                                {{ user.first_name.0|default:user.username.0|upper }}
+                            </div>
+                        {% endif %}
+                        <div>
+                            <p class="text-white font-medium">
+                                {% if user.first_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username }}{% endif %}
+                            </p>
+                            <p class="text-gray-400 text-sm">{{ user.email|truncatechars:25 }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Navigation Links -->
+                    <div class="space-y-2">
+                        {% if user.is_superuser %}
+                            <a href="{% url 'authentication:tapnex_dashboard' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
+                                <i class="bi bi-speedometer2"></i>Dashboard
+                            </a>
+                        {% elif user.customer %}
+                            <a href="{% url 'authentication:customer_dashboard' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
+                                <i class="bi bi-grid-fill"></i>Dashboard
+                            </a>
+                            <a href="{% url 'booking:game_selection' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
+                                <i class="bi bi-controller"></i>Book Games
+                            </a>
+                            <a href="{% url 'booking:my_bookings' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
+                                <i class="bi bi-calendar-check"></i>My Bookings
+                            </a>
+                        {% elif user.cafeowner %}
+                            <a href="{% url 'authentication:cafe_owner_dashboard' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
+                                <i class="bi bi-speedometer2"></i>Dashboard
+                            </a>
+                        {% endif %}
+                        
+                        <a href="{% url 'authentication:logout' %}" class="flex items-center gap-3 text-error hover:text-error-light hover:bg-error/10 p-3 rounded-lg transition-all">
+                            <i class="bi bi-box-arrow-right"></i>Logout
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="space-y-2">
+                        <a href="{% url 'home' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
+                            <i class="bi bi-house"></i>Home
+                        </a>
+                        <a href="{% url 'home' %}#features" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
+                            <i class="bi bi-star"></i>Features
+                        </a>
+                        <a href="{% url 'contact' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
+                            <i class="bi bi-envelope"></i>Contact
+                        </a>
+                        <div class="pt-4 border-t border-white/10">
+                            <a href="{% url 'authentication:customer_login' %}" class="btn btn-primary btn-block btn-ripple mb-3">
+                                Get Started
+                            </a>
+                            <a href="{% url 'authentication:customer_login' %}" class="btn btn-ghost btn-block">
+                                Login
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-40 lg:hidden"></div>
+
+    <!-- Add spacing for fixed navbar -->
+    <div class="h-20"></div>
+
+    <!-- Alert Messages -->
     {% if messages %}
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        <div class="container mx-auto px-4 py-4">
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} bg-gaming-secondary border border-gaming-accent rounded-lg p-4 mb-4">
-                    {{ message }}
+                <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %} animate-fade-in-down">
+                    <div class="flex items-center gap-3">
+                        <i class="bi bi-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} text-xl"></i>
+                        <div class="flex-1">{{ message }}</div>
+                    </div>
                 </div>
             {% endfor %}
         </div>
     {% endif %}
 
     <!-- Main Content -->
-    <main class="flex-1 w-full">
+    <main class="flex-1">
         {% block content %}
         {% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gaming-secondary mt-auto border-t border-gaming-accent w-full">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <!-- Policy Links -->
-            <div class="flex flex-wrap justify-center items-center gap-6 mb-6">
-                <a href="{% url 'about' %}" class="text-gray-400 hover:text-gaming-highlight transition-colors duration-200 text-sm">About Us</a>
-                <span class="text-gray-600">•</span>
-                <a href="{% url 'contact' %}" class="text-gray-400 hover:text-gaming-highlight transition-colors duration-200 text-sm">Contact Us</a>
-                <span class="text-gray-600">•</span>
-                <a href="{% url 'privacy' %}" class="text-gray-400 hover:text-gaming-highlight transition-colors duration-200 text-sm">Privacy Policy</a>
-                <span class="text-gray-600">•</span>
-                <a href="{% url 'terms' %}" class="text-gray-400 hover:text-gaming-highlight transition-colors duration-200 text-sm">Terms & Conditions</a>
-                <span class="text-gray-600">•</span>
-                <a href="{% url 'refund_policy' %}" class="text-gray-400 hover:text-gaming-highlight transition-colors duration-200 text-sm">Refund Policy</a>
-                <span class="text-gray-600">•</span>
-                <a href="{% url 'shipping_policy' %}" class="text-gray-400 hover:text-gaming-highlight transition-colors duration-200 text-sm">Shipping Policy</a>
+    <!-- Modern Footer -->
+    <footer class="bg-dark-600 border-t border-white/10 mt-auto">
+        <div class="container mx-auto px-4 py-12">
+            <!-- Footer Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <!-- Brand Column -->
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        {% include 'components/logo.html' with variant='simple' size='sm' %}
+                        <span class="text-white text-lg font-bold font-gaming">TapNex<span class="gradient-text-neon">Arena</span></span>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4">
+                        Premium gaming cafe booking platform. Level up your gaming experience with state-of-the-art facilities.
+                    </p>
+                    <div class="flex gap-3">
+                        <a href="#" class="w-10 h-10 rounded-lg glass flex items-center justify-center text-gray-400 hover:text-white hover:bg-primary-600 transition-all">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-lg glass flex items-center justify-center text-gray-400 hover:text-white hover:bg-primary-600 transition-all">
+                            <i class="bi bi-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-lg glass flex items-center justify-center text-gray-400 hover:text-white hover:bg-primary-600 transition-all">
+                            <i class="bi bi-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-lg glass flex items-center justify-center text-gray-400 hover:text-white hover:bg-primary-600 transition-all">
+                            <i class="bi bi-discord"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="text-white font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'home' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Home</a></li>
+                        <li><a href="{% url 'about' %}" class="text-gray-400 hover:text-white transition-colors text-sm">About Us</a></li>
+                        <li><a href="{% url 'contact' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Contact</a></li>
+                        {% if not user.is_authenticated %}
+                        <li><a href="{% url 'authentication:customer_login' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Get Started</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <!-- Legal -->
+                <div>
+                    <h3 class="text-white font-semibold mb-4">Legal</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'privacy' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Privacy Policy</a></li>
+                        <li><a href="{% url 'terms' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Terms & Conditions</a></li>
+                        <li><a href="{% url 'refund_policy' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Refund Policy</a></li>
+                        <li><a href="{% url 'shipping_policy' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Shipping Policy</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div>
+                    <h3 class="text-white font-semibold mb-4">Contact Info</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start gap-2 text-gray-400 text-sm">
+                            <i class="bi bi-geo-alt text-primary-400 mt-0.5"></i>
+                            <span>123 Gaming Street, Tech City</span>
+                        </li>
+                        <li class="flex items-center gap-2 text-gray-400 text-sm">
+                            <i class="bi bi-envelope text-primary-400"></i>
+                            <a href="mailto:support@tapnex.com" class="hover:text-white transition-colors">support@tapnex.com</a>
+                        </li>
+                        <li class="flex items-center gap-2 text-gray-400 text-sm">
+                            <i class="bi bi-telephone text-primary-400"></i>
+                            <a href="tel:+1234567890" class="hover:text-white transition-colors">+1 (234) 567-890</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
 
-            <!-- Bottom Section -->
-            <div class="border-t border-gaming-accent pt-6">
+            <!-- Footer Bottom -->
+            <div class="border-t border-white/10 pt-8">
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                     <div class="flex flex-col md:flex-row items-center gap-3">
                         <p class="text-gray-400 text-sm text-center md:text-left">
-                            &copy; 2025 TapNex Technologies - Brand by NEXGEN FC
+                            &copy; 2025 TapNex Technologies. All rights reserved.
                         </p>
-                        <img src="{% static 'images/nexgen_logo.png' %}" alt="NEXGEN FC" class="h-8 object-contain">
+                        <div class="flex items-center gap-2">
+                            <span class="text-gray-500 text-xs">Powered by</span>
+                            <img src="{% static 'images/nexgen_logo.png' %}" alt="NEXGEN FC" class="h-6 object-contain opacity-75 hover:opacity-100 transition-opacity">
+                        </div>
                     </div>
-                    <a href="{% url 'authentication:cafe_owner_login' %}" class="text-gray-400 hover:text-gaming-highlight text-xs transition-colors duration-200">
-                        Staff Login
+                    <a href="{% url 'authentication:cafe_owner_login' %}" class="text-gray-400 hover:text-white text-xs transition-colors flex items-center gap-2">
+                        <i class="bi bi-shield-lock"></i>
+                        <span>Staff Login</span>
                     </a>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Mobile Menu JavaScript -->
+    <!-- JavaScript Files -->
+    <script src="{% static 'js/animations.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
+    
+    <!-- Core UI JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const mobileMenuButton = document.querySelector('.mobile-menu-button');
-            const mobileMenu = document.getElementById('mobile-menu');
-            const hamburgerIcon = mobileMenuButton.querySelector('svg:first-child');
-            const closeIcon = mobileMenuButton.querySelector('svg:last-child');
+            // ============================================
+            // MOBILE MENU
+            // ============================================
+            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+            const mobileMenuClose = document.querySelector('.mobile-menu-close');
+            const mobileMenu = document.querySelector('.mobile-menu');
+            const mobileMenuOverlay = document.querySelector('.mobile-menu-overlay');
 
-            if (mobileMenuButton) {
-                mobileMenuButton.addEventListener('click', function() {
-                    const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
-                    
-                    // Toggle menu visibility
-                    mobileMenu.classList.toggle('hidden');
-                    
-                    // Toggle icons
-                    hamburgerIcon.classList.toggle('hidden');
-                    closeIcon.classList.toggle('hidden');
-                    
-                    // Update aria-expanded
-                    mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
-                });
-
-                // Close mobile menu when clicking outside
-                document.addEventListener('click', function(event) {
-                    if (!mobileMenuButton.contains(event.target) && !mobileMenu.contains(event.target)) {
-                        mobileMenu.classList.add('hidden');
-                        hamburgerIcon.classList.remove('hidden');
-                        closeIcon.classList.add('hidden');
-                        mobileMenuButton.setAttribute('aria-expanded', 'false');
-                    }
-                });
-
-                // Close mobile menu on window resize to desktop size
-                window.addEventListener('resize', function() {
-                    if (window.innerWidth >= 768) {
-                        mobileMenu.classList.add('hidden');
-                        hamburgerIcon.classList.remove('hidden');
-                        closeIcon.classList.add('hidden');
-                        mobileMenuButton.setAttribute('aria-expanded', 'false');
-                    }
-                });
+            function openMobileMenu() {
+                mobileMenu.classList.remove('translate-x-full');
+                mobileMenuOverlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
             }
 
-            // Notifications System
+            function closeMobileMenu() {
+                mobileMenu.classList.add('translate-x-full');
+                mobileMenuOverlay.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', openMobileMenu);
+            }
+            
+            if (mobileMenuClose) {
+                mobileMenuClose.addEventListener('click', closeMobileMenu);
+            }
+            
+            if (mobileMenuOverlay) {
+                mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+            }
+
+            // Close on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !mobileMenu.classList.contains('translate-x-full')) {
+                    closeMobileMenu();
+                }
+            });
+
+            // ============================================
+            // NOTIFICATIONS SYSTEM
+            // ============================================
             const notificationsButton = document.getElementById('notifications-button');
             const notificationsDropdown = document.getElementById('notifications-dropdown');
             const notificationBadge = document.getElementById('notification-badge');
             const notificationsList = document.getElementById('notifications-list');
 
-            if (notificationsButton) {
-                // Toggle notifications dropdown
+            if (notificationsButton && notificationsDropdown) {
+                // Toggle dropdown
                 notificationsButton.addEventListener('click', function(e) {
                     e.stopPropagation();
                     notificationsDropdown.classList.toggle('hidden');
@@ -434,7 +413,7 @@
                     }
                 });
 
-                // Close dropdown when clicking outside
+                // Close when clicking outside
                 document.addEventListener('click', function(event) {
                     if (!notificationsButton.contains(event.target) && !notificationsDropdown.contains(event.target)) {
                         notificationsDropdown.classList.add('hidden');
@@ -444,16 +423,18 @@
                 // Load notifications on page load
                 loadNotifications();
                 
-                // Poll for new notifications every 60 seconds (optimized from 30s)
+                // Poll for new notifications every 60 seconds
                 setInterval(loadNotifications, 60000);
             }
 
             function loadNotifications() {
+                if (!notificationsList) return;
+                
                 fetch('/booking/api/notifications/')
                     .then(response => response.json())
                     .then(data => {
-                        updateNotificationBadge(data.unread_count);
-                        updateNotificationsList(data.notifications);
+                        updateNotificationBadge(data.unread_count || 0);
+                        updateNotificationsList(data.notifications || []);
                     })
                     .catch(error => {
                         console.error('Error loading notifications:', error);
@@ -461,6 +442,8 @@
             }
 
             function updateNotificationBadge(count) {
+                if (!notificationBadge) return;
+                
                 if (count > 0) {
                     notificationBadge.textContent = count > 99 ? '99+' : count;
                     notificationBadge.classList.remove('hidden');
@@ -470,13 +453,13 @@
             }
 
             function updateNotificationsList(notifications) {
+                if (!notificationsList) return;
+                
                 if (notifications.length === 0) {
                     notificationsList.innerHTML = `
-                        <div class="p-4 text-center text-gray-400">
-                            <svg class="w-8 h-8 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
-                            </svg>
-                            <p class="text-sm">No new notifications</p>
+                        <div class="p-8 text-center">
+                            <i class="bi bi-bell-slash text-4xl text-gray-500 mb-3"></i>
+                            <p class="text-gray-400 text-sm">No new notifications</p>
                         </div>
                     `;
                     return;
@@ -484,23 +467,30 @@
 
                 let html = '';
                 notifications.forEach(notification => {
-                    const typeColors = {
-                        'success': 'text-green-400',
-                        'warning': 'text-yellow-400',
-                        'error': 'text-red-400',
-                        'info': 'text-blue-400'
+                    const iconMap = {
+                        'success': 'check-circle-fill',
+                        'warning': 'exclamation-triangle-fill',
+                        'error': 'x-circle-fill',
+                        'info': 'info-circle-fill'
+                    };
+                    
+                    const colorMap = {
+                        'success': 'text-success',
+                        'warning': 'text-warning',
+                        'error': 'text-error',
+                        'info': 'text-info'
                     };
                     
                     const timeAgo = getTimeAgo(new Date(notification.created_at));
                     
                     html += `
-                        <div class="p-4 border-b border-gaming-accent hover:bg-white/5 cursor-pointer" onclick="markNotificationRead(${notification.id})">
-                            <div class="flex items-start space-x-3">
-                                <div class="w-2 h-2 ${typeColors[notification.type] || 'text-gray-400'} rounded-full mt-2 flex-shrink-0"></div>
+                        <div class="p-4 border-b border-white/10 hover:bg-white/5 cursor-pointer transition-colors" onclick="markNotificationRead(${notification.id})">
+                            <div class="flex items-start gap-3">
+                                <i class="bi bi-${iconMap[notification.type] || 'info-circle-fill'} ${colorMap[notification.type] || 'text-info'} text-lg flex-shrink-0 mt-0.5"></i>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-white font-medium text-sm">${notification.title}</p>
-                                    <p class="text-gray-300 text-xs mt-1">${notification.message}</p>
-                                    <p class="text-gray-400 text-xs mt-1">${timeAgo}</p>
+                                    <p class="text-white font-medium text-sm mb-1">${notification.title || 'Notification'}</p>
+                                    <p class="text-gray-300 text-xs mb-2">${notification.message}</p>
+                                    <p class="text-gray-500 text-xs">${timeAgo}</p>
                                 </div>
                             </div>
                         </div>
@@ -517,14 +507,18 @@
                 if (diffInSeconds < 60) return 'Just now';
                 if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
                 if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-                return `${Math.floor(diffInSeconds / 86400)}d ago`;
+                if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+                return date.toLocaleDateString();
             }
 
             window.markNotificationRead = function(notificationId) {
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
+                
                 fetch(`/booking/api/notifications/${notificationId}/read/`, {
                     method: 'POST',
                     headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value || '{{ csrf_token }}'
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json'
                     }
                 })
                 .then(response => response.json())
@@ -537,40 +531,35 @@
                     console.error('Error marking notification as read:', error);
                 });
             };
-        });
-    </script>
 
-    {% block extra_js %}{% endblock %}
-    
-    <!-- Modern UI JavaScript -->
-    <script src="{% static 'js/modern-ui.js' %}"></script>
-    
-    <!-- Loading Overlay Component -->
-    {% include 'components/loading_overlay.html' %}
-    
-    <!-- Preloader Script -->
-    <script>
-        // Hide preloader when page is fully loaded
-        window.addEventListener('load', function() {
-            const preloader = document.getElementById('preloader');
-            preloader.classList.add('fade-out');
-            
-            // Remove from DOM after fade animation
+            // ============================================
+            // PRELOADER
+            // ============================================
+            window.addEventListener('load', function() {
+                const preloader = document.getElementById('preloader');
+                if (preloader) {
+                    setTimeout(() => {
+                        preloader.classList.add('fade-out');
+                        setTimeout(() => {
+                            preloader.style.display = 'none';
+                        }, 500);
+                    }, 300);
+                }
+            });
+
+            // Fallback: Hide preloader after 3 seconds
             setTimeout(() => {
-                preloader.style.display = 'none';
-            }, 500);
+                const preloader = document.getElementById('preloader');
+                if (preloader && !preloader.classList.contains('fade-out')) {
+                    preloader.classList.add('fade-out');
+                    setTimeout(() => {
+                        preloader.style.display = 'none';
+                    }, 500);
+                }
+            }, 3000);
+
+            console.log('✨ TapNex Arena UI initialized');
         });
-        
-        // Fallback: Hide preloader after 3 seconds if load event doesn't fire
-        setTimeout(() => {
-            const preloader = document.getElementById('preloader');
-            if (preloader && !preloader.classList.contains('fade-out')) {
-                preloader.classList.add('fade-out');
-                setTimeout(() => {
-                    preloader.style.display = 'none';
-                }, 500);
-            }
-        }, 3000);
     </script>
 </body>
 </html>

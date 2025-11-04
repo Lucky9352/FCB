@@ -1,76 +1,424 @@
-{% load static %}
+{% load static %}{% load static %}{% load static %}
+
 <!DOCTYPE html>
-<html lang="en">
+
+<html lang="en" class="scroll-smooth"><!DOCTYPE html><!DOCTYPE html>
+
 <head>
-    <meta charset="UTF-8">
+
+    <meta charset="UTF-8"><html lang="en" class="scroll-smooth"><html lang="en">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - Page Not Found | TapNex</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+
+    <title>404 - Page Not Found | TapNex Arena</title><head><head>
+
+    
+
+    <link rel="stylesheet" href="{% static 'css/design-system-v2.css' %}">    <meta charset="UTF-8">    <meta charset="UTF-8">
+
+    <link rel="stylesheet" href="{% static 'css/animations.css' %}">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>    <title>404 - Page Not Found | TapNex Arena</title>    <title>404 - Page Not Found | TapNex</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+            <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+        <!-- Modern Design System -->    <style>
+
     <style>
-        .gaming-gradient {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+
+        body {    <link rel="stylesheet" href="{% static 'css/design-system-v2.css' %}">        .gaming-gradient {
+
+            min-height: 100vh;
+
+            display: flex;    <link rel="stylesheet" href="{% static 'css/animations.css' %}">            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+
+            align-items: center;
+
+            justify-content: center;            }
+
+            background: linear-gradient(135deg, #0d1320 0%, #111826 50%, #151d2c 100%);
+
+            position: relative;    <!-- Google Fonts -->        .float-animation {
+
+            overflow: hidden;
+
+        }    <link rel="preconnect" href="https://fonts.googleapis.com">            animation: float 3s ease-in-out infinite;
+
+        
+
+        .bg-pattern {    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>        }
+
+            position: absolute;
+
+            inset: 0;    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">        @keyframes float {
+
+            background-image: 
+
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),                0%, 100% { transform: translateY(0px); }
+
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+
+            background-size: 50px 50px;    <!-- Icons -->            50% { transform: translateY(-20px); }
+
+            animation: patternMove 20s linear infinite;
+
+        }    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">        }
+
+        
+
+        @keyframes patternMove {            .glow {
+
+            0% { transform: translate(0, 0); }
+
+            100% { transform: translate(50px, 50px); }    <style>            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+
         }
-        .float-animation {
-            animation: float 3s ease-in-out infinite;
+
+                body {        }
+
+        .error-code {
+
+            font-size: 10rem;            min-height: 100vh;    </style>
+
+            font-weight: 900;
+
+            font-family: 'Orbitron', sans-serif;            display: flex;</head>
+
+            background: linear-gradient(135deg, #667eea 0%, #a855f7 50%, #00f5ff 100%);
+
+            -webkit-background-clip: text;            align-items: center;<body class="gaming-gradient min-h-screen flex items-center justify-center p-4">
+
+            background-clip: text;
+
+            -webkit-text-fill-color: transparent;            justify-content: center;    <div class="text-center max-w-2xl mx-auto">
+
+            animation: glitch 2s infinite;
+
+            line-height: 1;            background: linear-gradient(135deg, var(--color-dark-500) 0%, var(--color-dark-600) 50%, var(--color-dark-700) 100%);        <!-- Animated 404 -->
+
         }
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
+
+                    position: relative;        <div class="float-animation mb-8">
+
+        @keyframes glitch {
+
+            0%, 100% { transform: translate(0); }            overflow: hidden;            <h1 class="text-9xl font-bold text-white mb-4" style="text-shadow: 0 0 30px rgba(102, 126, 234, 0.8);">
+
+            20% { transform: translate(-2px, 2px); }
+
+            40% { transform: translate(2px, -2px); }        }                404
+
+            60% { transform: translate(-2px, -2px); }
+
+            80% { transform: translate(2px, 2px); }                    </h1>
+
         }
-        .glow {
-            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+
+                .bg-pattern {            <div class="text-6xl mb-4">🎮</div>
+
+        .floating-icon {
+
+            position: absolute;            position: absolute;        </div>
+
+            font-size: 4rem;
+
+            opacity: 0.1;            inset: 0;        
+
+            animation: floatAnim 10s ease-in-out infinite;
+
+        }            background-image:         <!-- Error Message -->
+
+        
+
+        @keyframes floatAnim {                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),        <h2 class="text-3xl font-bold text-white mb-4">Game Not Found!</h2>
+
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+
+            50% { transform: translateY(-30px) rotate(10deg); }                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);        <p class="text-xl text-gray-300 mb-8">
+
+        }
+
+    </style>            background-size: 50px 50px;            Oops! The page you're looking for seems to have disconnected from the server.
+
+</head>
+
+<body>            animation: patternMove 20s linear infinite;        </p>
+
+    <div class="bg-pattern"></div>
+
+            }        
+
+    <i class="bi bi-controller floating-icon" style="top: 10%; left: 10%; animation-delay: 0s;"></i>
+
+    <i class="bi bi-joystick floating-icon" style="top: 20%; right: 15%; animation-delay: 2s;"></i>                <!-- Error Details -->
+
+    <i class="bi bi-trophy floating-icon" style="bottom: 15%; left: 15%; animation-delay: 4s;"></i>
+
+    <i class="bi bi-cpu floating-icon" style="bottom: 20%; right: 10%; animation-delay: 6s;"></i>        @keyframes patternMove {        <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 mb-8">
+
+    
+
+    <div style="position: relative; z-index: 10; text-align: center; max-width: 600px; padding: 2rem;">            0% { transform: translate(0, 0); }            <p class="text-gray-300 mb-2">
+
+        <div class="error-code" style="margin-bottom: 2rem;">404</div>
+
+                    100% { transform: translate(50px, 50px); }                <strong class="text-white">Error Code:</strong> 404 - Page Not Found
+
+        <div style="margin-bottom: 2rem;" class="animate-float">
+
+            <i class="bi bi-controller" style="font-size: 6rem; color: #4b5563;"></i>        }            </p>
+
+        </div>
+
+                            <p class="text-gray-300">
+
+        <h1 style="font-size: 2.25rem; font-weight: 700; color: white; margin-bottom: 1rem;">
+
+            Oops! Page Not Found        .error-container {                The page you requested could not be found on this server.
+
+        </h1>
+
+        <p style="font-size: 1.25rem; color: #9ca3af; margin-bottom: 2rem;">            position: relative;            </p>
+
+            Looks like this page took a wrong turn. Let's get you back to the game!
+
+        </p>            z-index: 10;        </div>
+
+        
+
+        <div class="glass-strong" style="border-radius: 1rem; padding: 1.5rem; margin-bottom: 2rem;">            text-align: center;        
+
+            <div style="display: flex; align-items: flex-start; gap: 0.75rem; text-align: left;">
+
+                <i class="bi bi-info-circle-fill" style="color: #3b82f6; font-size: 1.25rem; flex-shrink: 0; margin-top: 0.25rem;"></i>            max-width: 600px;        <!-- Action Buttons -->
+
+                <div>
+
+                    <p style="color: white; font-weight: 600; margin-bottom: 0.5rem;">What happened?</p>            padding: 2rem;        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+
+                    <p style="color: #9ca3af; font-size: 0.875rem;">
+
+                        The page you're looking for doesn't exist or may have been moved.         }            <a href="{% url 'home' %}" 
+
+                        This could happen if you followed an old link or mistyped the URL.
+
+                    </p>                       class="glow inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-200">
+
+                </div>
+
+            </div>        .error-code {                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+        </div>
+
+                    font-size: 10rem;                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+
+        <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
+
+            <a href="{% url 'home' %}" class="btn btn-primary btn-lg btn-ripple hover-glow">            font-weight: 900;                </svg>
+
+                <i class="bi bi-house-fill"></i>
+
+                Back to Home            font-family: var(--font-gaming);                Back to Home
+
+                <i class="bi bi-arrow-right" style="margin-left: 0.5rem;"></i>
+
+            </a>            background: linear-gradient(135deg, var(--color-primary-400) 0%, var(--color-secondary-400) 50%, var(--color-neon-cyan) 100%);            </a>
+
+            
+
+            <button onclick="history.back()" class="btn btn-secondary btn-lg">            -webkit-background-clip: text;            
+
+                <i class="bi bi-arrow-left"></i>
+
+                Go Back            background-clip: text;            <button onclick="history.back()" 
+
+            </button>
+
+        </div>            -webkit-text-fill-color: transparent;                    class="inline-flex items-center justify-center px-8 py-3 bg-white/10 backdrop-blur-sm text-white border border-white/30 rounded-lg font-semibold hover:bg-white/20 transition-all duration-200">
+
+        
+
+        <div>            text-shadow: 0 0 80px rgba(102, 126, 234, 0.5);                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+            <p style="color: #6b7280; font-size: 0.875rem; margin-bottom: 1rem;">Looking for something specific?</p>
+
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; font-size: 0.875rem;">            animation: glitchAnimation 2s infinite;                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+
+                <a href="{% url 'home' %}#features" style="color: #9ca3af;">
+
+                    <i class="bi bi-star"></i> Features            line-height: 1;                </svg>
+
+                </a>
+
+                <a href="{% url 'contact' %}" style="color: #9ca3af;">            margin-bottom: 2rem;                Go Back
+
+                    <i class="bi bi-envelope"></i> Contact
+
+                </a>        }            </button>
+
+                <a href="{% url 'about' %}" style="color: #9ca3af;">
+
+                    <i class="bi bi-info-circle"></i> About                </div>
+
+                </a>
+
+            </div>        @keyframes glitchAnimation {        
+
+        </div>
+
+    </div>            0%, 100% {        <!-- Help Text -->
+
+    
+
+    <script src="{% static 'js/animations.js' %}"></script>                transform: translate(0);        <div class="mt-12 text-gray-400 text-sm">
+
+</body>
+
+</html>            }            <p>If you believe this is an error, please contact our support team.</p>
+
+
+            20% {        </div>
+
+                transform: translate(-2px, 2px);    </div>
+
+            }</body>
+
+            40% {</html>
+
+                transform: translate(2px, -2px);
+            }
+            60% {
+                transform: translate(-2px, -2px);
+            }
+            80% {
+                transform: translate(2px, 2px);
+            }
+        }
+        
+        .floating-icons {
+            position: absolute;
+            font-size: 4rem;
+            opacity: 0.1;
+            animation: floatIcon 10s ease-in-out infinite;
+        }
+        
+        .icon-1 {
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .icon-2 {
+            top: 20%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+        
+        .icon-3 {
+            bottom: 15%;
+            left: 15%;
+            animation-delay: 4s;
+        }
+        
+        .icon-4 {
+            bottom: 20%;
+            right: 10%;
+            animation-delay: 6s;
+        }
+        
+        @keyframes floatIcon {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-30px) rotate(10deg);
+            }
         }
     </style>
 </head>
-<body class="gaming-gradient min-h-screen flex items-center justify-center p-4">
-    <div class="text-center max-w-2xl mx-auto">
-        <!-- Animated 404 -->
-        <div class="float-animation mb-8">
-            <h1 class="text-9xl font-bold text-white mb-4" style="text-shadow: 0 0 30px rgba(102, 126, 234, 0.8);">
-                404
-            </h1>
-            <div class="text-6xl mb-4">🎮</div>
+<body>
+    <!-- Background Pattern -->
+    <div class="bg-pattern"></div>
+    
+    <!-- Floating Icons -->
+    <i class="bi bi-controller floating-icons icon-1 text-primary-600"></i>
+    <i class="bi bi-joystick floating-icons icon-2 text-secondary-600"></i>
+    <i class="bi bi-trophy floating-icons icon-3 text-warning"></i>
+    <i class="bi bi-cpu floating-icons icon-4 text-info"></i>
+    
+    <!-- Error Content -->
+    <div class="error-container">
+        <!-- Error Code -->
+        <div class="error-code animate-scale-in">
+            404
+        </div>
+        
+        <!-- Game Controller Icon -->
+        <div class="mb-8 animate-float">
+            <i class="bi bi-controller text-8xl text-gray-600"></i>
         </div>
         
         <!-- Error Message -->
-        <h2 class="text-3xl font-bold text-white mb-4">Game Not Found!</h2>
-        <p class="text-xl text-gray-300 mb-8">
-            Oops! The page you're looking for seems to have disconnected from the server.
+        <h1 class="text-4xl font-bold text-white mb-4 animate-fade-in-up">
+            Oops! Page Not Found
+        </h1>
+        <p class="text-xl text-gray-400 mb-8 animate-fade-in-up" style="animation-delay: 0.1s;">
+            Looks like this page took a wrong turn. Let's get you back to the game!
         </p>
         
-        <!-- Error Details -->
-        <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 mb-8">
-            <p class="text-gray-300 mb-2">
-                <strong class="text-white">Error Code:</strong> 404 - Page Not Found
-            </p>
-            <p class="text-gray-300">
-                The page you requested could not be found on this server.
-            </p>
+        <!-- Error Details Card -->
+        <div class="glass-strong rounded-2xl p-6 mb-8 animate-fade-in-up" style="animation-delay: 0.2s;">
+            <div class="flex items-start gap-3 text-left">
+                <i class="bi bi-info-circle-fill text-info text-xl flex-shrink-0 mt-1"></i>
+                <div>
+                    <p class="text-white font-semibold mb-2">What happened?</p>
+                    <p class="text-gray-400 text-sm">
+                        The page you're looking for doesn't exist or may have been moved. 
+                        This could happen if you followed an old link or mistyped the URL.
+                    </p>
+                </div>
+            </div>
         </div>
         
         <!-- Action Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="{% url 'home' %}" 
-               class="glow inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-200">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                </svg>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8 animate-fade-in-up" style="animation-delay: 0.3s;">
+            <a href="{% url 'home' %}" class="btn btn-primary btn-lg btn-ripple hover-glow">
+                <i class="bi bi-house-fill"></i>
                 Back to Home
+                <i class="bi bi-arrow-right ml-2"></i>
             </a>
             
-            <button onclick="history.back()" 
-                    class="inline-flex items-center justify-center px-8 py-3 bg-white/10 backdrop-blur-sm text-white border border-white/30 rounded-lg font-semibold hover:bg-white/20 transition-all duration-200">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                </svg>
+            <button onclick="history.back()" class="btn btn-secondary btn-lg">
+                <i class="bi bi-arrow-left"></i>
                 Go Back
             </button>
         </div>
         
-        <!-- Help Text -->
-        <div class="mt-12 text-gray-400 text-sm">
-            <p>If you believe this is an error, please contact our support team.</p>
+        <!-- Help Links -->
+        <div class="animate-fade-in" style="animation-delay: 0.4s;">
+            <p class="text-gray-500 text-sm mb-4">Looking for something specific?</p>
+            <div class="flex flex-wrap justify-center gap-4 text-sm">
+                <a href="{% url 'home' %}#features" class="text-gray-400 hover:text-primary-400 transition-colors flex items-center gap-1">
+                    <i class="bi bi-star"></i> Features
+                </a>
+                <a href="{% url 'contact' %}" class="text-gray-400 hover:text-primary-400 transition-colors flex items-center gap-1">
+                    <i class="bi bi-envelope"></i> Contact
+                </a>
+                <a href="{% url 'about' %}" class="text-gray-400 hover:text-primary-400 transition-colors flex items-center gap-1">
+                    <i class="bi bi-info-circle"></i> About
+                </a>
+            </div>
         </div>
     </div>
+    
+    <script src="{% static 'js/animations.js' %}"></script>
 </body>
 </html>
