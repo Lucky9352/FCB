@@ -653,6 +653,9 @@ function confirmSpotSelection() {
 
 // Book a slot
 function bookSlot(slotId, bookingType, spotsRequested) {
+    console.log('🎯 BOOKSLOT CLICKED!', { slotId, bookingType, spotsRequested });
+    alert('Button clicked! SlotID: ' + slotId);
+    
     // Comprehensive validation before making request
     if (!slotId) {
         console.error('bookSlot called without slotId');

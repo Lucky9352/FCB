@@ -83,8 +83,8 @@ FGC/
 
 2. **Create virtual environment**
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   python -m venv .venv
+   .venv\Scripts\activate
    ```
 
 3. **Install Python dependencies**
@@ -106,11 +106,15 @@ FGC/
 6. **Build CSS**
    ```bash
    npm run build-css
+   npm run build-css-prod
    ```
 
 7. **Run migrations**
    ```bash
    python manage.py migrate
+   python manage.py makemigrations
+   python manage.py collectstatic
+
    ```
 
 8. **Create test users (development only)**
