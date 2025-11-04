@@ -6,11 +6,22 @@
     <title>{% block title %}TapNex Arena - Gaming Cafe Booking Platform{% endblock %}</title>
     
     {% load static %}
-    <!-- TapNex Arena Design System -->
+    
+    <!-- Modern Design System 2.0 -->
+    <link rel="stylesheet" href="{% static 'css/modern-design-tokens.css' %}">
+    <link rel="stylesheet" href="{% static 'css/modern-components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/modern-navigation.css' %}">
+    
+    <!-- TapNex Arena Design System (Legacy Support) -->
     <link rel="stylesheet" href="{% static 'css/design-system.css' %}">
     
-    <!-- Fallback to existing styles -->
+    <!-- Tailwind Output -->
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
+    
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <!-- Bootstrap Icons (Legacy Support) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -530,6 +541,9 @@
     </script>
 
     {% block extra_js %}{% endblock %}
+    
+    <!-- Modern UI JavaScript -->
+    <script src="{% static 'js/modern-ui.js' %}"></script>
     
     <!-- Loading Overlay Component -->
     {% include 'components/loading_overlay.html' %}
