@@ -421,7 +421,6 @@ class BookingModal {
         .catch(error => {
             this.setButtonLoading(confirmButton, false);
             this.showError('Booking failed due to a network error. Please check your connection and try again.');
-            console.error('Booking error:', error);
         });
     }
     
@@ -519,7 +518,6 @@ function selectBookingOption(slotId, bookingType, availableSpots) {
             }
         })
         .catch(error => {
-            console.error('Error:', error);
             alert('Error loading slot details');
         });
 }

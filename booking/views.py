@@ -239,25 +239,53 @@ def my_bookings(request):
         if start_dt <= now <= end_dt and booking.status == 'IN_PROGRESS':
             if not current:  # Take the first one
                 current = booking
-        # Check for upcoming
-        elif start_dt > now and booking.status in ['CONFIRMED', 'PENDING']:
+        # Check for upcoming (any status, as long as it's in the future)
+        elif start_dt > now:
             upcoming.append(booking)
-        # Past bookings
-        elif end_dt < now or booking.status in ['COMPLETED', 'CANCELLED', 'NO_SHOW']:
+        # Past bookings (end time has passed)
+        elif end_dt < now:
             past.append(booking)
     
     # Sort lists
     upcoming.sort(key=lambda b: b.start_datetime)
     past.sort(key=lambda b: b.start_datetime, reverse=True)
     
+    # Get all bookings for "All" tab
+    all_bookings = list(bookings)
+    
     context = {
+        'bookings': all_bookings,  # For "All Bookings" tab
         'upcoming_bookings': upcoming,
         'current_booking': current,
         'past_bookings': past,
         'status_filter': status_filter,
+        'now': now,  # For template comparisons
     }
     
     return render(request, 'booking/my_bookings.html', context)
+
+
+@customer_required
+def booking_details(request, booking_id):
+    """View booking details for any confirmed/completed booking"""
+    booking = get_object_or_404(
+        Booking, 
+        id=booking_id, 
+        customer=request.user.customer_profile
+    )
+    
+    # Redirect to confirmation page if still pending
+    if booking.status == 'PENDING':
+        return redirect('booking:hybrid_booking_confirm', booking_id=booking_id)
+    
+    context = {
+        'booking': booking,
+        'is_hybrid': booking.game.booking_type == 'HYBRID',
+        'is_private': booking.booking_type == 'PRIVATE',
+        'is_shared': booking.booking_type == 'SHARED',
+    }
+    
+    return render(request, 'booking/booking_details.html', context)
 
 
 @customer_required

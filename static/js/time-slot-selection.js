@@ -18,7 +18,6 @@ class TimeSlotSelection {
     
     init() {
         if (!this.container) {
-            console.error('Time slot container not found');
             return;
         }
         
@@ -272,7 +271,7 @@ class TimeSlotSelection {
                 }
             })
             .catch(error => {
-                console.warn('Failed to load availability data:', error);
+                // Silently handle availability loading errors
             });
     }
     
@@ -316,7 +315,6 @@ class TimeSlotSelection {
                 }
             })
             .catch(error => {
-                console.error('Error loading time slots:', error);
                 this.showEmptyState('Error loading time slots');
             });
     }
@@ -479,7 +477,7 @@ class TimeSlotSelection {
                 }
             })
             .catch(error => {
-                console.warn('Failed to update availability:', error);
+                // Silently handle availability update errors
             });
     }
     

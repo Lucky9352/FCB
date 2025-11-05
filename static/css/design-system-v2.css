@@ -205,13 +205,7 @@
 /* ============================================
    GLOBAL RESET & BASE STYLES
    ============================================ */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* Removed problematic box-sizing and padding reset that was causing layout issues */
 
 html {
   font-size: 16px;
@@ -225,8 +219,8 @@ body {
   font-size: var(--text-base);
   font-weight: var(--font-normal);
   line-height: var(--leading-normal);
-  color: var(--color-gray-900);
-  background-color: var(--color-dark-500);
+  color: var(--color-gray-100);
+  background-color: #111827;
   overflow-x: hidden;
 }
 
@@ -971,11 +965,22 @@ a:hover {
   align-items: center;
   justify-content: center;
   transition: opacity 0.5s ease-out;
+  /* Auto-hide after page load */
+  animation: hidePreloader 0.5s ease-out 1s forwards;
+}
+
+@keyframes hidePreloader {
+  to {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
 }
 
 #preloader.fade-out {
   opacity: 0;
   pointer-events: none;
+  visibility: hidden;
 }
 
 .preloader-content {

@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{% block description %}Premium gaming cafe booking platform with state-of-the-art gaming stations, competitive pricing, and seamless booking experience.{% endblock %}">
-    <meta name="keywords" content="gaming cafe, esports, gaming stations, book gaming pc, competitive gaming">
+    <meta name="description" content="{% block description %}TapNex Arena - Professional 8-ball pool and table tennis venue. Book your session online with TapNex platform. Powered by NexGen FC.{% endblock %}">
+    <meta name="keywords" content="tapnex arena, pool table booking, table tennis, 8-ball pool, sports venue, table booking, tapnex">
     <meta name="author" content="TapNex Arena">
-    <title>{% block title %}TapNex Arena - Premium Gaming Cafe Booking Platform{% endblock %}</title>
+    <title>{% block title %}TapNex Arena - Book Pool & Table Tennis Tables{% endblock %}</title>
     
     {% load static %}
     
     <!-- Modern Design System v2.0 -->
     <link rel="stylesheet" href="{% static 'css/design-system-v2.css' %}">
     <link rel="stylesheet" href="{% static 'css/animations.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forge-custom.css' %}">
     
     <!-- Tailwind Output -->
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
@@ -26,63 +27,203 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
-    <link rel="apple-touch-icon" href="{% static 'images/logo.png' %}">
+    <link rel="icon" type="image/png" href="{% static 'images/tapnex_logo.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/tapnex_logo.png' %}">
     
     <!-- Theme Color -->
-    <meta name="theme-color" content="#667eea">
+    <meta name="theme-color" content="#111827">
+    
+    <!-- Preloader Styles -->
+    <style>
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .spinner-ring {
+            animation: spin 1s linear infinite;
+        }
+        
+        .spinner-pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        /* Header fixes */
+        .navbar {
+            display: block !important;
+            visibility: visible !important;
+            background: rgba(13, 19, 32, 0.98) !important;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .navbar .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Logo and brand styling */
+        .navbar .logo-text {
+            color: white !important;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-left: 0.75rem;
+        }
+        
+        .navbar .logo-text .gradient-part {
+            background: linear-gradient(135deg, #e94560, #00d4aa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Navigation links styling - clean and minimal */
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        
+        .nav-link:hover {
+            color: white !important;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .nav-link i {
+            display: none; /* Hide icons for cleaner look like the reference */
+        }
+        
+        /* Sign In button styling - exactly like the reference */
+        .btn-sign-in {
+            background: #4f46e5 !important;
+            color: white !important;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+        
+        .btn-sign-in:hover {
+            background: #4338ca !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+        }
+        
+        .btn-get-started {
+            background: linear-gradient(135deg, #e94560, #00d4aa) !important;
+            color: white !important;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+        
+        .btn-get-started:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(233, 69, 96, 0.4);
+        }
+        
+        /* Hide other button classes */
+        .btn-ghost {
+            display: none !important;
+        }
+        
+        /* Force navigation visibility */
+        .navbar .hidden.lg\\:flex {
+            display: flex !important;
+        }
+        
+        @media (min-width: 1024px) {
+            .navbar .hidden.lg\\:flex {
+                display: flex !important;
+                visibility: visible !important;
+            }
+        }
+        
+        /* Better spacing for navigation container */
+        .navbar .flex.justify-between {
+            min-height: 4rem;
+        }
+        
+        /* Navigation gap */
+        .nav-items {
+            gap: 2rem !important;
+        }
+    </style>
+    </style>
     
     {% block extra_css %}{% endblock %}
 </head>
 <body class="min-h-screen flex flex-col">
     
     <!-- Page Preloader -->
-    <div id="preloader">
-        <div class="preloader-content">
-            <div class="preloader-logo">
-                {% include 'components/logo.html' with variant='full' size='xl' animated=True %}
+    <div id="preloader" class="fixed inset-0 flex items-center justify-center z-[9999] transition-opacity duration-500" style="background: rgba(13, 19, 32, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+        <div class="text-center">
+            <!-- Simple Circular Spinner -->
+            <div class="relative w-16 h-16 mx-auto mb-4">
+                <div class="absolute inset-0 border-4 border-gray-700/30 rounded-full"></div>
+                <div class="spinner-ring absolute inset-0 rounded-full" style="border: 4px solid transparent; border-top-color: #e94560;"></div>
             </div>
-            <div class="spinner"></div>
-            <div class="text-white text-xl font-semibold mt-6">
-                TapNex<span class="dots-loading"><span>.</span><span>.</span><span>.</span></span>
-            </div>
-            <p class="text-gray-400 text-sm mt-2">Loading your gaming experience</p>
         </div>
     </div>
     
     <!-- Modern Navigation -->
-    <nav class="navbar fixed top-0 left-0 right-0 z-50 bg-dark-500/80 backdrop-filter backdrop-blur-lg border-b border-white/10 transition-all duration-300">
-        <div class="container mx-auto">
-            <div class="flex justify-between items-center h-20">
+    <nav class="navbar fixed top-0 left-0 right-0 z-50 backdrop-filter backdrop-blur-lg transition-all duration-300">
+        <div class="container mx-auto px-6">
+            <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
-                <div class="flex items-center gap-3">
-                    <a href="{% url 'home' %}" class="flex items-center gap-2 group">
-                        {% include 'components/logo.html' with variant='simple' size='md' %}
-                        <span class="text-white text-xl font-bold font-gaming hidden sm:block group-hover:text-primary-400 transition-colors">
-                            TapNex<span class="gradient-text-neon">Arena</span>
+                <div class="flex items-center">
+                    <a href="{% url 'home' %}" class="flex items-center group">
+                        <img src="{% static 'images/tapnex_logo.png' %}" alt="TapNex Arena" class="h-8 w-auto" onerror="this.src='{% static 'images/logos/tn-logo.svg' %}'">
+                        <span class="logo-text">
+                            TapNex<span class="gradient-part">Arena</span>
                         </span>
                     </a>
                 </div>
                 
                 <!-- Desktop Navigation -->
-                <div class="hidden lg:flex items-center gap-8">
+                <div class="hidden lg:flex items-center nav-items" style="display: flex !important; visibility: visible !important;">
                     {% if user.is_authenticated %}
                         {% if user.is_superuser %}
-                            <a href="{% url 'authentication:tapnex_dashboard' %}" class="text-gray-300 hover:text-white transition-colors">
-                                <i class="bi bi-speedometer2 mr-2"></i>Dashboard
+                            <a href="{% url 'authentication:tapnex_dashboard' %}" class="nav-link">
+                                Dashboard
                             </a>
                         {% elif user.customer %}
-                            <a href="{% url 'authentication:customer_dashboard' %}" class="text-gray-300 hover:text-white transition-colors">
-                                <i class="bi bi-grid-fill mr-2"></i>Dashboard
+                            <a href="{% url 'authentication:customer_dashboard' %}" class="nav-link">
+                                Dashboard
                             </a>
-                            <a href="{% url 'booking:game_selection' %}" class="text-gray-300 hover:text-white transition-colors">
-                                <i class="bi bi-controller mr-2"></i>Book Games
+                            <a href="{% url 'booking:game_selection' %}" class="nav-link">
+                                Book Tables
                             </a>
-                            <a href="{% url 'booking:my_bookings' %}" class="text-gray-300 hover:text-white transition-colors">
-                                <i class="bi bi-calendar-check mr-2"></i>My Bookings
+                            <a href="{% url 'booking:my_bookings' %}" class="nav-link">
+                                My Bookings
                             </a>
                         {% elif user.cafeowner %}
-                            <a href="{% url 'authentication:cafe_owner_dashboard' %}" class="text-gray-300 hover:text-white transition-colors">
+                            <a href="{% url 'authentication:cafe_owner_dashboard' %}" class="nav-link">
                                 Dashboard
                             </a>
                         {% endif %}
@@ -130,15 +271,25 @@
                             </a>
                         </div>
                     {% else %}
-                        <a href="{% url 'home' %}#features" class="text-gray-300 hover:text-white transition-colors">Features</a>
-                        <a href="{% url 'contact' %}" class="text-gray-300 hover:text-white transition-colors">Contact</a>
-                        <a href="{% url 'authentication:customer_login' %}" class="btn btn-ghost btn-sm">Login</a>
-                        <a href="{% url 'authentication:customer_login' %}" class="btn btn-primary btn-sm btn-ripple">Get Started</a>
+                        <a href="{% url 'home' %}" class="nav-link">
+                            Home
+                        </a>
+                        <a href="{% url 'about' %}" class="nav-link">
+                            About
+                        </a>
+                        <a href="{% url 'contact' %}" class="nav-link">
+                            Contact
+                        </a>
+                        
+                        <a href="{% url 'authentication:customer_login' %}" class="btn-sign-in">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            Sign In
+                        </a>
                     {% endif %}
                 </div>
 
                 <!-- Mobile Menu Toggle -->
-                <button class="lg:hidden mobile-menu-toggle text-white text-2xl">
+                <button class="lg:hidden mobile-menu-toggle text-white text-xl hover:text-gray-300 transition-colors p-2">
                     <i class="bi bi-list"></i>
                 </button>
             </div>
@@ -187,7 +338,7 @@
                                 <i class="bi bi-grid-fill"></i>Dashboard
                             </a>
                             <a href="{% url 'booking:game_selection' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
-                                <i class="bi bi-controller"></i>Book Games
+                                <i class="bi bi-calendar-check"></i>Book Tables
                             </a>
                             <a href="{% url 'booking:my_bookings' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
                                 <i class="bi bi-calendar-check"></i>My Bookings
@@ -205,20 +356,28 @@
                 {% else %}
                     <div class="space-y-2">
                         <a href="{% url 'home' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
-                            <i class="bi bi-house"></i>Home
+                            <i class="bi bi-house-door"></i>Home
+                        </a>
+                        <a href="{% url 'booking:game_selection' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
+                            <i class="bi bi-grid-3x3-gap"></i>Book Tables
                         </a>
                         <a href="{% url 'home' %}#features" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
                             <i class="bi bi-star"></i>Features
                         </a>
+                        <a href="{% url 'about' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
+                            <i class="bi bi-info-circle"></i>About
+                        </a>
                         <a href="{% url 'contact' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
                             <i class="bi bi-envelope"></i>Contact
                         </a>
-                        <div class="pt-4 border-t border-white/10">
-                            <a href="{% url 'authentication:customer_login' %}" class="btn btn-primary btn-block btn-ripple mb-3">
+                        <div class="pt-4 border-t border-white/10 space-y-3">
+                            <a href="{% url 'authentication:customer_login' %}" class="btn btn-primary btn-block btn-ripple">
+                                <i class="bi bi-rocket-takeoff"></i>
                                 Get Started
                             </a>
                             <a href="{% url 'authentication:customer_login' %}" class="btn btn-ghost btn-block">
-                                Login
+                                <i class="bi bi-box-arrow-in-right"></i>
+                                Sign In
                             </a>
                         </div>
                     </div>
@@ -231,7 +390,7 @@
     <div class="mobile-menu-overlay fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-40 lg:hidden"></div>
 
     <!-- Add spacing for fixed navbar -->
-    <div class="h-20"></div>
+    <div class="h-16"></div>
 
     <!-- Alert Messages -->
     {% if messages %}
@@ -261,11 +420,11 @@
                 <!-- Brand Column -->
                 <div>
                     <div class="flex items-center gap-2 mb-4">
-                        {% include 'components/logo.html' with variant='simple' size='sm' %}
+                        <img src="{% static 'images/tapnex_logo.png' %}" alt="TapNex Arena" class="h-8 w-auto" onerror="this.src='{% static 'images/logos/tn-logo.svg' %}'">
                         <span class="text-white text-lg font-bold font-gaming">TapNex<span class="gradient-text-neon">Arena</span></span>
                     </div>
                     <p class="text-gray-400 text-sm mb-4">
-                        Premium gaming cafe booking platform. Level up your gaming experience with state-of-the-art facilities.
+                        Professional 8-ball pool and table tennis venue. Book your perfect gaming session with our seamless platform powered by TapNex.
                     </p>
                     <div class="flex gap-3">
                         <a href="#" class="w-10 h-10 rounded-lg glass flex items-center justify-center text-gray-400 hover:text-white hover:bg-primary-600 transition-all">
@@ -313,11 +472,11 @@
                     <ul class="space-y-3">
                         <li class="flex items-start gap-2 text-gray-400 text-sm">
                             <i class="bi bi-geo-alt text-primary-400 mt-0.5"></i>
-                            <span>123 Gaming Street, Tech City</span>
+                            <span>TapNex Arena<br>Your Location Here</span>
                         </li>
                         <li class="flex items-center gap-2 text-gray-400 text-sm">
                             <i class="bi bi-envelope text-primary-400"></i>
-                            <a href="mailto:support@tapnex.com" class="hover:text-white transition-colors">support@tapnex.com</a>
+                            <a href="mailto:hello@tapnexarena.com" class="hover:text-white transition-colors">hello@tapnexarena.com</a>
                         </li>
                         <li class="flex items-center gap-2 text-gray-400 text-sm">
                             <i class="bi bi-telephone text-primary-400"></i>
@@ -332,11 +491,22 @@
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                     <div class="flex flex-col md:flex-row items-center gap-3">
                         <p class="text-gray-400 text-sm text-center md:text-left">
-                            &copy; 2025 TapNex Technologies. All rights reserved.
+                            &copy; 2025 TapNex Arena. All rights reserved.
                         </p>
-                        <div class="flex items-center gap-2">
-                            <span class="text-gray-500 text-xs">Powered by</span>
-                            <img src="{% static 'images/nexgen_logo.png' %}" alt="NEXGEN FC" class="h-6 object-contain opacity-75 hover:opacity-100 transition-opacity">
+                        <div class="flex items-center gap-3 text-xs text-gray-500">
+                            <span>•</span>
+                            <div class="flex items-center gap-1.5">
+                                <span>Powered by</span>
+                                <img src="{% static 'images/tapnex_logo.png' %}" alt="TapNex" class="h-4 w-auto opacity-75 hover:opacity-100 transition-opacity" onerror="this.style.display='none'">
+                                <span class="text-primary-400">TapNex</span>
+                            </div>
+                            <span>•</span>
+                            <div class="flex items-center gap-1.5">
+                                <span>A</span>
+                                <img src="{% static 'images/nexgen_logo.png' %}" alt="NexGen FC" class="h-5 w-auto opacity-75 hover:opacity-100 transition-opacity" onerror="this.style.display='none'">
+                                <span class="text-secondary-400">NexGen FC</span>
+                                <span>venture</span>
+                            </div>
                         </div>
                     </div>
                     <a href="{% url 'authentication:cafe_owner_login' %}" class="text-gray-400 hover:text-white text-xs transition-colors flex items-center gap-2">
@@ -349,6 +519,9 @@
     </footer>
 
     <!-- JavaScript Files -->
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    
     <script src="{% static 'js/animations.js' %}"></script>
     
     {% block extra_js %}{% endblock %}
@@ -437,7 +610,7 @@
                         updateNotificationsList(data.notifications || []);
                     })
                     .catch(error => {
-                        console.error('Error loading notifications:', error);
+                        // Error loading notifications
                     });
             }
 
@@ -456,12 +629,10 @@
                 if (!notificationsList) return;
                 
                 if (notifications.length === 0) {
-                    notificationsList.innerHTML = `
-                        <div class="p-8 text-center">
-                            <i class="bi bi-bell-slash text-4xl text-gray-500 mb-3"></i>
-                            <p class="text-gray-400 text-sm">No new notifications</p>
-                        </div>
-                    `;
+                    notificationsList.innerHTML = '<div class="p-8 text-center">' +
+                        '<i class="bi bi-bell-slash text-4xl text-gray-500 mb-3"></i>' +
+                        '<p class="text-gray-400 text-sm">No new notifications</p>' +
+                        '</div>';
                     return;
                 }
 
@@ -483,18 +654,16 @@
                     
                     const timeAgo = getTimeAgo(new Date(notification.created_at));
                     
-                    html += `
-                        <div class="p-4 border-b border-white/10 hover:bg-white/5 cursor-pointer transition-colors" onclick="markNotificationRead(${notification.id})">
-                            <div class="flex items-start gap-3">
-                                <i class="bi bi-${iconMap[notification.type] || 'info-circle-fill'} ${colorMap[notification.type] || 'text-info'} text-lg flex-shrink-0 mt-0.5"></i>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-white font-medium text-sm mb-1">${notification.title || 'Notification'}</p>
-                                    <p class="text-gray-300 text-xs mb-2">${notification.message}</p>
-                                    <p class="text-gray-500 text-xs">${timeAgo}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
+                    html += '<div class="p-4 border-b border-white/10 hover:bg-white/5 cursor-pointer transition-colors" onclick="markNotificationRead(' + notification.id + ')">';
+                    html += '<div class="flex items-start gap-3">';
+                    html += '<i class="bi bi-' + (iconMap[notification.type] || 'info-circle-fill') + ' ' + (colorMap[notification.type] || 'text-info') + ' text-lg flex-shrink-0 mt-0.5"></i>';
+                    html += '<div class="flex-1 min-w-0">';
+                    html += '<p class="text-white font-medium text-sm mb-1">' + (notification.title || 'Notification') + '</p>';
+                    html += '<p class="text-gray-300 text-xs mb-2">' + notification.message + '</p>';
+                    html += '<p class="text-gray-500 text-xs">' + timeAgo + '</p>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</div>';
                 });
 
                 notificationsList.innerHTML = html;
@@ -505,16 +674,16 @@
                 const diffInSeconds = Math.floor((now - date) / 1000);
                 
                 if (diffInSeconds < 60) return 'Just now';
-                if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-                if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-                if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+                if (diffInSeconds < 3600) return Math.floor(diffInSeconds / 60) + 'm ago';
+                if (diffInSeconds < 86400) return Math.floor(diffInSeconds / 3600) + 'h ago';
+                if (diffInSeconds < 604800) return Math.floor(diffInSeconds / 86400) + 'd ago';
                 return date.toLocaleDateString();
             }
 
             window.markNotificationRead = function(notificationId) {
                 const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
                 
-                fetch(`/booking/api/notifications/${notificationId}/read/`, {
+                fetch('/booking/api/notifications/' + notificationId + '/read/', {
                     method: 'POST',
                     headers: {
                         'X-CSRFToken': csrfToken,
@@ -528,7 +697,7 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error marking notification as read:', error);
+                    // Error marking notification as read
                 });
             };
 
@@ -539,7 +708,7 @@
                 const preloader = document.getElementById('preloader');
                 if (preloader) {
                     setTimeout(() => {
-                        preloader.classList.add('fade-out');
+                        preloader.style.opacity = '0';
                         setTimeout(() => {
                             preloader.style.display = 'none';
                         }, 500);
@@ -550,15 +719,13 @@
             // Fallback: Hide preloader after 3 seconds
             setTimeout(() => {
                 const preloader = document.getElementById('preloader');
-                if (preloader && !preloader.classList.contains('fade-out')) {
-                    preloader.classList.add('fade-out');
+                if (preloader && preloader.style.display !== 'none') {
+                    preloader.style.opacity = '0';
                     setTimeout(() => {
                         preloader.style.display = 'none';
                     }, 500);
                 }
             }, 3000);
-
-            console.log('✨ TapNex Arena UI initialized');
         });
     </script>
 </body>

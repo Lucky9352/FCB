@@ -43,13 +43,13 @@ urlpatterns = [
     
     # Booking Management
     path('tapnex/bookings/', superuser_views.manage_bookings, name='manage_bookings'),
-    path('tapnex/bookings/<int:booking_id>/', superuser_views.booking_detail, name='booking_detail'),
-    path('tapnex/bookings/<int:booking_id>/action/', superuser_views.booking_action, name='booking_action'),
+    path('tapnex/bookings/<uuid:booking_id>/', superuser_views.booking_detail, name='booking_detail'),
+    path('tapnex/bookings/<uuid:booking_id>/action/', superuser_views.booking_action, name='booking_action'),
     
     # Game Management
     path('tapnex/games/', superuser_views.manage_games, name='manage_games'),
-    path('tapnex/games/<int:game_id>/', superuser_views.game_detail, name='game_detail'),
-    path('tapnex/games/<int:game_id>/action/', superuser_views.game_action, name='game_action'),
+    path('tapnex/games/<uuid:game_id>/', superuser_views.game_detail, name='game_detail'),
+    path('tapnex/games/<uuid:game_id>/action/', superuser_views.game_action, name='game_action'),
     
     # Commission & Revenue
     path('tapnex/commission-settings/', tapnex_views.commission_settings, name='commission_settings'),

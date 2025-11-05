@@ -1,156 +1,81 @@
-{% load static %}{% load static %}
-
-<!DOCTYPE html><!DOCTYPE html>
-
-<html lang="en" class="scroll-smooth"><html lang="en">
-
-<head><head>
-
-    <meta charset="UTF-8">    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>403 - Access Denied | TapNex Arena</title>    <title>403 - Access Forbidden | TapNex</title>
-
-        <script src="https://cdn.tailwindcss.com"></script>
-
-    <link rel="stylesheet" href="{% static 'css/design-system-v2.css' %}">    <style>
-
-    <link rel="stylesheet" href="{% static 'css/animations.css' %}">        .gaming-gradient {
-
-                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">        }
-
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>        .shake-animation {
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">            animation: shake 0.5s ease-in-out infinite;
-
-            }
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">        @keyframes shake {
-
-                0%, 100% { transform: translateX(0); }
-
-    <style>            25% { transform: translateX(-10px); }
-
-        body {            75% { transform: translateX(10px); }
-
-            min-height: 100vh;        }
-
-            display: flex;        .glow {
-
-            align-items: center;            box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
-
-            justify-content: center;        }
-
-            background: linear-gradient(135deg, #0d1320 0%, #111826 50%, #151d2c 100%);    </style>
-
-            position: relative;</head>
-
-            overflow: hidden;<body class="gaming-gradient min-h-screen flex items-center justify-center p-4">
-
-        }    <div class="text-center max-w-2xl mx-auto">
-
-                <!-- Animated 403 -->
-
-        .bg-pattern {        <div class="mb-8">
-
-            position: absolute;            <h1 class="text-9xl font-bold text-yellow-500 mb-4" style="text-shadow: 0 0 30px rgba(251, 191, 36, 0.8);">
-
-            inset: 0;                403
-
-            background-image:             </h1>
-
-                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),            <div class="text-6xl mb-4 shake-animation">🔒</div>
-
-                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);        </div>
-
-            background-size: 50px 50px;        
-
-            animation: patternMove 20s linear infinite;        <!-- Error Message -->
-
-        }        <h2 class="text-3xl font-bold text-white mb-4">Access Forbidden!</h2>
-
-                <p class="text-xl text-gray-300 mb-8">
-
-        @keyframes patternMove {            You don't have permission to access this resource. Please check your credentials.
-
-            0% { transform: translate(0, 0); }        </p>
-
-            100% { transform: translate(50px, 50px); }        
-
-        }        <!-- Error Details -->
-
-                <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 mb-8">
-
-        .error-code {            <p class="text-gray-300 mb-2">
-
-            font-size: 10rem;                <strong class="text-white">Error Code:</strong> 403 - Forbidden
-
-            font-weight: 900;            </p>
-
-            font-family: 'Orbitron', sans-serif;            <p class="text-gray-300">
-
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #991b1b 100%);                Access to this resource is restricted. You may need to log in or contact an administrator.
-
-            -webkit-background-clip: text;            </p>
-
-            background-clip: text;        </div>
-
-            -webkit-text-fill-color: transparent;        
-
-            line-height: 1;        <!-- Action Buttons -->
-
-        }        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-
-                    <a href="{% url 'home' %}" 
-
-        .floating-icon {               class="glow inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 text-white rounded-lg font-semibold hover:from-yellow-700 hover:to-orange-700 transition-all duration-200">
-
-            position: absolute;                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-
-            font-size: 4rem;                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-
-            opacity: 0.1;                </svg>
-
-            animation: floatAnim 10s ease-in-out infinite;                Back to Home
-
-        }            </a>
-
-                    
-
-        @keyframes floatAnim {            <a href="{% url 'authentication:customer_login' %}" 
-
-            0%, 100% { transform: translateY(0) rotate(0deg); }               class="inline-flex items-center justify-center px-8 py-3 bg-white/10 backdrop-blur-sm text-white border border-white/30 rounded-lg font-semibold hover:bg-white/20 transition-all duration-200">
-
-            50% { transform: translateY(-30px) rotate(10deg); }                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-
-        }                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
-
-    </style>                </svg>
-
-</head>                Login
-
-<body>            </a>
-
-    <div class="bg-pattern"></div>        </div>
-
-            
-
-    <i class="bi bi-shield-lock floating-icon" style="top: 10%; left: 10%; animation-delay: 0s;"></i>        <!-- Help Text -->
-
-    <i class="bi bi-exclamation-triangle floating-icon" style="top: 20%; right: 15%; animation-delay: 2s;"></i>        <div class="mt-12 text-gray-400 text-sm">
-
-    <i class="bi bi-lock-fill floating-icon" style="bottom: 15%; left: 15%; animation-delay: 4s;"></i>            <p>If you believe you should have access, please contact support.</p>
-
-    <i class="bi bi-ban floating-icon" style="bottom: 20%; right: 10%; animation-delay: 6s;"></i>        </div>
-
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 - Access Forbidden | TapNex Gaming Cafe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gaming-gradient {
+            background: linear-gradient(135deg, #111827 0%, #1a202e 50%, #1f2937 100%);
+        }
+        .shake-animation {
+            animation: shake 0.5s ease-in-out infinite;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        .glow {
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+        }
+    </style>
+</head>
+<body class="gaming-gradient min-h-screen flex items-center justify-center p-4">
+    <div class="text-center max-w-2xl mx-auto">
+        <!-- Animated 403 -->
+        <div class="mb-8">
+            <h1 class="text-9xl font-bold text-yellow-500 mb-4" style="text-shadow: 0 0 30px rgba(251, 191, 36, 0.8);">
+                403
+            </h1>
+            <div class="text-6xl mb-4 shake-animation">🔒</div>
         </div>
-
-    <div style="position: relative; z-index: 10; text-align: center; max-width: 600px; padding: 2rem;"></body>
-
-        <div class="error-code" style="margin-bottom: 2rem;">403</div></html>
+        
+        <!-- Error Message -->
+        <h2 class="text-3xl font-bold text-white mb-4">Access Forbidden!</h2>
+        <p class="text-xl text-gray-300 mb-8">
+            You don't have permission to access this resource. Please check your credentials.
+        </p>
+        
+        <!-- Error Details -->
+        <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 mb-8">
+            <p class="text-gray-300 mb-2">
+                <strong class="text-white">Error Code:</strong> 403 - Forbidden
+            </p>
+            <p class="text-gray-300">
+                Access to this resource is restricted. You may need to log in or contact an administrator.
+            </p>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'home' %}" 
+               class="glow inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 text-white rounded-lg font-semibold hover:from-yellow-700 hover:to-orange-700 transition-all duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                Back to Home
+            </a>
+            
+            <a href="{% url 'authentication:customer_login' %}" 
+               class="inline-flex items-center justify-center px-8 py-3 bg-white/10 backdrop-blur-sm text-white border border-white/30 rounded-lg font-semibold hover:bg-white/20 transition-all duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                </svg>
+                Login
+            </a>
+        </div>
+        
+        <!-- Help Text -->
+        <div class="mt-12 text-gray-400 text-sm">
+            <p>If you believe you should have access, please contact support.</p>
+        </div>
+    </div>
+</body>
+</html>
 
         
         <div style="margin-bottom: 2rem;" class="animate-float">

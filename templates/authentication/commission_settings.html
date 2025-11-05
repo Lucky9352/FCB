@@ -240,13 +240,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const netPayout = grossRevenue - totalCommission;
         
         // Update preview (you can add preview elements if needed)
-        console.log('New commission structure:', {
-            rate: rate,
-            fee: fee,
-            commission: commission,
-            totalCommission: totalCommission,
-            netPayout: netPayout
-        });
     }
     
     commissionRateInput.addEventListener('input', calculateImpact);

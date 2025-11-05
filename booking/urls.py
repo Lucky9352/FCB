@@ -23,6 +23,7 @@ urlpatterns = [
     
     # Customer booking management
     path('my-bookings/', views.my_bookings, name='my_bookings'),
+    path('details/<uuid:booking_id>/', views.booking_details, name='booking_details'),
     
     # Booking actions (OLD)
     path('simulate-payment/<uuid:booking_id>/', views.simulate_payment, name='simulate_payment'),

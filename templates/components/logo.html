@@ -1,24 +1,24 @@
 {% load static %}
 
-{# TapNex Arena Logo Component #}
+{# Forge Gaming Cafe Logo Component #}
 {# Usage: {% include 'components/logo.html' with variant='full' size='md' link='/' animated=True %} #}
 
 {% with variant=variant|default:'full' size=size|default:'md' link=link animated=animated class=class %}
 
 <{% if link %}a href="{{ link }}"{% else %}div{% endif %} 
    class="logo logo--{{ size }} logo--{{ variant }} {% if animated %}logo--animated{% endif %} {{ class }}"
-   {% if link %}aria-label="TapNex Arena - Home"{% endif %}>
+   {% if link %}aria-label="Forge Gaming Cafe - Home"{% endif %}>
    
-   {# Logo Image - Using existing TN.png #}
-   <img src="{% static 'images/TN.png' %}" 
-        alt="TapNex Arena Logo" 
+   {# Logo Image - Using Forge Gaming logo #}
+   <img src="{% static 'images/forge_logo.png' %}" 
+        alt="Forge Gaming Cafe Logo" 
         class="logo__image"
-        onerror="this.style.display='none'"
+        onerror="this.src='{% static 'images/tapnex_logo.png' %}'"
         loading="lazy">
    
    {# Logo Text #}
    {% if variant == 'full' or variant == 'text-only' %}
-   <span class="logo__text">TapNex</span>
+       <span class="logo-text" style="background: linear-gradient(135deg, #e94560, #00d4aa); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Arena</span>
    {% endif %}
    
 </{% if link %}a{% else %}div{% endif %}>
@@ -28,14 +28,15 @@
 {# Fallback for missing logo image #}
 <style>
 .logo__image {
-    /* Ensure the existing TN.png logo displays properly */
-    max-width: 100%;
-    height: auto;
-    display: block !important;
-    object-fit: contain;
+    max-width: 100% !important;
+    max-height: 80px !important;
+    height: auto !important;
+    width: auto !important;
+    display: inline-block !important;
+    object-fit: contain !important;
 }
 
-.logo__image[src*="TN.png"] {
+.logo__image[src*="tapnex_logo.png"] {
     /* Specific styling for TN logo */
     filter: brightness(1.1);
 }
@@ -54,17 +55,17 @@
 
 .logo__image:not([src]) + .logo__text::before,
 .logo__image[src=""] + .logo__text::before {
-    content: "TN";
+    content: "F";
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 40px;
     height: 40px;
-    background: linear-gradient(135deg, var(--color-accent-cyan), var(--color-accent-orange));
+    background: linear-gradient(135deg, #e94560, #00d4aa);
     color: white;
-    font-weight: var(--font-weight-bold);
-    border-radius: var(--radius-lg);
-    margin-right: var(--space-2);
-    font-size: var(--font-size-lg);
+    font-weight: bold;
+    border-radius: 0.5rem;
+    margin-right: 0.5rem;
+    font-size: 1.5rem;
 }
 </style>

@@ -51,10 +51,6 @@ urlpatterns = [
     path('shipping-policy/', shipping_policy_view, name='shipping_policy'),
     path('contact/', contact_view, name='contact'),
     path('about/', about_view, name='about'),
-    
-    # Loading and Error Pages (for testing/preview)
-    path('loading/', TemplateView.as_view(template_name='loading.html'), name='loading'),
-    path('loading-test/', TemplateView.as_view(template_name='loading_test.html'), name='loading_test'),
 ]
 
 # Custom error handlers
@@ -65,4 +61,3 @@ handler403 = 'gaming_cafe.views.custom_403'
 # Serve media files in development
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-

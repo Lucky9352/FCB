@@ -9,7 +9,7 @@ cryptography==46.0.3
 defusedxml==0.7.1
 deprecation==2.1.0
 dj-database-url==3.0.1
-Django==5.2.7
+Django==5.2.8
 django-allauth==65.13.0
 djangorestframework==3.16.1
 gotrue==2.12.4
@@ -29,8 +29,8 @@ postgrest==2.23.2
 propcache==0.4.1
 psycopg2-binary==2.9.11
 pycparser==2.23
-pydantic==2.12.3
-pydantic_core==2.41.4
+pydantic==2.12.4
+pydantic_core==2.41.5
 PyJWT==2.10.1
 python-dateutil==2.9.0.post0
 python-decouple==3.8

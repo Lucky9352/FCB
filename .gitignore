@@ -26,7 +26,10 @@ MANIFEST
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+
+# Media files (QR codes are user-generated, exclude from git)
 media/
+!media/.gitkeep
 
 # Environment variables
 .env
@@ -82,5 +85,11 @@ htmlcov/
 credentials.json
 secrets.json
 /kachra
+
+# Exclude all markdown files except important docs
 *.md
 !README.md
+!TESTING_GUIDE.md
+!CLEANUP_SUMMARY.md
+!IGNORE_FILES_VERIFICATION.md
+!SCRIPTS_GUIDE.md

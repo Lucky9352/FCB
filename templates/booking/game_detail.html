@@ -6,13 +6,13 @@
 {% block extra_css %}
 <style>
     .slot-card {
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border: 2px solid transparent;
     }
     .slot-card:hover {
-        transform: translateY(-2px);
-        border-color: #3b82f6;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        transform: translateY(-4px);
+        border-color: rgba(233, 69, 96, 0.5);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
     }
     .capacity-indicator {
         display: inline-flex;
@@ -20,22 +20,29 @@
         gap: 4px;
     }
     .capacity-dot {
-        width: 8px;
-        height: 8px;
+        width: 10px;
+        height: 10px;
         border-radius: 50%;
+        transition: all 0.3s ease;
     }
     .capacity-dot.booked {
         background-color: #ef4444;
+        box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
     }
     .capacity-dot.available {
         background-color: #10b981;
+        box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
     }
     .date-tab {
-        transition: all 0.2s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .date-tab.active {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #e94560 0%, #00d4aa 100%);
         transform: scale(1.05);
+    }
+    .date-tab:hover:not(.active) {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.4);
     }
     .scrollbar-hide {
         -ms-overflow-style: none;
@@ -57,20 +64,20 @@
     }
     
     .fade-in {
-        animation: fadeIn 0.3s ease-in;
+        animation: fadeIn 0.4s ease-out;
     }
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
+        from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
     }
     
     /* Loading spinner */
     .loading-spinner {
         display: inline-block;
-        width: 40px;
-        height: 40px;
-        border: 4px solid rgba(255, 255, 255, 0.1);
-        border-top-color: #667eea;
+        width: 50px;
+        height: 50px;
+        border: 5px solid rgba(255, 255, 255, 0.1);
+        border-top-color: #e94560;
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
     }
@@ -117,6 +124,7 @@
     /* Modal animation */
     #spotSelectionModal {
         animation: modalFadeIn 0.3s ease-out;
+        backdrop-filter: blur(10px);
     }
     
     @keyframes modalFadeIn {
@@ -129,11 +137,24 @@
             transform: scale(1);
         }
     }
+    
+    /* Disabled button style */
+    .btn-disabled {
+        background: rgba(107, 114, 128, 0.3) !important;
+        color: rgba(156, 163, 175, 0.8) !important;
+        cursor: not-allowed !important;
+        opacity: 0.6;
+    }
+    
+    .btn-disabled:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-gaming-primary via-gaming-secondary to-gaming-accent py-8">
+<div class="min-h-screen py-8" style="background: linear-gradient(to bottom right, #111827, #1a202e, #1f2937);">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Back Button -->
@@ -147,29 +168,75 @@
         </div>
 
         <!-- Game Header -->
-        <div class="bg-white/10 backdrop-blur-lg rounded-2xl overflow-hidden border border-white/20 mb-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="card border-2 border-white/10 mb-8 overflow-hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-0">
                 <!-- Game Image -->
-                <div class="h-80 bg-gradient-to-br from-gaming-highlight/30 to-gaming-accent/30 relative overflow-hidden">
+                <div class="lg:col-span-2 h-96 lg:h-auto relative overflow-hidden">
                     {% if game.image %}
                     <img src="{{ game.image.url }}" alt="{{ game.name }}" class="w-full h-full object-cover">
                     {% else %}
-                    <div class="flex items-center justify-center h-full">
-                        <div class="text-white text-center">
-                            <div class="text-8xl mb-4">🎮</div>
-                            <div class="text-3xl font-bold">{{ game.name }}</div>
+                        <!-- Enhanced Placeholder based on game type -->
+                        {% if 'pool' in game.name|lower or '8' in game.name or 'ball' in game.name|lower %}
+                        <div class="w-full h-full bg-gradient-to-br from-emerald-900 via-teal-800 to-cyan-900 flex items-center justify-center relative overflow-hidden">
+                            <!-- Pool table felt texture effect -->
+                            <div class="absolute inset-0 opacity-20" style="background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px);"></div>
+                            <!-- Pool balls decoration -->
+                            <div class="relative z-10 flex flex-col items-center">
+                                <div class="flex gap-6 mb-6">
+                                    <div class="w-24 h-24 rounded-full bg-white shadow-2xl flex items-center justify-center">
+                                        <span class="text-4xl font-black text-gray-800">8</span>
+                                    </div>
+                                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-red-500 to-red-700 shadow-2xl"></div>
+                                </div>
+                                <div class="flex gap-6">
+                                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-2xl"></div>
+                                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 shadow-2xl"></div>
+                                </div>
+                            </div>
+                            <!-- Cue stick decoration -->
+                            <div class="absolute bottom-16 right-16 w-64 h-3 bg-gradient-to-r from-amber-800 to-amber-600 transform rotate-45 opacity-50 rounded-full shadow-xl"></div>
                         </div>
-                    </div>
+                        {% elif 'tennis' in game.name|lower or 'table tennis' in game.name|lower or 'ping' in game.name|lower %}
+                        <div class="w-full h-full bg-gradient-to-br from-blue-900 via-indigo-800 to-purple-900 flex items-center justify-center relative overflow-hidden">
+                            <!-- Table tennis table effect -->
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-4/5 h-3/5 bg-blue-600 opacity-20 rounded-lg border-4 border-white/30"></div>
+                                <div class="absolute w-4/5 h-2 bg-white/40 top-1/2 transform -translate-y-1/2"></div>
+                            </div>
+                            <!-- Ping pong elements -->
+                            <div class="relative z-10 flex flex-col items-center gap-8">
+                                <!-- Paddles -->
+                                <div class="flex gap-12 items-center">
+                                    <div class="relative">
+                                        <div class="w-28 h-32 rounded-full bg-gradient-to-br from-red-600 to-red-800 shadow-2xl"></div>
+                                        <div class="w-8 h-20 bg-amber-700 absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-16 rounded shadow-xl"></div>
+                                    </div>
+                                    <div class="w-16 h-16 rounded-full bg-white shadow-2xl animate-pulse"></div>
+                                    <div class="relative">
+                                        <div class="w-28 h-32 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 shadow-2xl"></div>
+                                        <div class="w-8 h-20 bg-amber-700 absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-16 rounded shadow-xl"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="w-full h-full bg-gradient-to-br from-primary-600 via-purple-600 to-secondary-600 flex items-center justify-center relative overflow-hidden">
+                            <div class="absolute inset-0 opacity-10" style="background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.2) 0%, transparent 50%);"></div>
+                            <div class="relative z-10">
+                                <i class="bi bi-trophy-fill text-white text-9xl opacity-80 drop-shadow-2xl"></i>
+                            </div>
+                        </div>
+                        {% endif %}
                     {% endif %}
                     
                     <!-- Booking Type Badge -->
                     <div class="absolute top-4 right-4">
                         {% if game.booking_type == 'HYBRID' %}
-                        <span class="bg-green-500/90 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
+                        <span class="badge badge-success text-sm shadow-lg">
                             🤝 Private + Shared Available
                         </span>
                         {% else %}
-                        <span class="bg-blue-500/90 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
+                        <span class="badge badge-primary text-sm shadow-lg">
                             🔒 Private Booking Only
                         </span>
                         {% endif %}
@@ -177,41 +244,54 @@
                 </div>
 
                 <!-- Game Info -->
-                <div class="p-8">
-                    <h1 class="text-4xl font-bold text-white mb-4">{{ game.name }}</h1>
-                    <p class="text-gray-300 text-lg mb-6">{{ game.description }}</p>
+                <div class="lg:col-span-3 p-8 lg:p-10">
+                    <h1 class="text-5xl font-black text-white mb-4">{{ game.name }}</h1>
+                    <p class="text-gray-300 text-lg mb-8 leading-relaxed">{{ game.description|default:"Professional gaming experience with premium equipment and perfect ambiance." }}</p>
                     
                     <!-- Game Details Grid -->
-                    <div class="grid grid-cols-2 gap-4 mb-6">
-                        <div class="bg-white/5 rounded-lg p-4 border border-white/10">
-                            <div class="text-gray-400 text-sm mb-1">Capacity</div>
-                            <div class="text-white text-xl font-bold">{{ game.capacity }} Player{{ game.capacity|pluralize }}</div>
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <div class="bg-white/5 rounded-xl p-5 border border-white/10 hover:bg-white/10 transition-all">
+                            <div class="text-gray-400 text-sm mb-2 flex items-center gap-2">
+                                <i class="bi bi-people-fill text-primary-400"></i>
+                                Capacity
+                            </div>
+                            <div class="text-white text-2xl font-bold">{{ game.capacity }} Player{{ game.capacity|pluralize }}</div>
                         </div>
                         
-                        <div class="bg-white/5 rounded-lg p-4 border border-white/10">
-                            <div class="text-gray-400 text-sm mb-1">Slot Duration</div>
-                            <div class="text-white text-xl font-bold">{{ game.slot_duration_minutes }} Minutes</div>
+                        <div class="bg-white/5 rounded-xl p-5 border border-white/10 hover:bg-white/10 transition-all">
+                            <div class="text-gray-400 text-sm mb-2 flex items-center gap-2">
+                                <i class="bi bi-clock-fill text-secondary-400"></i>
+                                Slot Duration
+                            </div>
+                            <div class="text-white text-2xl font-bold">{{ game.slot_duration_minutes }} Minutes</div>
                         </div>
                         
-                        <div class="bg-white/5 rounded-lg p-4 border border-white/10">
-                            <div class="text-gray-400 text-sm mb-1">Private Price</div>
-                            <div class="text-gaming-highlight text-xl font-bold">₹{{ game.private_price }}</div>
+                        <div class="bg-gradient-to-br from-red-500/20 to-pink-500/20 rounded-xl p-5 border border-red-400/30 hover:border-red-400/50 transition-all">
+                            <div class="text-red-200 text-sm mb-2 flex items-center gap-2">
+                                <i class="bi bi-wallet2"></i>
+                                Private Price
+                            </div>
+                            <div class="text-white text-2xl font-bold">₹{{ game.private_price }}</div>
                         </div>
                         
                         {% if game.booking_type == 'HYBRID' %}
-                        <div class="bg-white/5 rounded-lg p-4 border border-white/10">
-                            <div class="text-gray-400 text-sm mb-1">Shared Price (per person)</div>
-                            <div class="text-green-400 text-xl font-bold">₹{{ game.shared_price }}</div>
+                        <div class="bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl p-5 border border-green-400/30 hover:border-green-400/50 transition-all">
+                            <div class="text-green-200 text-sm mb-2 flex items-center gap-2">
+                                <i class="bi bi-wallet2"></i>
+                                Shared Price (per person)
+                            </div>
+                            <div class="text-white text-2xl font-bold">₹{{ game.shared_price }}</div>
                         </div>
                         {% endif %}
                     </div>
 
                     {% if not is_authenticated %}
                     <!-- Login CTA for non-authenticated users -->
-                    <div class="bg-gradient-to-r from-gaming-highlight to-gaming-accent rounded-lg p-4 text-center">
-                        <p class="text-white font-semibold mb-3">Login to book this game!</p>
+                    <div class="bg-gradient-to-r from-primary-600 to-secondary-600 rounded-xl p-6 text-center">
+                        <p class="text-white font-bold text-lg mb-4">Login to book this game!</p>
                         <a href="{% url 'authentication:customer_login' %}?next={{ request.path }}" 
-                           class="inline-block bg-white text-gaming-primary px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all">
+                           class="btn btn-light btn-lg hover-glow">
+                            <i class="bi bi-box-arrow-in-right"></i>
                             Login Now
                         </a>
                     </div>
@@ -221,18 +301,21 @@
         </div>
 
         <!-- Date Selection -->
-        <div class="mb-8">
-            <h2 class="text-2xl font-bold text-white mb-4">Select Date</h2>
-            <div class="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
+        <div class="mb-10">
+            <h2 class="text-3xl font-black text-white mb-6 flex items-center gap-3">
+                <i class="bi bi-calendar-event text-primary-400"></i>
+                Select Date
+            </h2>
+            <div class="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide py-2">
                 {% for date in date_range %}
                 <button type="button"
                         onclick="selectDate('{{ date.isoformat }}')" 
-                        class="date-tab flex-shrink-0 px-6 py-3 rounded-lg text-center min-w-[120px] transition-all duration-200 {% if date == selected_date %}active text-white shadow-lg{% else %}bg-white/10 text-gray-300 hover:bg-white/20{% endif %} border border-white/20"
+                        class="date-tab flex-shrink-0 px-8 py-4 rounded-xl text-center min-w-[140px] transition-all duration-300 {% if date == selected_date %}active text-white shadow-2xl{% else %}bg-white/5 text-gray-300 hover:bg-white/10{% endif %} border-2 border-white/10"
                         data-date="{{ date.isoformat }}">
-                    <div class="font-semibold">
+                    <div class="font-bold text-lg mb-1">
                         {% if date == today %}Today{% else %}{{ date|date:"M d" }}{% endif %}
                     </div>
-                    <div class="text-sm">{{ date|date:"D" }}</div>
+                    <div class="text-sm opacity-80">{{ date|date:"D" }}</div>
                 </button>
                 {% endfor %}
             </div>
@@ -240,12 +323,20 @@
 
         <!-- Available Slots for Selected Date -->
         <div>
-            <h2 class="text-2xl font-bold text-white mb-4">
-                Available Time Slots - <span id="selectedDateDisplay">{{ selected_date|date:"l, F d, Y" }}</span>
-                {% if selected_date == today %}
-                <span class="text-sm text-gaming-highlight ml-2">(Today)</span>
-                {% endif %}
+            <h2 class="text-3xl font-black text-white mb-6 flex items-center gap-3">
+                <i class="bi bi-clock-history text-secondary-400"></i>
+                <span>Available Time Slots</span>
+                <span id="liveIndicator" class="ml-auto flex items-center gap-2 text-xs font-medium text-success opacity-0 transition-opacity duration-300">
+                    <span class="w-2 h-2 rounded-full bg-success animate-pulse"></span>
+                    Live Updates Active
+                </span>
             </h2>
+            <div class="mb-4 card p-4 flex items-center justify-between">
+                <span class="text-gray-300 font-medium" id="selectedDateDisplay">{{ selected_date|date:"l, F d, Y" }}</span>
+                {% if selected_date == today %}
+                <span class="badge badge-primary">Today</span>
+                {% endif %}
+            </div>
             
             <!-- Slots Container - Loaded via AJAX -->
             <div id="slotsContainer">
@@ -331,20 +422,20 @@ function selectDate(dateStr) {
     // Update active state on date buttons with smooth transition
     document.querySelectorAll('.date-tab').forEach(btn => {
         if (btn.dataset.date === dateStr) {
-            btn.classList.add('active', 'text-white', 'shadow-lg');
-            btn.classList.remove('bg-white/10', 'text-gray-300');
-            // Add a subtle scale effect for clicked button
-            btn.style.transform = 'scale(1.05)';
+            btn.classList.add('active', 'text-white', 'shadow-2xl');
+            btn.classList.remove('bg-white/5', 'text-gray-300');
         } else {
-            btn.classList.remove('active', 'text-white', 'shadow-lg');
-            btn.classList.add('bg-white/10', 'text-gray-300');
-            btn.style.transform = 'scale(1)';
+            btn.classList.remove('active', 'text-white', 'shadow-2xl');
+            btn.classList.add('bg-white/5', 'text-gray-300');
         }
     });
     
     // Update date display
-    const displayText = formatDateDisplay(dateStr) + (isToday(dateStr) ? ' <span class="text-sm text-gaming-highlight ml-2">(Today)</span>' : '');
-    document.getElementById('selectedDateDisplay').innerHTML = displayText;
+    const displayText = formatDateDisplay(dateStr);
+    const displayElement = document.getElementById('selectedDateDisplay');
+    if (displayElement) {
+        displayElement.textContent = displayText;
+    }
     
     // Scroll slots container into view smoothly
     document.getElementById('slotsContainer').scrollIntoView({ 
@@ -352,8 +443,16 @@ function selectDate(dateStr) {
         block: 'nearest' 
     });
     
+    // Stop current polling
+    stopPolling();
+    
     // Load slots for selected date
     loadSlotsForDate(dateStr);
+    
+    // Restart polling immediately
+    setTimeout(() => {
+        startPolling();
+    }, 1000);
 }
 
 // Load slots via API (OPTIMIZED WITH AJAX)
@@ -380,10 +479,10 @@ function loadSlotsForDate(dateStr) {
             return response.json();
         })
         .then(data => {
+            currentSlotsData = data.slots; // Store for comparison
             renderSlots(data.slots);
         })
         .catch(error => {
-            console.error('Error loading slots:', error);
             showError('Unable to load slots. Please try again.');
         });
 }
@@ -394,44 +493,48 @@ function renderSlots(slots) {
     
     if (!slots || slots.length === 0) {
         container.innerHTML = `
-            <div class="text-center py-16 bg-white/5 rounded-2xl border border-white/10 fade-in">
-                <div class="text-gray-400 text-6xl mb-4">📅</div>
-                <p class="text-gray-300 text-lg mb-2">No slots available for this date</p>
-                <p class="text-gray-400">Try selecting a different date or check back later</p>
+            <div class="text-center py-20 card fade-in">
+                <div class="text-gray-400 text-7xl mb-6">📅</div>
+                <p class="text-white text-2xl font-bold mb-3">No slots available for this date</p>
+                <p class="text-gray-400 text-lg">Try selecting a different date or check back later</p>
             </div>
         `;
         return;
     }
     
-    let html = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">';
+    let html = '<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">';
     
     slots.forEach(slot => {
         const availability = slot.availability;
         const bookingOptions = slot.booking_options;
         
         html += `
-            <div class="slot-card bg-white/10 backdrop-blur-lg rounded-lg p-5 border border-white/20 fade-in">
-                <!-- Time -->
-                <div class="flex items-center justify-between mb-3">
-                    <div class="text-white font-bold text-lg">
-                        ${slot.time_display}
+            <div class="slot-card card hover-lift fade-in">
+                <!-- Time Header -->
+                <div class="flex items-center justify-between mb-4 pb-4 border-b border-white/10">
+                    <div class="flex items-center gap-3">
+                        <i class="bi bi-clock text-primary-400 text-2xl"></i>
+                        <span class="text-white font-black text-2xl">
+                            ${slot.time_display}
+                        </span>
                     </div>
                     <div class="capacity-indicator">
                         ${renderCapacityDots(availability)}
-                        <span class="text-xs text-gray-400 ml-1">
+                        <span class="text-sm text-gray-400 ml-2 font-medium">
                             ${availability.available_spots}/${availability.total_capacity}
                         </span>
                     </div>
                 </div>
 
                 <!-- Booking Options -->
-                <div class="space-y-2">
+                <div class="space-y-3">
                     ${renderBookingOptions(slot, bookingOptions)}
                 </div>
 
                 ${availability.available_spots === 0 ? `
-                <div class="mt-3 text-center">
-                    <span class="inline-block bg-red-500/20 text-red-300 px-3 py-1 rounded-full text-xs font-medium">
+                <div class="mt-4 text-center">
+                    <span class="inline-flex items-center gap-2 bg-error/20 text-error px-4 py-2 rounded-lg text-sm font-bold border border-error/30">
+                        <i class="bi bi-x-circle-fill"></i>
                         Fully Booked
                     </span>
                 </div>
@@ -478,22 +581,25 @@ function renderPrivateOption(slot, option) {
     const disabled = !option.available;
     
     return `
-        <div class="bg-blue-500/20 border border-blue-400/30 rounded p-3">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-blue-200 font-medium text-sm">🔒 Private Booking</span>
-                <span class="text-blue-300 font-bold">₹${option.price}</span>
+        <div class="bg-gradient-to-br from-blue-500/20 to-blue-600/20 border-2 border-blue-400/30 rounded-xl p-4 hover:border-blue-400/50 transition-all">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-blue-200 font-bold flex items-center gap-2">
+                    <i class="bi bi-lock-fill"></i>
+                    Private Booking
+                </span>
+                <span class="text-blue-300 font-black text-xl">₹${option.price}</span>
             </div>
-            <div class="text-blue-200 text-xs mb-2">${option.description}</div>
-            ${isAuthenticated ? `
-                <button onclick="bookSlot('${slot.id}', 'PRIVATE', ${option.capacity})" 
+            <div class="text-blue-200 text-sm mb-3 opacity-90">${option.description}</div>
+            ${isAuthenticated === 'true' ? `
+                <button onclick="bookSlot('${slot.id}', 'PRIVATE', ${option.capacity}, event)" 
                         ${disabled ? 'disabled' : ''}
-                        class="w-full ${disabled ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'} text-white px-3 py-2 rounded text-sm font-medium transition-colors">
-                    ${disabled ? 'Not Available' : 'Book Private'}
+                        class="w-full ${disabled ? 'btn-disabled' : 'btn btn-primary hover-glow'} transition-all">
+                    ${disabled ? '<i class="bi bi-x-circle"></i> Not Available' : '<i class="bi bi-calendar-check"></i> Book Private'}
                 </button>
             ` : `
                 <a href="/accounts/login/?next=${window.location.pathname}" 
-                   class="block w-full bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm font-medium text-center transition-colors">
-                    Login to Book
+                   class="btn btn-primary w-full text-center hover-glow">
+                    <i class="bi bi-box-arrow-in-right"></i> Login to Book
                 </a>
             `}
         </div>
@@ -503,24 +609,30 @@ function renderPrivateOption(slot, option) {
 // Render shared booking option
 function renderSharedOption(slot, option) {
     const disabled = !option.available;
+    const pricePerSpot = option.price_per_spot || option.price || 0;
+    const availableSpots = option.available_spots || 0;
+    const maxSpotsPerBooking = option.max_spots_per_booking || 4;
     
     return `
-        <div class="bg-green-500/20 border border-green-400/30 rounded p-3">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-green-200 font-medium text-sm">🤝 Shared Booking</span>
-                <span class="text-green-300 font-bold">₹${option.price_per_spot}/person</span>
+        <div class="bg-gradient-to-br from-green-500/20 to-emerald-600/20 border-2 border-green-400/30 rounded-xl p-4 hover:border-green-400/50 transition-all">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-green-200 font-bold flex items-center gap-2">
+                    <i class="bi bi-people-fill"></i>
+                    Shared Booking
+                </span>
+                <span class="text-green-300 font-black text-xl">₹${pricePerSpot}/person</span>
             </div>
-            <div class="text-green-200 text-xs mb-2">${option.description}</div>
-            ${isAuthenticated ? `
-                <button onclick="showSpotSelectionModal('${slot.id}', ${option.available_spots}, ${option.price_per_spot}, ${option.max_spots_per_booking || 4})" 
+            <div class="text-green-200 text-sm mb-3 opacity-90">${option.description}</div>
+            ${isAuthenticated === 'true' ? `
+                <button onclick="showSpotSelectionModal('${slot.id}', ${availableSpots}, ${pricePerSpot}, ${maxSpotsPerBooking})" 
                         ${disabled ? 'disabled' : ''}
-                        class="w-full ${disabled ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'} text-white px-3 py-2 rounded text-sm font-medium transition-colors">
-                    ${disabled ? 'Not Available' : 'Book Shared'}
+                        class="w-full ${disabled ? 'btn-disabled' : 'btn btn-success hover-glow'} transition-all">
+                    ${disabled ? '<i class="bi bi-x-circle"></i> Not Available' : '<i class="bi bi-calendar-check"></i> Book Shared'}
                 </button>
             ` : `
                 <a href="/accounts/login/?next=${window.location.pathname}" 
-                   class="block w-full bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-sm font-medium text-center transition-colors">
-                    Login to Book
+                   class="btn btn-success w-full text-center hover-glow">
+                    <i class="bi bi-box-arrow-in-right"></i> Login to Book
                 </a>
             `}
         </div>
@@ -611,8 +723,9 @@ function updatePriceDisplay() {
 function closeSpotModal(event) {
     if (event && event.target !== event.currentTarget) return;
     
-    document.getElementById('spotSelectionModal').classList.add('hidden');
-    document.getElementById('spotSelectionModal').classList.remove('flex');
+    const modal = document.getElementById('spotSelectionModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
     selectedSlotId = null;
     selectedSpots = 0;
     pricePerSpot = 0;
@@ -623,7 +736,6 @@ function closeSpotModal(event) {
 function confirmSpotSelection() {
     // Comprehensive validation
     if (!selectedSlotId) {
-        console.error('confirmSpotSelection: selectedSlotId is null');
         alert('Slot information missing. Please close and try again.');
         return;
     }
@@ -638,43 +750,32 @@ function confirmSpotSelection() {
         return;
     }
     
-    console.log('✅ Spot selection confirmed:', {
-        slotId: selectedSlotId,
-        spots: selectedSpots,
-        maxSpots: maxSpots
-    });
+    // Store values before closing modal (to prevent reset)
+    const slotIdToBook = selectedSlotId;
+    const spotsToBook = selectedSpots;
     
-    // Close modal
+    // Close modal (this will reset the global variables)
     closeSpotModal();
     
-    // Proceed with booking
-    bookSlot(selectedSlotId, 'SHARED', selectedSpots);
+    // Proceed with booking using stored values
+    bookSlot(slotIdToBook, 'SHARED', spotsToBook, null);
 }
 
 // Book a slot
-function bookSlot(slotId, bookingType, spotsRequested) {
-    console.log('🎯 BOOKSLOT CLICKED!', { slotId, bookingType, spotsRequested });
-    alert('Button clicked! SlotID: ' + slotId);
-    
+function bookSlot(slotId, bookingType, spotsRequested, event) {
     // Comprehensive validation before making request
     if (!slotId) {
-        console.error('bookSlot called without slotId');
         alert('Slot information missing. Please try again.');
-        if (typeof hideLoading === 'function') hideLoading();
         return;
     }
     
     if (!bookingType || !['PRIVATE', 'SHARED'].includes(bookingType)) {
-        console.error('bookSlot called with invalid bookingType:', bookingType);
         alert('Invalid booking type. Please try again.');
-        if (typeof hideLoading === 'function') hideLoading();
         return;
     }
     
     if (!spotsRequested || spotsRequested < 1) {
-        console.error('bookSlot called with invalid spotsRequested:', spotsRequested);
         alert('Invalid number of spots. Please try again.');
-        if (typeof hideLoading === 'function') hideLoading();
         return;
     }
     
@@ -684,11 +785,14 @@ function bookSlot(slotId, bookingType, spotsRequested) {
         spots_requested: spotsRequested
     };
     
-    console.log('✅ Sending booking request:', bookingData);
-    
-    // Show loading overlay
-    if (typeof showLoading === 'function') {
-        showLoading('Creating your booking...');
+    // Show loading state on button if event is provided
+    let clickedButton = null;
+    if (event && event.target) {
+        clickedButton = event.target;
+        clickedButton.disabled = true;
+        const originalText = clickedButton.innerHTML;
+        clickedButton.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Processing...';
+        clickedButton.dataset.originalText = originalText;
     }
     
     // Create booking using AJAX
@@ -713,8 +817,10 @@ function bookSlot(slotId, bookingType, spotsRequested) {
             // Redirect to confirmation page
             window.location.href = data.redirect_url;
         } else {
-            if (typeof hideLoading === 'function') {
-                hideLoading();
+            // Restore button state
+            if (clickedButton && clickedButton.dataset.originalText) {
+                clickedButton.disabled = false;
+                clickedButton.innerHTML = clickedButton.dataset.originalText;
             }
             
             // Build error message
@@ -722,33 +828,146 @@ function bookSlot(slotId, bookingType, spotsRequested) {
             if (data.details) {
                 errorMessage += '\n\n' + data.details;
             }
-            if (data.parsed) {
-                console.error('Server received:', data.parsed);
-            }
             
             // If authentication required, redirect to login
             if (data.redirect_url && data.error === 'Authentication required') {
                 window.location.href = data.redirect_url;
             } else {
                 alert(errorMessage);
-                console.error('Booking error:', data);
             }
         }
     })
     .catch(error => {
-        if (typeof hideLoading === 'function') {
-            hideLoading();
+        // Restore button state
+        if (clickedButton && clickedButton.dataset.originalText) {
+            clickedButton.disabled = false;
+            clickedButton.innerHTML = clickedButton.dataset.originalText;
         }
-        console.error('Network/fetch error:', error);
         alert(error.message || 'An error occurred. Please try again.');
     });
 }
 {% endif %}
 
+// Real-time polling for slot updates
+let pollingInterval = null;
+const POLLING_INTERVAL_MS = 3000; // Poll every 3 seconds for real-time updates
+
+function startPolling() {
+    // Clear any existing interval
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+    }
+    
+    // Show live indicator
+    const liveIndicator = document.getElementById('liveIndicator');
+    if (liveIndicator) {
+        liveIndicator.style.opacity = '1';
+    }
+    
+    // Start polling
+    pollingInterval = setInterval(() => {
+        // Silently refresh slots without showing loading spinner
+        fetch(`/api/games/${gameId}/slots/?date=${currentDate}`)
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+            })
+            .then(data => {
+                if (data && data.slots) {
+                    // Only update if the data has changed
+                    updateSlotsIfChanged(data.slots);
+                }
+            })
+            .catch(error => {
+                // Silently handle errors to avoid interrupting user experience
+                console.error('Polling error:', error);
+            });
+    }, POLLING_INTERVAL_MS);
+}
+
+function stopPolling() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
+    
+    // Hide live indicator
+    const liveIndicator = document.getElementById('liveIndicator');
+    if (liveIndicator) {
+        liveIndicator.style.opacity = '0';
+    }
+}
+
+// Store current slots data for comparison
+let currentSlotsData = null;
+
+function updateSlotsIfChanged(newSlots) {
+    // Convert to JSON string for simple comparison
+    const newSlotsStr = JSON.stringify(newSlots);
+    const currentSlotsStr = JSON.stringify(currentSlotsData);
+    
+    if (newSlotsStr !== currentSlotsStr) {
+        currentSlotsData = newSlots;
+        renderSlots(newSlots);
+        
+        // Show subtle notification
+        showUpdateNotification();
+    }
+}
+
+function showUpdateNotification() {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 z-50 glass rounded-xl px-4 py-3 max-w-sm transform translate-x-full transition-transform duration-300 border-success/30 text-success';
+    notification.innerHTML = `
+        <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 flex-shrink-0 animate-pulse" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+            </svg>
+            <span class="text-sm font-medium">Availability updated</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Animate in
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        notification.style.transform = 'translateX(full)';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+
+// Pause polling when page is not visible
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        stopPolling();
+    } else {
+        // Immediately refresh when page becomes visible
+        loadSlotsForDate(currentDate);
+        startPolling();
+    }
+});
+
 // Load initial slots on page load
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Loading slots for date:', currentDate);
     loadSlotsForDate(currentDate);
+    
+    // Start real-time polling immediately after initial load
+    setTimeout(() => {
+        startPolling();
+    }, 1000); // Wait 1 second before starting polling
+});
+
+// Clean up on page unload
+window.addEventListener('beforeunload', function() {
+    stopPolling();
 });
 
 </script>
