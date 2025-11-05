@@ -4,7 +4,7 @@
 {% block title %}Active Bookings - Today{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-gaming-primary via-gaming-secondary to-gaming-accent py-8">
+<div class="min-h-screen py-8" style="background: linear-gradient(to bottom right, #111827, #1a202e, #1f2937);">
     <div class="container mx-auto px-4">
         <!-- Header -->
         <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 mb-8 border border-white/20">
@@ -145,7 +145,6 @@ async function completeBooking(bookingId) {
             alert('Error: ' + result.message);
         }
     } catch (error) {
-        console.error('Error:', error);
         alert('Network error. Please try again.');
     }
 }

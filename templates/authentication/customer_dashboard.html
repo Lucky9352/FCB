@@ -1,313 +1,298 @@
 {% extends 'base.html' %}
+
 {% load static %}
 
-{% block title %}Customer Dashboard - Gaming Cafe{% endblock %}
+{% block title %}Customer Dashboard - TapNex Gaming Cafe{% endblock %}
 
 {% block extra_css %}
 <style>
     .status-indicator {
-        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+        display: inline-flex;
+        align-items: center;
+        padding: 0.375rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
     }
-    .status-pending { @apply bg-yellow-100 text-yellow-800; }
-    .status-confirmed { @apply bg-green-100 text-green-800; }
-    .status-in-progress { @apply bg-blue-100 text-blue-800; }
-    .status-completed { @apply bg-gray-100 text-gray-800; }
-    .status-cancelled { @apply bg-red-100 text-red-800; }
+    
+    .status-pending { 
+        background-color: rgba(251, 191, 36, 0.1); 
+        color: rgb(245, 158, 11); 
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    
+    .status-confirmed { 
+        background-color: rgba(34, 197, 94, 0.1); 
+        color: rgb(34, 197, 94); 
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    
+    .status-in-progress { 
+        background-color: rgba(59, 130, 246, 0.1); 
+        color: rgb(59, 130, 246); 
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    
+    .status-completed { 
+        background-color: rgba(107, 114, 128, 0.1); 
+        color: rgb(107, 114, 128); 
+        border: 1px solid rgba(107, 114, 128, 0.3);
+    }
+    
+    .status-cancelled { 
+        background-color: rgba(239, 68, 68, 0.1); 
+        color: rgb(239, 68, 68); 
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
     
     .station-card {
-        @apply bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20 hover:border-gaming-highlight/50 transition-all duration-300 cursor-pointer;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 1rem;
+        padding: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+        cursor: pointer;
     }
+    
     .station-card:hover {
+        border-color: rgba(var(--gaming-highlight-rgb), 0.5);
         transform: translateY(-2px);
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     }
     
     .booking-card {
-        @apply bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10 hover:border-white/20 transition-all duration-200;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.2s ease;
+    }
+    
+    .booking-card:hover {
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .dashboard-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .welcome-card {
+        background: linear-gradient(135deg, rgba(var(--gaming-highlight-rgb), 0.2), rgba(255, 255, 255, 0.1));
+        border: 1px solid rgba(var(--gaming-highlight-rgb), 0.3);
+    }
+    
+    .stats-card {
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-4px);
+    }
+    
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #e94560;
+        margin-bottom: 0.5rem;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-gaming-primary via-gaming-secondary to-gaming-accent">
-    <!-- Welcome Section -->
-    <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 mb-8 border border-white/20">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
-            <!-- Avatar -->
-            <div class="flex-shrink-0">
-                {% if customer.avatar_url %}
-                    <img src="{{ customer.avatar_url }}" alt="Profile" class="w-20 h-20 rounded-full border-4 border-gaming-highlight shadow-lg">
-                {% else %}
-                    <div class="w-20 h-20 bg-gradient-to-br from-gaming-highlight to-gaming-accent rounded-full flex items-center justify-center border-4 border-white/20 shadow-lg">
-                        <span class="text-white text-2xl font-bold">
-                            {{ user.first_name.0|default:user.username.0|upper }}
-                        </span>
+<div class="min-h-screen" style="background: linear-gradient(to bottom right, #111827, #1a202e, #1f2937);">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Welcome Section -->
+        <div class="dashboard-card welcome-card mb-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 bg-gaming-highlight/20 rounded-full flex items-center justify-center">
+                        {% if user.first_name %}
+                            <span class="text-2xl font-bold text-gaming-highlight">
+                                {{ user.first_name|first|upper }}
+                            </span>
+                        {% else %}
+                            <svg class="w-8 h-8 text-gaming-highlight" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                            </svg>
+                        {% endif %}
                     </div>
-                {% endif %}
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold text-white">
+                            Welcome back, {{ user.first_name|default:user.username }}!
+                        </h1>
+                        <p class="text-gray-300">Ready for your next gaming session?</p>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <a href="{% url 'booking:game_selection' %}" 
+                       class="bg-gaming-highlight hover:bg-gaming-highlight/80 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 text-center">
+                        Book New Session
+                    </a>
+                    <a href="{% url 'booking:my_bookings' %}" 
+                       class="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-6 py-3 rounded-lg font-medium transition-all duration-200 text-center">
+                        View All Bookings
+                    </a>
+                </div>
             </div>
-            
-            <!-- User Info -->
-            <div class="flex-grow">
-                <h1 class="text-3xl font-bold text-white mb-2">
-                    Welcome back, {{ user.first_name|default:user.username }}!
-                </h1>
-                <p class="text-gray-300 mb-3">Ready for your next gaming session?</p>
-                
-                <!-- Stats -->
-                <div class="flex flex-wrap gap-4 text-sm">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-2 h-2 bg-gaming-highlight rounded-full"></div>
-                        <span class="text-gray-300">Total Bookings: <span class="text-white font-semibold">{{ total_bookings }}</span></span>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="dashboard-card stats-card">
+                <div class="stats-number">{{ total_bookings|default:0 }}</div>
+                <p class="text-gray-300">Total Bookings</p>
+            </div>
+            <div class="dashboard-card stats-card">
+                <div class="stats-number">{{ upcoming_bookings|default:0 }}</div>
+                <p class="text-gray-300">Upcoming</p>
+            </div>
+            <div class="dashboard-card stats-card">
+                <div class="stats-number">{{ completed_bookings|default:0 }}</div>
+                <p class="text-gray-300">Completed</p>
+            </div>
+            <div class="dashboard-card stats-card">
+                <div class="stats-number">{{ total_hours|default:0 }}</div>
+                <p class="text-gray-300">Hours Played</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Recent Bookings -->
+            <div class="lg:col-span-2">
+                <div class="dashboard-card">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold text-white">Recent Bookings</h2>
+                        <a href="{% url 'booking:my_bookings' %}" 
+                           class="text-gaming-highlight hover:underline text-sm">
+                            View All
+                        </a>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <div class="w-2 h-2 bg-green-400 rounded-full"></div>
-                        <span class="text-gray-300">Completed: <span class="text-white font-semibold">{{ completed_bookings }}</span></span>
-                    </div>
-                    {% if customer.phone %}
-                    <div class="flex items-center space-x-2">
-                        <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
-                        <span class="text-gray-300">Phone: <span class="text-white font-semibold">{{ customer.phone }}</span></span>
-                    </div>
+
+                    {% if recent_bookings %}
+                        <div class="space-y-4">
+                            {% for booking in recent_bookings %}
+                            <div class="booking-card">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-12 h-12 bg-gaming-highlight/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-6 h-6 text-gaming-highlight" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"></path>
+                                                <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-1a1 1 0 10-2 0v1H5V7h1a1 1 0 000-2H5z"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-white font-medium">{{ booking.gaming_station.name }}</h3>
+                                            <p class="text-gray-300 text-sm">{{ booking.start_time|date:"M j, g:i A" }}</p>
+                                            <p class="text-gray-400 text-sm">{{ booking.duration_hours|floatformat:1 }}h • ₹{{ booking.total_amount }}</p>
+                                        </div>
+                                    </div>
+                                    <span class="status-indicator status-{{ booking.status }}">
+                                        {{ booking.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-8">
+                            <div class="w-16 h-16 mx-auto mb-4 bg-white/10 rounded-full flex items-center justify-center">
+                                <svg class="w-8 h-8 text-white/40" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                                    <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-white font-medium mb-2">No bookings yet</h3>
+                            <p class="text-gray-400 text-sm mb-4">Start by booking your first gaming session!</p>
+                            <a href="{% url 'booking:game_selection' %}" 
+                               class="bg-gaming-highlight hover:bg-gaming-highlight/80 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200">
+                                Book Now
+                            </a>
+                        </div>
                     {% endif %}
                 </div>
             </div>
-            
-            <!-- Current Booking Alert -->
-            {% if current_booking %}
-            <div class="flex-shrink-0 bg-blue-500/20 border border-blue-400/30 rounded-lg p-4">
-                <div class="flex items-center space-x-2 mb-2">
-                    <div class="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
-                    <span class="text-blue-300 font-semibold text-sm">Currently Gaming</span>
-                </div>
-                <p class="text-white font-medium">{{ current_booking.gaming_station.name }}</p>
-                <p class="text-blue-200 text-sm">Until {{ current_booking.end_time|date:"g:i A" }}</p>
-            </div>
-            {% endif %}
-        </div>
-    </div>
 
-    <!-- Quick Booking Section -->
-    <div class="mb-8">
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold text-white">Available Games</h2>
-            <p class="text-gray-300 text-sm">Book your favorite games</p>
-        </div>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {% for game in available_games %}
-            <a href="{% url 'booking:game_detail' game.id %}" class="group station-card">
-                <div class="flex items-start justify-between mb-3">
-                    <div>
-                        <h3 class="text-white font-semibold group-hover:text-gaming-highlight transition-colors">{{ game.name }}</h3>
-                        <p class="text-gray-300 text-sm">{{ game.slot_duration_minutes }} min slots</p>
-                    </div>
-                    <div class="flex items-center space-x-1">
-                        <div class="w-2 h-2 bg-green-400 rounded-full"></div>
-                        <span class="text-green-300 text-xs font-medium">Available</span>
-                    </div>
-                </div>
-                
-                {% if game.image %}
-                <div class="mb-3 rounded-lg overflow-hidden">
-                    <img src="{{ game.image.url }}" alt="{{ game.name }}" class="w-full h-24 object-cover group-hover:scale-110 transition-transform duration-300">
-                </div>
-                {% else %}
-                <div class="mb-3 bg-gradient-to-br from-gaming-highlight/20 to-gaming-accent/20 rounded-lg h-24 flex items-center justify-center">
-                    <svg class="w-8 h-8 text-gaming-highlight" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"></path>
-                    </svg>
-                </div>
-                {% endif %}
-                
-                <div class="mb-3">
-                    <p class="text-gray-400 text-xs line-clamp-2">{{ game.description|truncatewords:10 }}</p>
-                </div>
-                
-                <div class="flex items-center justify-between pt-3 border-t border-white/10">
-                    <div>
-                        <span class="text-gaming-highlight font-bold text-sm">₹{{ game.private_price }}</span>
-                        <span class="text-gray-400 text-xs"> private</span>
-                    </div>
-                    <span class="bg-gaming-highlight hover:bg-gaming-highlight/80 text-white px-3 py-1 rounded-lg text-sm font-medium transition-colors duration-200 inline-block text-center">
-                        Book Now
-                    </span>
-                </div>
-            </a>
-            {% empty %}
-            <div class="col-span-full text-center py-8">
-                <svg class="w-12 h-12 mx-auto mb-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"></path>
-                </svg>
-                <p class="text-gray-300">No games available at the moment.</p>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-
-    <!-- Dashboard Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Upcoming Bookings -->
-        <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-bold text-white">Upcoming Bookings</h3>
-                <a href="#" class="text-gaming-highlight hover:text-gaming-highlight/80 text-sm font-medium transition-colors duration-200">
-                    View All
-                </a>
-            </div>
-            
-            {% if upcoming_bookings %}
-                <div class="space-y-4">
-                    {% for booking in upcoming_bookings %}
-                    <div class="booking-card">
-                        <div class="flex items-start justify-between mb-2">
+            <!-- Quick Actions & Account Info -->
+            <div class="space-y-6">
+                <!-- Quick Actions -->
+                <div class="dashboard-card">
+                    <h2 class="text-xl font-bold text-white mb-6">Quick Actions</h2>
+                    <div class="space-y-3">
+                        <a href="{% url 'booking:game_selection' %}" 
+                           class="flex items-center space-x-3 p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-all duration-200 group">
+                            <div class="w-10 h-10 bg-gaming-highlight/20 rounded-lg flex items-center justify-center group-hover:bg-gaming-highlight/30 transition-all duration-200">
+                                <svg class="w-5 h-5 text-gaming-highlight" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
                             <div>
-                                <h4 class="text-white font-medium">{{ booking.gaming_station.name }}</h4>
-                                <p class="text-gray-300 text-sm">{{ booking.gaming_station.get_station_type_display }}</p>
+                                <p class="text-white font-medium">Book Gaming Session</p>
+                                <p class="text-gray-400 text-sm">Reserve your slot</p>
                             </div>
-                            <span class="status-indicator status-{{ booking.status|lower }}">
-                                {{ booking.get_status_display }}
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between text-sm">
-                            <div class="text-gray-300">
-                                <div class="flex items-center space-x-1 mb-1">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span>{{ booking.start_time|date:"M j, Y" }}</span>
-                                </div>
-                                <div class="flex items-center space-x-1">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span>{{ booking.start_time|date:"g:i A" }} - {{ booking.end_time|date:"g:i A" }}</span>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-gaming-highlight font-semibold">₹{{ booking.total_amount }}</p>
-                                <p class="text-gray-400 text-xs">{{ booking.duration_hours|floatformat:1 }}h</p>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="text-center py-8">
-                    <svg class="w-12 h-12 mx-auto mb-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
-                    </svg>
-                    <p class="text-gray-300 mb-2">No upcoming bookings</p>
-                    <p class="text-gray-400 text-sm">Book a gaming session to get started!</p>
-                </div>
-            {% endif %}
-        </div>
+                        </a>
 
-        <!-- Recent Booking History -->
-        <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-bold text-white">Recent History</h3>
-                <a href="#" class="text-gaming-highlight hover:text-gaming-highlight/80 text-sm font-medium transition-colors duration-200">
-                    View All
-                </a>
-            </div>
-            
-            {% if recent_bookings %}
-                <div class="space-y-4">
-                    {% for booking in recent_bookings %}
-                    <div class="booking-card">
-                        <div class="flex items-start justify-between mb-2">
+                        <a href="{% url 'booking:my_bookings' %}" 
+                           class="flex items-center space-x-3 p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-all duration-200 group">
+                            <div class="w-10 h-10 bg-gaming-highlight/20 rounded-lg flex items-center justify-center group-hover:bg-gaming-highlight/30 transition-all duration-200">
+                                <svg class="w-5 h-5 text-gaming-highlight" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
                             <div>
-                                <h4 class="text-white font-medium">{{ booking.gaming_station.name }}</h4>
-                                <p class="text-gray-300 text-sm">{{ booking.gaming_station.get_station_type_display }}</p>
+                                <p class="text-white font-medium">My Bookings</p>
+                                <p class="text-gray-400 text-sm">View & manage</p>
                             </div>
-                            <span class="status-indicator status-{{ booking.status|lower }}">
-                                {{ booking.get_status_display }}
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between text-sm">
-                            <div class="text-gray-300">
-                                <div class="flex items-center space-x-1 mb-1">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span>{{ booking.start_time|date:"M j, Y" }}</span>
-                                </div>
-                                <div class="flex items-center space-x-1">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span>{{ booking.start_time|date:"g:i A" }} - {{ booking.end_time|date:"g:i A" }}</span>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-gaming-highlight font-semibold">₹{{ booking.total_amount }}</p>
-                                <p class="text-gray-400 text-xs">{{ booking.duration_hours|floatformat:1 }}h</p>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="text-center py-8">
-                    <svg class="w-12 h-12 mx-auto mb-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2v8h12V6H4z" clip-rule="evenodd"></path>
-                    </svg>
-                    <p class="text-gray-300 mb-2">No booking history</p>
-                    <p class="text-gray-400 text-sm">Your completed bookings will appear here</p>
-                </div>
-            {% endif %}
-        </div>
-    </div>
+                        </a>
 
-    <!-- Quick Actions Bar -->
-    <div class="mt-8 bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-        <div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
-            <div>
-                <h3 class="text-lg font-semibold text-white mb-1">Ready to Game?</h3>
-                <p class="text-gray-300 text-sm">Book your next gaming session or manage your existing bookings</p>
-            </div>
-            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-                <a href="{% url 'booking:selection' %}" class="bg-gaming-highlight hover:bg-gaming-highlight/80 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 inline-block">
-                    <div class="flex items-center space-x-2">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span>Book Now</span>
+                        <a href="{% url 'contact' %}" 
+                           class="flex items-center space-x-3 p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-all duration-200 group">
+                            <div class="w-10 h-10 bg-gaming-highlight/20 rounded-lg flex items-center justify-center group-hover:bg-gaming-highlight/30 transition-all duration-200">
+                                <svg class="w-5 h-5 text-gaming-highlight" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-white font-medium">Contact Support</p>
+                                <p class="text-gray-400 text-sm">Get help</p>
+                            </div>
+                        </a>
                     </div>
-                </a>
-                <button onclick="viewBookings()" class="bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/40 px-6 py-3 rounded-lg font-medium transition-all duration-200">
-                    <div class="flex items-center space-x-2">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span>My Bookings</span>
+                </div>
+
+                <!-- Account Info -->
+                <div class="dashboard-card">
+                    <h2 class="text-xl font-bold text-white mb-6">Account Info</h2>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-300">Email</span>
+                            <span class="text-white text-sm">{{ user.email }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-300">Member since</span>
+                            <span class="text-white text-sm">{{ user.date_joined|date:"M Y" }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-300">Status</span>
+                            <span class="status-indicator status-confirmed">Active</span>
+                        </div>
                     </div>
-                </button>
+
+                    <div class="mt-6 pt-6 border-t border-white/10">
+                        <a href="{% url 'account_logout' %}" 
+                           class="w-full bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 py-2 px-4 rounded-lg text-center transition-all duration-200 block">
+                            Sign Out
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
-<script>
-function viewBookings() {
-    // TODO: Navigate to bookings page - will be implemented in future tasks
-    window.location.href = '{% url "booking:my_bookings" %}';
-}
-
-// Touch optimization for mobile devices
-document.addEventListener('DOMContentLoaded', function() {
-    // Add touch feedback for interactive elements
-    const touchElements = document.querySelectorAll('.station-card, button');
-    
-    touchElements.forEach(element => {
-        element.addEventListener('touchstart', function() {
-            this.style.transform = 'scale(0.98)';
-        });
-        
-        element.addEventListener('touchend', function() {
-            this.style.transform = '';
-        });
-    });
-});
-</script>
 {% endblock %}

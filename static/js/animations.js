@@ -484,8 +484,6 @@
     initModals();
     initPreloader();
     initCounters();
-
-    console.log('✨ TapNex Arena UI initialized');
   }
 
   // Auto-initialize

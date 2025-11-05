@@ -42,7 +42,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-gaming-primary via-gaming-secondary to-gaming-accent">
+<div class="min-h-screen" style="background: linear-gradient(to bottom right, #111827, #1a202e, #1f2937);">
     <!-- Header -->
     <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 mb-8 border border-white/20">
         <div class="flex items-center justify-between">
@@ -274,7 +274,6 @@ function loadTimeSlots(stationId) {
             container.innerHTML = slotsHtml;
         })
         .catch(error => {
-            console.error('Error loading time slots:', error);
             container.innerHTML = '<p class="text-red-400 text-center py-4">Error loading time slots</p>';
         });
 }
@@ -380,7 +379,6 @@ function proceedToConfirmation() {
         }
     })
     .catch(error => {
-        console.error('Error creating booking:', error);
         alert('Error creating booking');
         button.textContent = originalText;
         button.disabled = false;

@@ -25,7 +25,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-build-key-only-replac
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('*', default='localhost,127.0.0.1,forge.tapnex.tech', cast=lambda v: [s.strip() for s in v.split(',')])
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,.vercel.app,forge.tapnex.tech', cast=lambda v: [s.strip() for s in v.split(',')])
 
 
 # Application definition
@@ -54,9 +54,12 @@ INSTALLED_APPS = [
 
 SITE_ID = 1
 
+# Check if running on Vercel
+IS_VERCEL = os.environ.get('VERCEL', False)
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Keep WhiteNoise for all environments
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -143,16 +146,23 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# On Vercel, STATIC_ROOT doesn't physically exist, so we set it to None
+# WhiteNoise will serve from STATICFILES_DIRS instead
+if IS_VERCEL:
+    STATIC_ROOT = None
+else:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
-# WhiteNoise configuration for Vercel
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+# WhiteNoise configuration - works on both local and Vercel
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = True if DEBUG else False
+WHITENOISE_MANIFEST_STRICT = False  # Don't fail on missing files in manifest
 
 # Media files
 MEDIA_URL = '/media/'

@@ -25,6 +25,19 @@ class CafeOwnerLoginView(LoginView):
         else:
             messages.error(self.request, 'Access denied. This login is for cafe owners only.')
             return '/accounts/login/'
+    
+    def form_valid(self, form):
+        """Add success message on successful login"""
+        response = super().form_valid(form)
+        user = self.request.user
+        username = user.username
+        # Get cafe owner name if available
+        if hasattr(user, 'cafe_owner_profile'):
+            cafe_name = user.cafe_owner_profile.cafe_name
+            messages.success(self.request, f'Welcome back, {cafe_name}!')
+        else:
+            messages.success(self.request, f'Welcome back, {username}!')
+        return response
 
     def form_invalid(self, form):
         messages.error(self.request, 'Invalid username or password. Please try again.')

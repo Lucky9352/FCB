@@ -1,315 +1,344 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Game Management Dashboard{% endblock %}
+{% block title %}
+  Game Management Dashboard
+{% endblock %}
 
 {% block extra_css %}
-<style>
+  <style>
     .stat-card {
-        @apply bg-white rounded-lg shadow-md p-6 border-l-4;
+      @apply bg-white rounded-lg shadow-md p-6 border-l-4;
     }
-    .stat-card.primary { @apply border-blue-500; }
-    .stat-card.success { @apply border-green-500; }
-    .stat-card.warning { @apply border-yellow-500; }
-    .stat-card.info { @apply border-indigo-500; }
+    .stat-card.primary {
+      @apply border-blue-500;
+    }
+    .stat-card.success {
+      @apply border-green-500;
+    }
+    .stat-card.warning {
+      @apply border-yellow-500;
+    }
+    .stat-card.info {
+      @apply border-indigo-500;
+    }
     
     .game-card {
-        @apply bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200;
+      @apply bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200;
     }
     
     .status-badge {
-        @apply px-3 py-1 rounded-full text-sm font-medium;
+      @apply px-3 py-1 rounded-full text-sm font-medium;
     }
-    .status-badge.active { @apply bg-green-100 text-green-800; }
-    .status-badge.inactive { @apply bg-red-100 text-red-800; }
+    .status-badge.active {
+      @apply bg-green-100 text-green-800;
+    }
+    .status-badge.inactive {
+      @apply bg-red-100 text-red-800;
+    }
     
     .booking-type-badge {
-        @apply px-2 py-1 rounded text-xs font-medium;
+      @apply px-2 py-1 rounded text-xs font-medium;
     }
-    .booking-type-badge.single { @apply bg-blue-100 text-blue-800; }
-    .booking-type-badge.hybrid { @apply bg-purple-100 text-purple-800; }
-</style>
+    .booking-type-badge.single {
+      @apply bg-blue-100 text-blue-800;
+    }
+    .booking-type-badge.hybrid {
+      @apply bg-purple-100 text-purple-800;
+    }
+  </style>
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 py-8">
+  <div class="min-h-screen py-8" style="background-color: #111827;">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-8">
-            <div class="flex justify-between items-center">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Game Management Dashboard</h1>
-                    <p class="mt-2 text-gray-600">Manage your games, schedules, and bookings</p>
-                </div>
-                <div class="flex space-x-4">
-                    <a href="{% url 'booking:game_create' %}" 
-                       class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                        </svg>
-                        Add New Game
-                    </a>
-                    <a href="{% url 'booking:custom_slot_create' %}" 
-                       class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        Add Custom Slot
-                    </a>
-                    <a href="{% url 'booking:game_management:schedule_management' %}" 
-                       class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                        Manage Schedules
-                    </a>
-                </div>
+      <!-- Header -->
+      <div class="mb-8">
+        <div class="flex justify-between items-center">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">Game Management Dashboard</h1>
+            <p class="mt-2 text-gray-600">Manage your games, schedules, and bookings</p>
+          </div>
+          <div class="flex space-x-4">
+            <a href="{% url 'booking:game_create' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>Add New Game
+            </a>
+            <a href="{% url 'booking:custom_slot_create' %}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>Add Custom Slot
+            </a>
+            <a href="{% url 'booking:game_management:schedule_management' %}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>Manage Schedules
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="stat-card primary">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14-7H5a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"></path>
+              </svg>
             </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500">Total Games</p>
+              <p class="text-2xl font-bold text-gray-900">{{ total_games }}</p>
+            </div>
+          </div>
         </div>
 
-        <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="stat-card primary">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14-7H5a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Total Games</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ total_games }}</p>
-                    </div>
-                </div>
+        <div class="stat-card success">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
             </div>
-
-            <div class="stat-card success">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Active Games</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ active_games }}</p>
-                    </div>
-                </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500">Active Games</p>
+              <p class="text-2xl font-bold text-gray-900">{{ active_games }}</p>
             </div>
-
-            <div class="stat-card warning">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Today's Bookings</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ today_bookings_count }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="stat-card info">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Today's Revenue</p>
-                        <p class="text-2xl font-bold text-gray-900">₹{{ today_revenue|floatformat:0 }}</p>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
 
-        <!-- Games Grid -->
-        <div class="mb-8">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">Your Games</h2>
-            
-            {% if games %}
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {% for game in games %}
-                        <div class="game-card">
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="flex-1">
-                                    <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ game.name }}</h3>
-                                    <p class="text-gray-600 text-sm mb-3">{{ game.description|truncatechars:100 }}</p>
-                                </div>
-                                {% if game.image %}
-                                    <img src="{{ game.image.url }}" alt="{{ game.name }}" 
-                                         class="w-16 h-16 object-cover rounded-lg ml-4">
-                                {% endif %}
-                            </div>
-                            
-                            <!-- Game Details -->
-                            <div class="space-y-2 mb-4">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-gray-500">Capacity:</span>
-                                    <span class="text-sm font-medium">{{ game.capacity }} players</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-gray-500">Type:</span>
-                                    <span class="booking-type-badge {% if game.booking_type == 'SINGLE' %}single{% else %}hybrid{% endif %}">
-                                        {% if game.booking_type == 'SINGLE' %}🔒 Private Only{% else %}🤝 Private + Shared{% endif %}
-                                    </span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-gray-500">Schedule:</span>
-                                    <span class="text-sm font-medium">{{ game.opening_time|time:"H:i" }} - {{ game.closing_time|time:"H:i" }}</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-gray-500">Pricing:</span>
-                                    <div class="text-right">
-                                        <div class="text-sm font-medium">Private: ₹{{ game.private_price }}</div>
-                                        {% if game.shared_price %}
-                                            <div class="text-xs text-gray-500">Shared: ₹{{ game.shared_price }}/person</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Statistics -->
-                            <div class="border-t pt-4 mb-4">
-                                <div class="grid grid-cols-2 gap-4 text-center">
-                                    <div>
-                                        <div class="text-lg font-bold text-blue-600">{{ game.total_slots }}</div>
-                                        <div class="text-xs text-gray-500">Total Slots</div>
-                                    </div>
-                                    <div>
-                                        <div class="text-lg font-bold text-green-600">{{ game.confirmed_bookings }}</div>
-                                        <div class="text-xs text-gray-500">Bookings</div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Status and Actions -->
-                            <div class="flex justify-between items-center">
-                                <span class="status-badge {% if game.is_active %}active{% else %}inactive{% endif %}">
-                                    {% if game.is_active %}✅ Active{% else %}❌ Inactive{% endif %}
-                                </span>
-                                
-                                <div class="flex space-x-2">
-                                    <a href="{% url 'booking:game_detail' game.id %}" 
-                                       class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                        View Details
-                                    </a>
-                                    <a href="{% url 'booking:game_update' game.id %}" 
-                                       class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
-                                        Edit
-                                    </a>
-                                    <button onclick="toggleGameStatus('{{ game.id }}', {{ game.is_active|yesno:'true,false' }})"
-                                            class="text-gray-600 hover:text-gray-800 text-sm font-medium">
-                                        {% if game.is_active %}Deactivate{% else %}Activate{% endif %}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="text-center py-12">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14-7H5a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"></path>
-                    </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900">No games yet</h3>
-                    <p class="mt-1 text-sm text-gray-500">Get started by creating your first game.</p>
-                    <div class="mt-6">
-                        <a href="{% url 'booking:game_create' %}" 
-                           class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                            Add New Game
-                        </a>
-                    </div>
-                </div>
-            {% endif %}
+        <div class="stat-card warning">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500">Today's Bookings</p>
+              <p class="text-2xl font-bold text-gray-900">{{ today_bookings_count }}</p>
+            </div>
+          </div>
         </div>
 
-        <!-- Upcoming Bookings -->
-        {% if upcoming_bookings %}
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-bold text-gray-900 mb-4">Upcoming Bookings</h2>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Game</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            {% for booking in upcoming_bookings %}
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">{{ booking.game.name }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ booking.customer.user.get_full_name|default:booking.customer.user.username }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ booking.game_slot.date }}</div>
-                                        <div class="text-sm text-gray-500">{{ booking.game_slot.start_time|time:"H:i" }} - {{ booking.game_slot.end_time|time:"H:i" }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="booking-type-badge {% if booking.booking_type == 'PRIVATE' %}single{% else %}hybrid{% endif %}">
-                                            {{ booking.booking_type|title }} ({{ booking.spots_booked }} spot{{ booking.spots_booked|pluralize }})
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        ₹{{ booking.total_amount }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                   {% if booking.status == 'CONFIRMED' %}bg-green-100 text-green-800
-                                                   {% elif booking.status == 'PENDING' %}bg-yellow-100 text-yellow-800
-                                                   {% else %}bg-gray-100 text-gray-800{% endif %}">
-                                            {{ booking.get_status_display }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+        <div class="stat-card info">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+              </svg>
             </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500">Today's Revenue</p>
+              <p class="text-2xl font-bold text-gray-900">₹{{ today_revenue|floatformat:0 }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Games Grid -->
+      <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Your Games</h2>
+
+        {% if games %}
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for game in games %}
+              <div class="game-card">
+                <div class="flex justify-between items-start mb-4">
+                  <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ game.name }}</h3>
+                    <p class="text-gray-600 text-sm mb-3">{{ game.description|truncatechars:100 }}</p>
+                  </div>
+                  {% if game.image %}
+                    <img src="{{ game.image.url }}" alt="{{ game.name }}" class="w-16 h-16 object-cover rounded-lg ml-4" />
+                  {% endif %}
+                </div>
+
+                <!-- Game Details -->
+                <div class="space-y-2 mb-4">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-500">Capacity:</span>
+                    <span class="text-sm font-medium">{{ game.capacity }} players</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-500">Type:</span>
+                    <span class="booking-type-badge {% if game.booking_type == 'SINGLE' %}
+                        single
+                      {% else %}
+                        hybrid
+                      {% endif %}">
+                      {% if game.booking_type == 'SINGLE' %}
+                        🔒 Private Only
+                      {% else %}
+                        🤝 Private + Shared
+                      {% endif %}
+                    </span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-500">Schedule:</span>
+                    <span class="text-sm font-medium">{{ game.opening_time|time:'H:i' }} - {{ game.closing_time|time:'H:i' }}</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-500">Pricing:</span>
+                    <div class="text-right">
+                      <div class="text-sm font-medium">Private: ₹{{ game.private_price }}</div>
+                      {% if game.shared_price %}
+                        <div class="text-xs text-gray-500">Shared: ₹{{ game.shared_price }}/person</div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="border-t pt-4 mb-4">
+                  <div class="grid grid-cols-2 gap-4 text-center">
+                    <div>
+                      <div class="text-lg font-bold text-blue-600">{{ game.total_slots }}</div>
+                      <div class="text-xs text-gray-500">Total Slots</div>
+                    </div>
+                    <div>
+                      <div class="text-lg font-bold text-green-600">{{ game.confirmed_bookings }}</div>
+                      <div class="text-xs text-gray-500">Bookings</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Status and Actions -->
+                <div class="flex justify-between items-center">
+                  <span class="status-badge {% if game.is_active %}
+                      active
+                    {% else %}
+                      inactive
+                    {% endif %}">
+                    {% if game.is_active %}
+                      ✅ Active
+                    {% else %}
+                      ❌ Inactive
+                    {% endif %}
+                  </span>
+
+                  <div class="flex space-x-2">
+                    <a href="{% url 'booking:game_detail' game.id %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">View Details</a>
+                    <a href="{% url 'booking:game_update' game.id %}" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">Edit</a>
+                    <button onclick="toggleGameStatus('{{ game.id }}', {{ game.is_active|yesno:'true,false' }})" class="text-gray-600 hover:text-gray-800 text-sm font-medium">
+                      {% if game.is_active %}
+                        Deactivate
+                      {% else %}
+                        Activate
+                      {% endif %}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14-7H5a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"></path>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No games yet</h3>
+            <p class="mt-1 text-sm text-gray-500">Get started by creating your first game.</p>
+            <div class="mt-6">
+              <a href="{% url 'booking:game_create' %}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>Add New Game
+              </a>
+            </div>
+          </div>
         {% endif %}
-    </div>
-</div>
+      </div>
 
-<script>
-function toggleGameStatus(gameId, isActive) {
-    const action = isActive ? 'deactivate' : 'activate';
+      <!-- Upcoming Bookings -->
+      {% if upcoming_bookings %}
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-bold text-gray-900 mb-4">Upcoming Bookings</h2>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Game</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                {% for booking in upcoming_bookings %}
+                  <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="text-sm font-medium text-gray-900">{{ booking.game.name }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="text-sm text-gray-900">{{ booking.customer.user.get_full_name|default:booking.customer.user.username }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="text-sm text-gray-900">{{ booking.game_slot.date }}</div>
+                      <div class="text-sm text-gray-500">{{ booking.game_slot.start_time|time:'H:i' }} - {{ booking.game_slot.end_time|time:'H:i' }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span class="booking-type-badge {% if booking.booking_type == 'PRIVATE' %}
+                          single
+                        {% else %}
+                          hybrid
+                        {% endif %}">
+                        {{ booking.booking_type|title }} ({{ booking.spots_booked }} spot{{ booking.spots_booked|pluralize }})
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹{{ booking.total_amount }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                   {% if booking.status == 'CONFIRMED' %}
+                          bg-green-100 text-green-800
+
+                        {% elif booking.status == 'PENDING' %}
+                          bg-yellow-100 text-yellow-800
+
+                        {% else %}
+                          bg-gray-100 text-gray-800
+                        {% endif %}">
+                        {{ booking.get_status_display }}
+                      </span>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    function toggleGameStatus(gameId, isActive) {
+      const action = isActive ? 'deactivate' : 'activate'
     
-    if (confirm(`Are you sure you want to ${action} this game?`)) {
+      if (confirm(`Are you sure you want to ${action} this game?`)) {
         fetch(`/booking/games/${gameId}/toggle-status/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                'Content-Type': 'application/json',
-            },
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+          }
         })
-        .then(response => response.json())
-        .then(data => {
+          .then((response) => response.json())
+          .then((data) => {
             if (data.success) {
-                location.reload();
+              location.reload()
             } else {
-                alert('Error: ' + data.error);
+              alert('Error: ' + data.error)
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while updating the game status.');
-        });
+          })
+          .catch((error) => {
+            alert('An error occurred while updating the game status.')
+          })
+      }
     }
-}
-</script>
+  </script>
 {% endblock %}

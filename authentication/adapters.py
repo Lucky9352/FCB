@@ -93,5 +93,16 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         return '/'
     
     def add_message(self, request, level, message_tag, message, extra_tags=''):
-        """Customize message display"""
+        """Customize message display - ensure message is a string"""
+        # Don't add login success messages from allauth - we'll handle them ourselves
+        if message_tag == 'account/messages/logged_in.txt':
+            return
+        
+        # Convert message to string if it's not already
+        if not isinstance(message, str):
+            # If it's a dict, skip it (likely a context dict from allauth)
+            if isinstance(message, dict):
+                return
+            message = str(message)
+        
         messages.add_message(request, level, message, extra_tags=extra_tags)

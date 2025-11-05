@@ -58,7 +58,7 @@ def tapnex_dashboard(request):
     # Recent bookings for monitoring
     recent_bookings = Booking.objects.filter(
         status__in=['CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'PENDING']
-    ).select_related('customer__user', 'game').order_by('-created_at')[:10]
+    ).select_related('customer__user', 'game', 'game_slot').order_by('-created_at')[:10]
     
     context = {
         'tapnex_user': tapnex_user,

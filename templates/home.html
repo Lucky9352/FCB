@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}TapNex Arena - Premium Gaming Cafe Booking Platform{% endblock %}
+{% block title %}TapNex Arena - Professional Pool & Table Tennis Tables{% endblock %}
 
-{% block description %}Experience the ultimate gaming destination. Book premium gaming stations with RTX 4090 GPUs, ultra-fast internet, and pro-grade peripherals. Level up your gaming journey today!{% endblock %}
+{% block description %}TapNex Arena - Premium sports venue powered by TapNex. Experience professional 8-ball pool tables and championship-grade table tennis. Book your perfect gaming session today!{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -13,40 +13,42 @@
     inset: 0;
     overflow: hidden;
     z-index: 0;
+    pointer-events: none;
   }
   
   .gradient-orb {
     position: absolute;
     border-radius: 50%;
-    filter: blur(100px);
-    opacity: 0.3;
+    filter: blur(80px);
+    opacity: 0.4;
     animation: floatOrb 20s ease-in-out infinite;
+    pointer-events: none;
   }
   
   .orb-1 {
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(102, 126, 234, 0.5) 0%, transparent 70%);
-    top: -200px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.3) 0%, transparent 70%);
+    top: -100px;
     left: -100px;
     animation-delay: 0s;
   }
   
   .orb-2 {
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(168, 85, 247, 0.5) 0%, transparent 70%);
-    top: 40%;
-    right: -150px;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(168, 85, 247, 0.25) 0%, transparent 70%);
+    top: 20%;
+    right: -100px;
     animation-delay: 7s;
   }
   
   .orb-3 {
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(0, 245, 255, 0.4) 0%, transparent 70%);
-    bottom: -100px;
-    left: 30%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(0, 245, 255, 0.2) 0%, transparent 70%);
+    bottom: -50px;
+    left: 20%;
     animation-delay: 14s;
   }
   
@@ -55,10 +57,10 @@
       transform: translate(0, 0) scale(1);
     }
     33% {
-      transform: translate(50px, -50px) scale(1.1);
+      transform: translate(30px, -30px) scale(1.05);
     }
     66% {
-      transform: translate(-50px, 50px) scale(0.9);
+      transform: translate(-30px, 30px) scale(0.95);
     }
   }
   
@@ -149,17 +151,55 @@
   .stat-number {
     font-size: 3rem;
     font-weight: 900;
-    background: linear-gradient(135deg, #667eea 0%, #a855f7 50%, #00f5ff 100%);
+    background: linear-gradient(135deg, #e94560 0%, #00d4aa 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+  
+  /* Ensure no horizontal scroll */
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Improved gradient text visibility */
+  .gradient-text-neon {
+    background: linear-gradient(135deg, #e94560 0%, #00d4aa 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.2;
+    font-weight: 900;
+    display: inline-block;
+  }
+  
+  /* Hero heading improvements */
+  h1 {
+    line-height: 1.1;
+  }
+  
+  /* Ensure proper spacing for hero section */
+  .hero-content {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+  
+  @media (max-width: 640px) {
+    .stat-number {
+      font-size: 2.5rem;
+    }
+    
+    .gradient-text-neon {
+      font-size: 3rem !important;
+      line-height: 1.1;
+    }
   }
 </style>
 {% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
-<section class="relative min-h-screen flex items-center justify-center overflow-hidden grid-pattern">
+<section class="relative min-h-screen flex items-center justify-center overflow-hidden grid-pattern pt-16" style="background-color: #111827;">
   <!-- Animated Background -->
   <div class="hero-bg">
     <div class="gradient-orb orb-1"></div>
@@ -168,27 +208,32 @@
   </div>
   
   <!-- Hero Content -->
-  <div class="relative z-10 container mx-auto px-4 py-20 text-center">
+  <div class="relative z-10 container mx-auto px-6 py-12 text-center max-w-7xl">
+    <!-- Forge Logo -->
+    <div data-reveal="fadeIn" class="mb-12">
+      <img src="{% static 'images/forge_logo.png' %}" alt="Forge Gaming Cafe" class="h-32 md:h-40 lg:h-44 w-auto mx-auto" onerror="this.style.display='none'">
+    </div>
+    
     <!-- Badge -->
     <div data-reveal="fadeIn" class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8 animate-fade-in">
       <span class="w-2 h-2 bg-success rounded-full animate-pulse"></span>
-      <span class="text-sm text-gray-300">🎮 Now Live - Premium Gaming Stations Available</span>
+      <span class="text-sm text-gray-300">🎯 Now Open - Professional Tables Available</span>
     </div>
     
     <!-- Main Heading -->
     <h1 data-reveal="fadeInUp" data-reveal-delay="100" 
-        class="text-5xl sm:text-6xl lg:text-7xl font-black text-white mb-6 leading-tight">
-      Level Up Your
-      <span class="block mt-2 gradient-text-neon font-gaming">
-        Gaming Experience
+        class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-6 leading-tight text-center">
+      <span class="block text-3xl sm:text-4xl md:text-5xl font-normal mb-3">Welcome to</span>
+      <span class="block gradient-text-neon font-gaming text-5xl sm:text-6xl md:text-7xl lg:text-8xl">
+        Forge Gaming Cafe
       </span>
     </h1>
     
     <!-- Subheading -->
     <p data-reveal="fadeInUp" data-reveal-delay="200" 
-       class="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto mb-12 leading-relaxed">
-      Premium gaming stations with RTX 4090 GPUs, 240Hz monitors, and ultra-low latency internet. 
-      Book your session and dominate the battlefield.
+       class="text-lg sm:text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-12 leading-relaxed text-center px-6">
+      Professional 8-ball pool and championship table tennis.<br>
+      <span class="text-primary-400">Perfect your skills</span> at our premium sports venue.
     </p>
     
     <!-- CTA Buttons -->
@@ -197,8 +242,8 @@
       {% if user.is_authenticated %}
         <a href="{% url 'booking:game_selection' %}" 
            class="btn btn-primary btn-xl btn-ripple group hover-glow">
-          <i class="bi bi-controller"></i>
-          Book Your Session
+          <i class="bi bi-calendar-check"></i>
+          Book Your Table
           <i class="bi bi-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
         </a>
         <a href="{% url 'authentication:customer_dashboard' %}" 
@@ -222,18 +267,18 @@
     
     <!-- Trust Badges -->
     <div data-reveal="fadeIn" data-reveal-delay="400" 
-         class="flex flex-wrap justify-center items-center gap-8 text-gray-400 text-sm">
+         class="flex flex-wrap justify-center items-center gap-8 text-gray-400 text-sm mb-16">
       <div class="flex items-center gap-2">
         <i class="bi bi-shield-check text-success text-xl"></i>
-        <span>Verified Platform</span>
+        <span>Powered by TapNex</span>
       </div>
       <div class="flex items-center gap-2">
         <i class="bi bi-lightning-charge-fill text-warning text-xl"></i>
         <span>Instant Booking</span>
       </div>
       <div class="flex items-center gap-2">
-        <i class="bi bi-star-fill text-warning text-xl"></i>
-        <span>4.9/5 Rating</span>
+        <i class="bi bi-people-fill text-info text-xl"></i>
+        <span>500+ Happy Players</span>
       </div>
     </div>
     
@@ -246,40 +291,122 @@
   </div>
 </section>
 
-<!-- Stats Section -->
-<section id="stats" class="py-20 bg-gradient-to-b from-dark-500 to-dark-600">
-  <div class="container mx-auto px-4">
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-      <!-- Stat 1 -->
-      <div data-reveal="scaleIn" class="text-center">
-        <div class="stat-number mb-2" data-counter="10000">0</div>
-        <p class="text-gray-400 text-lg">Happy Gamers</p>
-        <p class="text-gray-500 text-sm mt-1">and counting</p>
+
+<!-- Games Preview Section -->
+{% if games %}
+<section class="py-24" style="background: linear-gradient(to bottom, #1a202e, #111827);">
+  <div class="container mx-auto px-4 max-w-6xl">
+    <!-- Section Header -->
+    <div class="text-center mb-16">
+      <div data-reveal="fadeIn" class="inline-block px-4 py-2 rounded-full glass mb-4">
+        <span class="text-sm text-primary-400 font-semibold">🎯 OUR TABLES</span>
       </div>
-      
-      <!-- Stat 2 -->
-      <div data-reveal="scaleIn" data-reveal-delay="100" class="text-center">
-        <div class="stat-number mb-2" data-counter="100">0</div>
-        <p class="text-gray-400 text-lg">Gaming Stations</p>
-        <p class="text-gray-500 text-sm mt-1">premium setups</p>
+      <h2 data-reveal="fadeInUp" class="text-4xl sm:text-5xl font-black text-white mb-6">
+        Book Your <span class="gradient-text-neon">Table</span>
+      </h2>
+      <p data-reveal="fadeInUp" data-reveal-delay="100" class="text-xl text-gray-400 max-w-2xl mx-auto">
+        Choose from our selection of professional 8-ball pool and championship table tennis tables
+      </p>
+    </div>
+    
+    <!-- Games Grid - 2 Column for 2 items -->
+    <div class="grid md:grid-cols-2 gap-10 mb-12 max-w-5xl mx-auto">
+      {% for game in games|slice:":6" %}
+      <div data-reveal="fadeInUp" data-reveal-delay="{{ forloop.counter0|add:'00' }}" class="game-card group">
+        {% if game.image %}
+          <img src="{{ game.image.url }}" alt="{{ game.name }}" class="game-card-image">
+        {% else %}
+          <!-- Enhanced Placeholder based on game type -->
+          {% if 'pool' in game.name|lower or '8' in game.name or 'ball' in game.name|lower %}
+            <div class="game-card-image bg-gradient-to-br from-emerald-900 via-teal-800 to-cyan-900 flex items-center justify-center relative overflow-hidden">
+              <!-- Pool table felt texture effect -->
+              <div class="absolute inset-0 opacity-20" style="background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px);"></div>
+              <!-- Pool balls decoration -->
+              <div class="relative z-10 flex flex-col items-center">
+                <div class="flex gap-4 mb-4">
+                  <div class="w-16 h-16 rounded-full bg-white shadow-2xl flex items-center justify-center">
+                    <span class="text-2xl font-black text-gray-800">8</span>
+                  </div>
+                  <div class="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-700 shadow-2xl"></div>
+                </div>
+                <div class="flex gap-4">
+                  <div class="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-2xl"></div>
+                  <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 shadow-2xl"></div>
+                </div>
+              </div>
+              <!-- Cue stick decoration -->
+              <div class="absolute bottom-10 right-10 w-48 h-2 bg-gradient-to-r from-amber-800 to-amber-600 transform rotate-45 opacity-50 rounded-full"></div>
+            </div>
+          {% elif 'tennis' in game.name|lower or 'table tennis' in game.name|lower or 'ping' in game.name|lower %}
+            <div class="game-card-image bg-gradient-to-br from-blue-900 via-indigo-800 to-purple-900 flex items-center justify-center relative overflow-hidden">
+              <!-- Table tennis table effect -->
+              <div class="absolute inset-0 flex items-center justify-center">
+                <div class="w-4/5 h-3/5 bg-blue-600 opacity-20 rounded-lg border-4 border-white/30"></div>
+                <div class="absolute w-4/5 h-1 bg-white/40 top-1/2 transform -translate-y-1/2"></div>
+              </div>
+              <!-- Ping pong elements -->
+              <div class="relative z-10 flex flex-col items-center gap-6">
+                <!-- Paddles -->
+                <div class="flex gap-8 items-center">
+                  <div class="relative">
+                    <div class="w-20 h-24 rounded-full bg-gradient-to-br from-red-600 to-red-800 shadow-2xl"></div>
+                    <div class="w-6 h-16 bg-amber-700 absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-12 rounded"></div>
+                  </div>
+                  <div class="w-12 h-12 rounded-full bg-white shadow-2xl animate-pulse"></div>
+                  <div class="relative">
+                    <div class="w-20 h-24 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 shadow-2xl"></div>
+                    <div class="w-6 h-16 bg-amber-700 absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-12 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% else %}
+            <!-- Generic gaming placeholder -->
+            <div class="game-card-image bg-gradient-to-br from-primary-600 via-purple-600 to-secondary-600 flex items-center justify-center relative overflow-hidden">
+              <div class="absolute inset-0 opacity-10" style="background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.2) 0%, transparent 50%);"></div>
+              <div class="relative z-10">
+                <i class="bi bi-trophy-fill text-white text-7xl opacity-80 drop-shadow-2xl"></i>
+              </div>
+            </div>
+          {% endif %}
+        {% endif %}
+        
+        <div class="game-card-content">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="badge badge-success text-xs">
+              <i class="bi bi-circle-fill text-xs mr-1"></i>Available Now
+            </span>
+            {% if game.is_popular %}
+            <span class="badge badge-warning text-xs">
+              <i class="bi bi-fire text-xs mr-1"></i>Popular
+            </span>
+            {% endif %}
+          </div>
+          <h3 class="text-3xl font-black text-white mb-3">{{ game.name }}</h3>
+          <p class="text-gray-300 text-base mb-6 line-clamp-2">{{ game.description|default:"Professional gaming experience with top-tier equipment"|truncatewords:20 }}</p>
+          <div class="flex gap-3">
+            <a href="{% url 'booking:game_detail' game.id %}" class="btn btn-primary btn-md group-hover:bg-primary-500 transition-all flex-1">
+              <i class="bi bi-calendar-check"></i>
+              Book Now
+              <i class="bi bi-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+            </a>
+          </div>
+        </div>
       </div>
-      
-      <!-- Stat 3 -->
-      <div data-reveal="scaleIn" data-reveal-delay="200" class="text-center">
-        <div class="stat-number mb-2">24/7</div>
-        <p class="text-gray-400 text-lg">Always Open</p>
-        <p class="text-gray-500 text-sm mt-1">book anytime</p>
-      </div>
-      
-      <!-- Stat 4 -->
-      <div data-reveal="scaleIn" data-reveal-delay="300" class="text-center">
-        <div class="stat-number mb-2" data-counter="500">0</div>
-        <p class="text-gray-400 text-lg">Games Available</p>
-        <p class="text-gray-500 text-sm mt-1">AAA titles</p>
-      </div>
+      {% endfor %}
+    </div>
+    
+    <!-- View All Button -->
+    <div class="text-center" data-reveal="fadeInUp">
+      <a href="{% url 'booking:game_selection' %}" id="viewAllTablesBtn" class="btn btn-primary btn-lg btn-ripple hover-glow">
+        <i class="bi bi-grid-3x3-gap-fill"></i>
+        <span class="btn-text">View All Tables</span>
+        <i class="bi bi-arrow-right ml-2"></i>
+      </a>
     </div>
   </div>
 </section>
+{% endif %}
 
 <!-- Features Section -->
 <section id="features" class="py-24 relative overflow-hidden">
@@ -287,13 +414,13 @@
     <!-- Section Header -->
     <div class="text-center mb-16">
       <div data-reveal="fadeIn" class="inline-block px-4 py-2 rounded-full glass mb-4">
-        <span class="text-sm text-primary-400 font-semibold">✨ WHY CHOOSE US</span>
+        <span class="text-sm text-primary-400 font-semibold">✨ WHY FORGE GAMING CAFE</span>
       </div>
       <h2 data-reveal="fadeInUp" class="text-4xl sm:text-5xl font-black text-white mb-6">
-        Unmatched Gaming <span class="gradient-text-neon">Excellence</span>
+        Premium Sports <span class="gradient-text-neon">Experience</span>
       </h2>
       <p data-reveal="fadeInUp" data-reveal-delay="100" class="text-xl text-gray-400 max-w-3xl mx-auto">
-        We've built the ultimate gaming destination with everything you need to perform at your peak
+        Professional equipment, perfect environment, and seamless booking - everything you need to excel at your game
       </p>
     </div>
     
@@ -302,24 +429,24 @@
       <!-- Feature 1 -->
       <div data-reveal="fadeInUp" class="card feature-card hover-lift">
         <div class="text-neon-cyan mb-4">
-          <i class="bi bi-gpu-card text-5xl"></i>
+          <i class="bi bi-trophy-fill text-5xl"></i>
         </div>
-        <h3 class="text-2xl font-bold text-white mb-3">Premium Hardware</h3>
+        <h3 class="text-2xl font-bold text-white mb-3">Professional Tables</h3>
         <p class="text-gray-400 leading-relaxed mb-4">
-          RTX 4090 GPUs, Intel i9 processors, 32GB RAM, and NVMe SSDs. Experience gaming at maximum settings with ultra-high framerates.
+          Tournament-grade pool tables and championship table tennis setups. Experience professional-quality equipment maintained to perfection.
         </p>
         <ul class="space-y-2 text-sm text-gray-400">
           <li class="flex items-center gap-2">
             <i class="bi bi-check-circle-fill text-success"></i>
-            RTX 4090 24GB Graphics
+            8-Ball Pool Tables
           </li>
           <li class="flex items-center gap-2">
             <i class="bi bi-check-circle-fill text-success"></i>
-            240Hz Gaming Monitors
+            Professional Table Tennis
           </li>
           <li class="flex items-center gap-2">
             <i class="bi bi-check-circle-fill text-success"></i>
-            Mechanical Keyboards
+            Premium Equipment
           </li>
         </ul>
       </div>
@@ -327,24 +454,24 @@
       <!-- Feature 2 -->
       <div data-reveal="fadeInUp" data-reveal-delay="100" class="card feature-card hover-lift">
         <div class="text-neon-pink mb-4">
-          <i class="bi bi-speedometer2 text-5xl"></i>
+          <i class="bi bi-lightning-charge-fill text-5xl"></i>
         </div>
-        <h3 class="text-2xl font-bold text-white mb-3">Ultra-Fast Network</h3>
+        <h3 class="text-2xl font-bold text-white mb-3">Perfect Environment</h3>
         <p class="text-gray-400 leading-relaxed mb-4">
-          Dedicated 10Gbps fiber connection with enterprise-grade networking. Say goodbye to lag and hello to victory.
+          Climate-controlled venue with professional lighting and comfortable seating. The ideal atmosphere for focused play.
         </p>
         <ul class="space-y-2 text-sm text-gray-400">
           <li class="flex items-center gap-2">
             <i class="bi bi-check-circle-fill text-success"></i>
-            <1ms Latency
+            Optimal Lighting
           </li>
           <li class="flex items-center gap-2">
             <i class="bi bi-check-circle-fill text-success"></i>
-            DDoS Protection
+            Air Conditioned
           </li>
           <li class="flex items-center gap-2">
             <i class="bi bi-check-circle-fill text-success"></i>
-            Dedicated Bandwidth
+            Comfortable Lounge
           </li>
         </ul>
       </div>
@@ -406,7 +533,7 @@
         </div>
         <h3 class="text-2xl font-bold text-white mb-3">Tournaments & Events</h3>
         <p class="text-gray-400 leading-relaxed mb-4">
-          Join weekly tournaments, seasonal leagues, and special events. Compete, connect, and win amazing prizes.
+          Join weekly tournaments, seasonal leagues, and special events. Compete with other players and win amazing prizes.
         </p>
         <ul class="space-y-2 text-sm text-gray-400">
           <li class="flex items-center gap-2">
@@ -419,7 +546,7 @@
           </li>
           <li class="flex items-center gap-2">
             <i class="bi bi-check-circle-fill text-success"></i>
-            Pro Coaching
+            Coaching Available
           </li>
         </ul>
       </div>
@@ -431,7 +558,7 @@
         </div>
         <h3 class="text-2xl font-bold text-white mb-3">24/7 Support</h3>
         <p class="text-gray-400 leading-relaxed mb-4">
-          Our gaming experts are always here to help. Technical support, booking assistance, and gaming advice available round the clock.
+          Our staff is always here to help. Booking assistance, equipment support, and playing tips available round the clock.
         </p>
         <ul class="space-y-2 text-sm text-gray-400">
           <li class="flex items-center gap-2">
@@ -440,7 +567,7 @@
           </li>
           <li class="flex items-center gap-2">
             <i class="bi bi-check-circle-fill text-success"></i>
-            Technical Assistance
+            Equipment Assistance
           </li>
           <li class="flex items-center gap-2">
             <i class="bi bi-check-circle-fill text-success"></i>
@@ -452,91 +579,31 @@
   </div>
 </section>
 
-<!-- Games Preview Section -->
-{% if games %}
-<section class="py-24 bg-gradient-to-b from-dark-600 to-dark-500">
-  <div class="container mx-auto px-4">
-    <!-- Section Header -->
-    <div class="text-center mb-16">
-      <div data-reveal="fadeIn" class="inline-block px-4 py-2 rounded-full glass mb-4">
-        <span class="text-sm text-primary-400 font-semibold">🎮 GAME LIBRARY</span>
-      </div>
-      <h2 data-reveal="fadeInUp" class="text-4xl sm:text-5xl font-black text-white mb-6">
-        Popular <span class="gradient-text-neon">Games</span>
-      </h2>
-      <p data-reveal="fadeInUp" data-reveal-delay="100" class="text-xl text-gray-400 max-w-2xl mx-auto">
-        Play the latest AAA titles with maximum settings and buttery smooth framerates
-      </p>
-    </div>
-    
-    <!-- Games Grid -->
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-      {% for game in games|slice:":6" %}
-      <div data-reveal="fadeInUp" data-reveal-delay="{{ forloop.counter0|add:'00' }}" class="game-card group">
-        {% if game.image %}
-          <img src="{{ game.image.url }}" alt="{{ game.name }}" class="game-card-image">
-        {% else %}
-          <div class="game-card-image bg-gradient-to-br from-primary-600 to-secondary-600 flex items-center justify-center">
-            <i class="bi bi-controller text-white text-6xl opacity-50"></i>
-          </div>
-        {% endif %}
-        
-        <div class="game-card-content">
-          <div class="flex items-center gap-2 mb-2">
-            <span class="badge badge-primary">Available</span>
-            {% if game.is_popular %}
-            <span class="badge badge-warning">Popular</span>
-            {% endif %}
-          </div>
-          <h3 class="text-2xl font-bold text-white mb-2">{{ game.name }}</h3>
-          <p class="text-gray-300 text-sm mb-4 line-clamp-2">{{ game.description|truncatewords:15 }}</p>
-          <a href="{% url 'booking:game_detail' game.id %}" class="btn btn-primary btn-sm group-hover:bg-primary-500 transition-all">
-            <i class="bi bi-play-fill"></i>
-            Book Now
-            <i class="bi bi-arrow-right ml-2"></i>
-          </a>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-    
-    <!-- View All Button -->
-    <div class="text-center" data-reveal="fadeInUp">
-      <a href="{% url 'booking:game_selection' %}" class="btn btn-primary btn-lg btn-ripple hover-glow">
-        <i class="bi bi-grid-3x3-gap-fill"></i>
-        View All Games
-        <i class="bi bi-arrow-right ml-2"></i>
-      </a>
-    </div>
-  </div>
-</section>
-{% endif %}
-
 <!-- CTA Section -->
 <section class="py-24 relative overflow-hidden">
   <div class="absolute inset-0 bg-gradient-to-br from-primary-600 to-secondary-600 opacity-10"></div>
   
   <div class="container mx-auto px-4 relative z-10">
     <div data-reveal="scaleIn" class="max-w-4xl mx-auto text-center glass-strong rounded-3xl p-12">
-      <i class="bi bi-rocket-takeoff-fill text-6xl text-primary-400 mb-6 inline-block"></i>
+      <i class="bi bi-trophy-fill text-6xl text-primary-400 mb-6 inline-block"></i>
       <h2 class="text-4xl sm:text-5xl font-black text-white mb-6">
-        Ready to Dominate?
+        Ready to Play?
       </h2>
       <p class="text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
-        Join thousands of gamers who've leveled up their gaming experience with TapNex Arena. 
-        Your next victory starts here!
+        Join hundreds of players at <span class="text-primary-400 font-semibold">TapNex Arena</span>. 
+        Perfect your 8-ball pool and table tennis skills today!
       </p>
       <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
         {% if not user.is_authenticated %}
         <a href="{% url 'authentication:customer_login' %}" class="btn btn-primary btn-xl btn-ripple hover-glow">
-          <i class="bi bi-controller"></i>
-          Start Gaming Now
+          <i class="bi bi-calendar-check"></i>
+          Start Playing Now
           <i class="bi bi-arrow-right ml-2"></i>
         </a>
         {% else %}
         <a href="{% url 'booking:game_selection' %}" class="btn btn-primary btn-xl btn-ripple hover-glow">
           <i class="bi bi-calendar-check"></i>
-          Book Your Session
+          Book Your Table
           <i class="bi bi-arrow-right ml-2"></i>
         </a>
         {% endif %}
@@ -559,7 +626,7 @@
           </div>
           <div class="flex items-center gap-2">
             <i class="bi bi-people-fill text-info text-xl"></i>
-            <span>10,000+ Happy Gamers</span>
+            <span>500+ Happy Players</span>
           </div>
         </div>
       </div>
@@ -570,7 +637,61 @@
 
 {% block extra_js %}
 <script>
-  // Add any page-specific JavaScript here
-  console.log('🎮 Home page loaded');
+  // Page-specific JavaScript
+  document.addEventListener('DOMContentLoaded', function() {
+    // Prevent multiple clicks on View All Tables button
+    const viewAllTablesBtn = document.getElementById('viewAllTablesBtn');
+    if (viewAllTablesBtn) {
+      viewAllTablesBtn.addEventListener('click', function(e) {
+        // Check if already clicked
+        if (this.classList.contains('pointer-events-none')) {
+          e.preventDefault();
+          return;
+        }
+        
+        // Disable the button
+        this.classList.add('pointer-events-none', 'opacity-50', 'cursor-not-allowed');
+        this.classList.remove('hover-glow', 'btn-ripple');
+        
+        // Change button text to show loading state
+        const btnText = this.querySelector('.btn-text');
+        if (btnText) {
+          btnText.textContent = 'Loading...';
+        }
+        
+        // Add loading spinner
+        const spinner = document.createElement('i');
+        spinner.className = 'bi bi-arrow-repeat animate-spin ml-2';
+        const arrow = this.querySelector('.bi-arrow-right');
+        if (arrow) {
+          arrow.replaceWith(spinner);
+        }
+      });
+    }
+
+    // Also handle all Book Now buttons in game cards
+    const bookNowButtons = document.querySelectorAll('.game-card a[href*="game_detail"]');
+    bookNowButtons.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        if (this.classList.contains('pointer-events-none')) {
+          e.preventDefault();
+          return;
+        }
+        
+        this.classList.add('pointer-events-none', 'opacity-75');
+        this.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Loading...';
+      });
+    });
+  });
 </script>
+<style>
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+</style>
 {% endblock %}

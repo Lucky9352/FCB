@@ -42,7 +42,6 @@ class RealtimeAvailability {
     setupWebSocket() {
         // Check if WebSocket is supported
         if (!window.WebSocket) {
-            console.warn('WebSocket not supported, falling back to polling');
             return;
         }
         
@@ -54,14 +53,12 @@ class RealtimeAvailability {
             this.socket = new WebSocket(wsUrl);
             this.setupWebSocketEvents();
         } catch (error) {
-            console.error('Failed to create WebSocket connection:', error);
             this.fallbackToPolling();
         }
     }
     
     setupWebSocketEvents() {
         this.socket.onopen = () => {
-            console.log('WebSocket connected');
             this.isConnected = true;
             this.reconnectAttempts = 0;
             this.updateConnectionStatus(true);
@@ -77,12 +74,11 @@ class RealtimeAvailability {
                 const data = JSON.parse(event.data);
                 this.handleMessage(data);
             } catch (error) {
-                console.error('Failed to parse WebSocket message:', error);
+                // Silently handle parse errors
             }
         };
         
         this.socket.onclose = (event) => {
-            console.log('WebSocket disconnected:', event.code, event.reason);
             this.isConnected = false;
             this.updateConnectionStatus(false);
             
@@ -90,17 +86,15 @@ class RealtimeAvailability {
             if (this.reconnectAttempts < this.maxReconnectAttempts) {
                 setTimeout(() => {
                     this.reconnectAttempts++;
-                    console.log(`Reconnection attempt ${this.reconnectAttempts}`);
                     this.setupWebSocket();
                 }, this.reconnectDelay * Math.pow(2, this.reconnectAttempts));
             } else {
-                console.warn('Max reconnection attempts reached, falling back to polling');
                 this.fallbackToPolling();
             }
         };
         
         this.socket.onerror = (error) => {
-            console.error('WebSocket error:', error);
+            // Silently handle WebSocket errors
         };
     }
     
@@ -125,7 +119,7 @@ class RealtimeAvailability {
                 this.updateCapacity(data.station_id, data.capacity);
                 break;
             default:
-                console.log('Unknown message type:', data.type);
+                // Unknown message type
         }
     }
     
@@ -375,12 +369,11 @@ class RealtimeAvailability {
                 data.stations.forEach(station => this.updateStation(station));
             }
         } catch (error) {
-            console.error('Failed to fetch station updates:', error);
+            // Silently handle fetch errors
         }
     }
     
     fallbackToPolling() {
-        console.log('Falling back to polling for updates');
         this.isConnected = false;
         this.updateConnectionStatus(false);
         

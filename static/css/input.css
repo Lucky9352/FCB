@@ -3,9 +3,9 @@
 
 @theme {
   /* Custom color palette for gaming theme */
-  --color-gaming-primary: #1a1a2e;
-  --color-gaming-secondary: #16213e;
-  --color-gaming-accent: #0f3460;
+  --color-gaming-primary: #111827;
+  --color-gaming-secondary: #1a202e;
+  --color-gaming-accent: #1f2937;
   --color-gaming-highlight: #e94560;
   --color-gaming-success: #00d4aa;
   
@@ -19,7 +19,7 @@
 
 @layer base {
   body {
-    background-color: var(--color-gaming-primary);
+    background-color: #111827;
     color: white;
     font-family: system-ui, sans-serif;
   }

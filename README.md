@@ -1,21 +1,21 @@
-# 🎮 Forge Gaming Cafe - Booking Platform
+# � Forge Sports Arena - Booking Platform
 
-A comprehensive gaming cafe booking platform built with Django, powered by TapNex Technologies.
+A comprehensive sports venue booking platform built with Django, powered by TapNex Technologies.
 
 ## 📋 Overview
 
-This platform enables customers to book gaming slots at Forge Gaming Cafe with integrated payment processing, real-time availability management, and multi-role dashboard support.
+This platform enables customers to book pool tables and table tennis tables at Forge Sports Arena with integrated payment processing, real-time availability management, and multi-role dashboard support.
 
 ## 🚀 Features
 
 - **Multi-Role System**
-  - Customer Dashboard: Book gaming slots, view bookings, manage profile
-  - Cafe Owner Dashboard: Manage games, slots, view bookings and revenue
+  - Customer Dashboard: Book tables, view bookings, manage profile
+  - Venue Owner Dashboard: Manage tables, slots, view bookings and revenue
   - TapNex Superuser: Platform analytics, commission management, system settings
 
 - **Booking Management**
-  - Real-time slot availability
-  - Multiple game stations support
+  - Real-time table availability
+  - Multiple table types support (8-ball pool, table tennis)
   - Flexible time slot generation
   - Booking confirmation and notifications
 
@@ -177,13 +177,13 @@ python manage.py test
 ## 👥 User Roles
 
 ### Customer
-- Browse available games and slots
+- Browse available tables (pool & table tennis)
 - Make bookings
 - View booking history
 - Manage profile
 
-### Cafe Owner
-- Manage games and gaming stations
+### Venue Owner
+- Manage tables and equipment
 - Configure slot timings
 - View all bookings
 - Access revenue reports
@@ -191,7 +191,7 @@ python manage.py test
 ### TapNex Superuser
 - Platform-wide analytics
 - Commission management
-- Cafe owner management
+- Venue owner management
 - System configuration
 
 ## 🔒 Security Features
@@ -229,9 +229,10 @@ This is a private project. For bug reports or feature requests, please contact s
 - [ ] Mobile app integration
 - [ ] Advanced analytics dashboard
 - [ ] Loyalty program
-- [ ] Multi-cafe support
+- [ ] Multi-venue support
 - [ ] Tournament management
-- [ ] Social features
+- [ ] League features
+- [ ] Coaching sessions booking
 
 ## ⚙️ Configuration
 
