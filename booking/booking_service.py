@@ -149,10 +149,21 @@ class BookingService:
             
             game = game_slot.game
             
+            # RE-CHECK availability under lock (race condition protection)
+            # This ensures that even if two users clicked at the same time,
+            # only one will succeed and the other will get an accurate error
+            
             # Validate booking request
             if booking_type == 'PRIVATE':
                 if not availability.can_book_private:
-                    raise ValidationError("Private booking not available - slot already has bookings")
+                    if availability.booked_spots > 0:
+                        raise ValidationError(
+                            f"Private booking no longer available. "
+                            f"{availability.booked_spots} spot(s) were just booked by another user. "
+                            f"Please select a different time slot or book individual spots."
+                        )
+                    else:
+                        raise ValidationError("Private booking not available - slot already has bookings")
                 
                 if game.booking_type not in ['SINGLE', 'HYBRID']:
                     raise ValidationError("This game does not support private bookings")
@@ -161,35 +172,74 @@ class BookingService:
                 price_per_spot = game.private_price / game.capacity
                 total_price = game.private_price
                 
-                # Update availability for private booking
-                availability.is_private_booked = True
-                availability.booked_spots = game.capacity
+                # Don't update availability here - let Booking.save() handle it
+                # Availability will be updated based on booking status (PENDING vs CONFIRMED)
             
             elif booking_type == 'SHARED':
                 if game.booking_type != 'HYBRID':
                     raise ValidationError("This game does not support shared bookings")
                 
                 if not availability.can_book_shared:
-                    raise ValidationError("Shared booking not available - slot is privately booked")
+                    raise ValidationError(
+                        "Shared booking no longer available. "
+                        "This slot was just booked privately by another user. "
+                        "Please select a different time slot."
+                    )
                 
-                if spots_requested > availability.available_spots:
-                    raise ValidationError(f"Only {availability.available_spots} spots available")
+                # CRITICAL: Re-check available spots under lock (including pending reservations)
+                reserved_spots = availability.get_reserved_spots_count()
+                truly_available = availability.available_spots - reserved_spots
+                
+                if spots_requested > truly_available:
+                    if truly_available > 0:
+                        if reserved_spots > 0:
+                            raise ValidationError(
+                                f"Only {truly_available} spot(s) available now. "
+                                f"{reserved_spots} spot(s) are reserved by users completing payment. "
+                                f"Please select {truly_available} or fewer spots, or wait a few minutes."
+                            )
+                        else:
+                            raise ValidationError(
+                                f"Only {truly_available} spot(s) available now. "
+                                f"Another user just booked some spots. "
+                                f"Please select {truly_available} or fewer spots."
+                            )
+                    else:
+                        if reserved_spots > 0:
+                            raise ValidationError(
+                                f"All spots are currently reserved by users completing payment. "
+                                f"Please wait a few minutes or select a different time slot."
+                            )
+                        else:
+                            raise ValidationError(
+                                "This time slot just became fully booked by another user. "
+                                "Please select a different time slot."
+                            )
                 
                 if spots_requested < 1:
                     raise ValidationError("Must book at least 1 spot")
                 
-                spots_booked = spots_requested
-                price_per_spot = game.shared_price
-                total_price = price_per_spot * spots_requested
-                
-                # Update availability for shared booking
-                availability.booked_spots += spots_requested
+                # AUTO-CONVERT TO PRIVATE: If booking all available spots in one booking, treat as private
+                if spots_requested == game.capacity and availability.booked_spots == 0:
+                    # User is booking all spots at once - convert to private booking with private pricing
+                    booking_type = 'PRIVATE'
+                    spots_booked = game.capacity
+                    price_per_spot = game.private_price / game.capacity
+                    total_price = game.private_price
+                    
+                    # Don't update availability here - let Booking.save() handle it
+                else:
+                    # Regular shared booking
+                    spots_booked = spots_requested
+                    price_per_spot = game.shared_price
+                    total_price = price_per_spot * spots_requested
+                    
+                    # Don't update availability here - let Booking.save() handle it
             
             else:
                 raise ValidationError("Invalid booking type")
             
-            # Save availability changes
-            availability.save()
+            # Don't save availability here - Booking.save() will handle it based on status
             
             # Get platform fee from TapNex superuser settings
             from authentication.models import TapNexSuperuser
@@ -241,22 +291,24 @@ class BookingService:
             if booking.status in ['CANCELLED', 'COMPLETED']:
                 raise ValidationError("Booking cannot be cancelled")
             
-            # Update availability
-            try:
-                availability = SlotAvailability.objects.select_for_update().get(
-                    game_slot=booking.game_slot
-                )
-                
-                if booking.booking_type == 'PRIVATE':
-                    availability.is_private_booked = False
-                    availability.booked_spots = 0
-                else:  # SHARED
-                    availability.booked_spots = max(0, availability.booked_spots - booking.spots_booked)
-                
-                availability.save()
-                
-            except SlotAvailability.DoesNotExist:
-                pass  # Availability doesn't exist, nothing to update
+            # Update availability - ONLY if booking was CONFIRMED/IN_PROGRESS
+            # PENDING bookings don't affect booked_spots (they're tracked via get_reserved_spots_count)
+            if booking.status in ['CONFIRMED', 'IN_PROGRESS']:
+                try:
+                    availability = SlotAvailability.objects.select_for_update().get(
+                        game_slot=booking.game_slot
+                    )
+                    
+                    if booking.booking_type == 'PRIVATE':
+                        availability.is_private_booked = False
+                        availability.booked_spots = 0
+                    else:  # SHARED
+                        availability.booked_spots = max(0, availability.booked_spots - booking.spots_booked)
+                    
+                    availability.save()
+                    
+                except SlotAvailability.DoesNotExist:
+                    pass  # Availability doesn't exist, nothing to update
             
             # Update booking status
             old_status = booking.status
@@ -463,30 +515,53 @@ class BookingService:
             game_slot: GameSlot instance
             
         Returns:
-            Dict with restriction information
+            Dict with restriction information including pending reservations
         """
+        from django.utils import timezone
+        
         try:
             availability = SlotAvailability.objects.get(game_slot=game_slot)
             
+            # Expire old pending reservations first
+            BookingService.expire_old_reservations(game_slot)
+            
+            # Get pending reservations count
+            reserved_spots = availability.get_reserved_spots_count()
+            truly_available = availability.get_truly_available_spots()
+            
+            # Check if there are any pending private bookings
+            has_pending_private = game_slot.bookings.filter(
+                status='PENDING',
+                booking_type='PRIVATE',
+                reservation_expires_at__gt=timezone.now()
+            ).exists()
+            
             restrictions = {
-                'can_book_private': availability.can_book_private,
-                'can_book_shared': availability.can_book_shared,
-                'is_private_locked': availability.is_private_booked,
+                'can_book_private': availability.can_book_private and not has_pending_private,
+                'can_book_shared': availability.can_book_shared and not has_pending_private,
+                'is_private_locked': availability.is_private_booked or has_pending_private,
                 'is_shared_locked': availability.booked_spots > 0 and not availability.is_private_booked,
-                'available_spots': availability.available_spots,
+                'available_spots': truly_available,  # FIXED: Use truly_available instead of availability.available_spots
                 'booked_spots': availability.booked_spots,
-                'total_capacity': availability.total_capacity
+                'reserved_spots': reserved_spots,
+                'truly_available_spots': truly_available,
+                'total_capacity': availability.total_capacity,
+                'has_pending_reservations': reserved_spots > 0
             }
             
             # Add restriction reasons
             if not restrictions['can_book_private']:
-                if restrictions['is_shared_locked']:
+                if has_pending_private:
+                    restrictions['private_restriction_reason'] = "Someone is currently completing payment for private booking"
+                elif restrictions['is_shared_locked']:
                     restrictions['private_restriction_reason'] = f"Slot has {availability.booked_spots} shared bookings"
                 else:
                     restrictions['private_restriction_reason'] = "Slot is fully booked"
             
             if not restrictions['can_book_shared']:
-                if restrictions['is_private_locked']:
+                if has_pending_private:
+                    restrictions['shared_restriction_reason'] = "Someone is currently completing payment for private booking"
+                elif restrictions['is_private_locked']:
                     restrictions['shared_restriction_reason'] = "Slot is privately booked"
                 else:
                     restrictions['shared_restriction_reason'] = "No spots available"
@@ -502,5 +577,21 @@ class BookingService:
                 'is_shared_locked': False,
                 'available_spots': game_slot.game.capacity,
                 'booked_spots': 0,
-                'total_capacity': game_slot.game.capacity
+                'reserved_spots': 0,
+                'truly_available_spots': game_slot.game.capacity,
+                'total_capacity': game_slot.game.capacity,
+                'has_pending_reservations': False
             }
+    
+    @staticmethod
+    def expire_old_reservations(game_slot):
+        """Expire old pending reservations for a slot"""
+        from django.utils import timezone
+        
+        expired_bookings = game_slot.bookings.filter(
+            status='PENDING',
+            reservation_expires_at__lte=timezone.now()
+        )
+        
+        for booking in expired_bookings:
+            booking.check_and_expire_reservation()

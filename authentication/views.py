@@ -78,7 +78,9 @@ def customer_login_view(request):
     """Customer login view - redirects to Google OAuth or shows customer login options"""
     if request.user.is_authenticated:
         if hasattr(request.user, 'customer_profile'):
-            return redirect('/customer/dashboard/')
+            # Respect the 'next' parameter for redirect after login
+            next_url = request.GET.get('next', '/customer/dashboard/')
+            return redirect(next_url)
         else:
             messages.error(request, 'Please use the appropriate login method.')
             logout(request)
@@ -100,13 +102,17 @@ def customer_email_login_view(request):
             if hasattr(user, 'customer_profile'):
                 login(request, user)
                 messages.success(request, f'Welcome back, {user.get_full_name() or user.username}!')
-                return redirect('authentication:customer_dashboard')
+                # Respect the 'next' parameter for redirect after login
+                next_url = request.POST.get('next') or request.GET.get('next', 'authentication:customer_dashboard')
+                return redirect(next_url)
             else:
                 # Create customer profile if doesn't exist
                 Customer.objects.get_or_create(user=user)
                 login(request, user)
                 messages.success(request, f'Welcome, {user.get_full_name() or user.username}!')
-                return redirect('authentication:customer_dashboard')
+                # Respect the 'next' parameter for redirect after login
+                next_url = request.POST.get('next') or request.GET.get('next', 'authentication:customer_dashboard')
+                return redirect(next_url)
         else:
             messages.error(request, 'Invalid username or password. Please try again.')
             return redirect('authentication:customer_login')

@@ -32,18 +32,45 @@ class GameSerializer(serializers.ModelSerializer):
 
 
 class SlotAvailabilitySerializer(serializers.ModelSerializer):
-    """Serializer for slot availability information"""
+    """Serializer for slot availability information with reservation tracking"""
     
-    available_spots = serializers.IntegerField(read_only=True)
+    available_spots = serializers.SerializerMethodField()  # Changed to use truly_available_spots
     can_book_private = serializers.BooleanField(read_only=True)
     can_book_shared = serializers.BooleanField(read_only=True)
+    reserved_spots = serializers.SerializerMethodField()
+    truly_available_spots = serializers.SerializerMethodField()
+    pending_reservations = serializers.SerializerMethodField()
     
     class Meta:
         model = SlotAvailability
         fields = [
             'total_capacity', 'booked_spots', 'is_private_booked',
-            'available_spots', 'can_book_private', 'can_book_shared'
+            'available_spots', 'can_book_private', 'can_book_shared',
+            'reserved_spots', 'truly_available_spots', 'pending_reservations'
         ]
+    
+    def get_available_spots(self, obj):
+        """Get truly available spots (accounting for reserved spots)"""
+        return obj.get_truly_available_spots()
+    
+    def get_reserved_spots(self, obj):
+        """Get count of spots reserved by pending payments"""
+        return obj.get_reserved_spots_count()
+    
+    def get_truly_available_spots(self, obj):
+        """Get spots that are neither booked nor reserved"""
+        return obj.get_truly_available_spots()
+    
+    def get_pending_reservations(self, obj):
+        """Get list of pending reservations with expiry times"""
+        pending = obj.get_pending_reservations()
+        return [{
+            'booking_id': str(booking.id),
+            'spots': booking.spots_booked,
+            'booking_type': booking.booking_type,
+            'expires_at': booking.reservation_expires_at.isoformat() if booking.reservation_expires_at else None,
+            'time_remaining_seconds': booking.time_remaining_seconds
+        } for booking in pending]
 
 
 class BookingOptionSerializer(serializers.Serializer):
