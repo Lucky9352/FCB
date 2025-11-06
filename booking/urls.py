@@ -1,4 +1,5 @@
 from django.urls import path, include
+from django.shortcuts import render
 from . import views
 from . import payment_views
 from . import verification_views
@@ -49,6 +50,9 @@ urlpatterns = [
     # AJAX endpoints
     path('api/availability/', views.get_availability, name='get_availability'),
     path('api/slot-availability/<int:game_slot_id>/', views.get_slot_availability, name='get_slot_availability'),
+    
+    # Test page
+    path('test-api/', lambda request: render(request, 'booking/test_api.html'), name='test_api'),
     
     # Real-time API endpoints
     path('api/stations/status/', api_realtime.station_status_api, name='station_status_api'),

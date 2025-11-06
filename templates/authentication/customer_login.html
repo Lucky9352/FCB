@@ -73,6 +73,10 @@
             <!-- Form -->
             <form class="space-y-6" method="post" action="{% url 'authentication:customer_email_login' %}" id="login-form">
               {% csrf_token %}
+              <!-- Hidden field to preserve the 'next' parameter -->
+              {% if request.GET.next %}
+              <input type="hidden" name="next" value="{{ request.GET.next }}">
+              {% endif %}
 
               <!-- Username/Email Field -->
               <div class="form-group">
@@ -713,8 +717,13 @@ function handleGoogleLogin() {
   button.style.opacity = '0.5';
   button.style.cursor = 'not-allowed';
   
+  // Preserve the 'next' parameter for redirect after Google login
+  const urlParams = new URLSearchParams(window.location.search);
+  const nextUrl = urlParams.get('next');
+  const googleLoginUrl = nextUrl ? `/accounts/google/login/?next=${encodeURIComponent(nextUrl)}` : '/accounts/google/login/?process=login';
+  
   setTimeout(() => {
-    window.location.href = '/accounts/google/login/';
+    window.location.href = googleLoginUrl;
   }, 500);
 }
 
@@ -724,8 +733,13 @@ function handleGoogleSignup(buttonElement) {
   buttonElement.style.opacity = '0.5';
   buttonElement.style.cursor = 'not-allowed';
   
+  // Preserve the 'next' parameter for redirect after Google signup
+  const urlParams = new URLSearchParams(window.location.search);
+  const nextUrl = urlParams.get('next');
+  const googleLoginUrl = nextUrl ? `/accounts/google/login/?next=${encodeURIComponent(nextUrl)}` : '/accounts/google/login/?process=login';
+  
   setTimeout(() => {
-    window.location.href = '/accounts/google/login/';
+    window.location.href = googleLoginUrl;
   }, 500);
 }
 

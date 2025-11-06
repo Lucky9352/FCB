@@ -73,14 +73,7 @@ class GameSlotsAPI(APIView):
         else:
             selected_date = timezone.now().date()
         
-        # Try cache first (cache for 2 minutes to keep data fresh)
-        cache_key = f'game_slots_{game_id}_{selected_date}'
-        cached_data = cache.get(cache_key)
-        
-        if cached_data:
-            return Response(cached_data)
-        
-        # Get slots with optimized queries (CRITICAL PERFORMANCE FIX)
+        # Get slots with optimized queries
         slots = GameSlot.objects.filter(
             game=game,
             date=selected_date,
@@ -92,10 +85,38 @@ class GameSlotsAPI(APIView):
             Prefetch(
                 'bookings',
                 queryset=Booking.objects.filter(
-                    status__in=['CONFIRMED', 'COMPLETED']
+                    status__in=['CONFIRMED', 'COMPLETED', 'PENDING']
                 ).select_related('customer')
             )
         ).order_by('start_time')
+        
+        # Expire old reservations in bulk BEFORE processing slots (performance optimization)
+        # Only expire if there are any to avoid unnecessary queries
+        expired_count = Booking.objects.filter(
+            game_slot__game=game,
+            game_slot__date=selected_date,
+            status='PENDING',
+            reservation_expires_at__lte=timezone.now()
+        ).update(status='EXPIRED', is_reservation_expired=True)
+        
+        # CRITICAL: Refresh slots from database after expiring reservations
+        # The .select_related('availability') loaded stale data before expiration
+        if expired_count > 0:
+            slots = GameSlot.objects.filter(
+                game=game,
+                date=selected_date,
+                is_active=True
+            ).select_related(
+                'game',
+                'availability'
+            ).prefetch_related(
+                Prefetch(
+                    'bookings',
+                    queryset=Booking.objects.filter(
+                        status__in=['CONFIRMED', 'COMPLETED', 'PENDING']
+                    ).select_related('customer')
+                )
+            ).order_by('start_time')
         
         # Filter past slots
         now = timezone.now()
@@ -140,10 +161,12 @@ class GameSlotsAPI(APIView):
             'slots': serializer.data
         }
         
-        # Cache for 2 minutes
-        cache.set(cache_key, response_data, 120)
-        
-        return Response(response_data)
+        # Create response with no-cache headers to prevent browser caching
+        response = Response(response_data)
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        return response
 
 
 class GameSlotsWeekAPI(APIView):
@@ -156,13 +179,6 @@ class GameSlotsWeekAPI(APIView):
         """Get slots for next 7 days"""
         
         game = get_object_or_404(Game, id=game_id, is_active=True)
-        
-        # Try cache first
-        cache_key = f'game_slots_week_{game_id}'
-        cached_data = cache.get(cache_key)
-        
-        if cached_data:
-            return Response(cached_data)
         
         # Get date range
         start_date = timezone.now().date()
@@ -181,7 +197,7 @@ class GameSlotsWeekAPI(APIView):
             Prefetch(
                 'bookings',
                 queryset=Booking.objects.filter(
-                    status__in=['CONFIRMED', 'COMPLETED']
+                    status__in=['CONFIRMED', 'COMPLETED', 'PENDING']
                 )
             )
         ).order_by('date', 'start_time')
@@ -232,9 +248,6 @@ class GameSlotsWeekAPI(APIView):
             'game_name': game.name,
             'dates': grouped_data
         }
-        
-        # Cache for 5 minutes
-        cache.set(cache_key, response_data, 300)
         
         return Response(response_data)
 

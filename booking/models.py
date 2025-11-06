@@ -158,6 +158,28 @@ class SlotAvailability(models.Model):
     def __str__(self):
         return f"{self.game_slot} - {self.available_spots}/{self.total_capacity} available"
     
+    def get_pending_reservations(self):
+        """Get active pending reservations for this slot"""
+        from django.utils import timezone
+        
+        # Get all PENDING bookings that haven't expired
+        pending_bookings = self.game_slot.bookings.filter(
+            status='PENDING',
+            reservation_expires_at__gt=timezone.now()
+        )
+        
+        return pending_bookings
+    
+    def get_reserved_spots_count(self):
+        """Get count of spots currently reserved by pending payments"""
+        pending_bookings = self.get_pending_reservations()
+        return sum(booking.spots_booked for booking in pending_bookings)
+    
+    def get_truly_available_spots(self):
+        """Get spots that are neither booked nor reserved"""
+        reserved = self.get_reserved_spots_count()
+        return max(0, self.available_spots - reserved)
+    
     @property
     def available_spots(self):
         """Get number of available spots"""
@@ -278,6 +300,7 @@ class Booking(models.Model):
         ('COMPLETED', 'Completed'),
         ('CANCELLED', 'Cancelled'),
         ('NO_SHOW', 'No Show'),
+        ('EXPIRED', 'Payment Expired'),
     ]
     
     BOOKING_TYPES = [
@@ -358,6 +381,19 @@ class Booking(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
     payment_id = models.CharField(max_length=100, blank=True, help_text="Payment gateway transaction ID (DEPRECATED)")
     payment_status = models.CharField(max_length=20, blank=True, help_text="Payment status from gateway")
+    
+    # Payment Reservation System (5-minute payment window)
+    reservation_expires_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text="Timestamp when payment reservation expires (5 minutes from booking creation)"
+    )
+    is_reservation_expired = models.BooleanField(
+        default=False,
+        db_index=True,
+        help_text="Whether the payment reservation has expired"
+    )
     
     # Razorpay Payment Fields
     razorpay_order_id = models.CharField(max_length=100, blank=True, help_text="Razorpay order ID")
@@ -509,8 +545,57 @@ class Booking(models.Model):
         subtotal = Decimal(str(self.price_per_spot)) * Decimal(str(self.spots_booked))
         return subtotal.quantize(Decimal('0.01'))
     
+    def check_and_expire_reservation(self):
+        """
+        Check if reservation has expired and update status accordingly
+        Returns True if expired, False otherwise
+        """
+        from django.utils import timezone
+        
+        if self.status != 'PENDING':
+            return False
+        
+        if not self.reservation_expires_at:
+            return False
+        
+        if timezone.now() >= self.reservation_expires_at:
+            # Reservation has expired
+            self.status = 'EXPIRED'
+            self.is_reservation_expired = True
+            self.save()
+            return True
+        
+        return False
+    
+    @property
+    def is_payment_window_active(self):
+        """Check if payment window is still active"""
+        from django.utils import timezone
+        
+        if self.status != 'PENDING':
+            return False
+        
+        if not self.reservation_expires_at:
+            return False
+        
+        return timezone.now() < self.reservation_expires_at
+    
+    @property
+    def time_remaining_seconds(self):
+        """Get remaining time in seconds for payment"""
+        from django.utils import timezone
+        
+        if not self.is_payment_window_active:
+            return 0
+        
+        remaining = (self.reservation_expires_at - timezone.now()).total_seconds()
+        return max(0, int(remaining))
+    
     def save(self, *args, **kwargs):
         """Override save to calculate total amount and update availability"""
+        from django.utils import timezone
+        from datetime import timedelta
+        
         # Calculate subtotal and total amount if not set
         if self.price_per_spot and self.spots_booked:
             if not self.subtotal:
@@ -518,8 +603,13 @@ class Booking(models.Model):
             if not self.total_amount:
                 self.total_amount = self.calculate_total_amount()
         
-        # Update slot availability when booking is confirmed
+        # Set reservation expiry time for new PENDING bookings
         is_new = self.pk is None
+        if is_new and self.status == 'PENDING' and not self.reservation_expires_at:
+            # Set expiry to 5 minutes from now
+            self.reservation_expires_at = timezone.now() + timedelta(minutes=5)
+        
+        # Update slot availability when booking is confirmed
         old_status = None
         if not is_new:
             # Only get old booking if it exists (updating existing booking)
@@ -533,29 +623,44 @@ class Booking(models.Model):
         
         # Update availability when booking status changes
         if self.game_slot and (is_new or old_status != self.status):
-            self.update_slot_availability()
+            self.update_slot_availability(old_status)
     
-    def update_slot_availability(self):
-        """Update slot availability based on booking status"""
+    def update_slot_availability(self, old_status=None):
+        """Update slot availability based on booking status
+        
+        Args:
+            old_status: Previous status of the booking (if updating existing booking)
+        """
         availability, created = SlotAvailability.objects.get_or_create(
             game_slot=self.game_slot,
             defaults={'total_capacity': self.game.capacity}
         )
         
         if self.status in ['CONFIRMED', 'IN_PROGRESS']:
-            # Add booking to availability
+            # Add booking to availability (permanent)
             if self.booking_type == 'PRIVATE':
                 availability.is_private_booked = True
                 availability.booked_spots = availability.total_capacity
             else:  # SHARED
-                availability.booked_spots += self.spots_booked
-        elif self.status in ['CANCELLED', 'NO_SHOW']:
-            # Remove booking from availability
-            if self.booking_type == 'PRIVATE':
-                availability.is_private_booked = False
-                availability.booked_spots = 0
-            else:  # SHARED
-                availability.booked_spots = max(0, availability.booked_spots - self.spots_booked)
+                # Only add if transitioning from PENDING or new booking
+                # PENDING bookings were never in booked_spots
+                if old_status in ['PENDING', None]:
+                    availability.booked_spots += self.spots_booked
+        elif self.status == 'PENDING':
+            # PENDING bookings reserve spots temporarily
+            # These are tracked separately via get_reserved_spots_count()
+            # Don't modify booked_spots for PENDING bookings
+            pass
+        elif self.status in ['CANCELLED', 'NO_SHOW', 'EXPIRED']:
+            # Only subtract if the booking was previously CONFIRMED/IN_PROGRESS
+            # PENDING bookings were never added to booked_spots, so don't subtract
+            if old_status in ['CONFIRMED', 'IN_PROGRESS']:
+                if self.booking_type == 'PRIVATE':
+                    availability.is_private_booked = False
+                    availability.booked_spots = 0
+                else:  # SHARED
+                    availability.booked_spots = max(0, availability.booked_spots - self.spots_booked)
+            # If old_status was PENDING, no need to modify booked_spots
         
         availability.save()
         

@@ -352,6 +352,35 @@
             </div>
         </div>
 
+        <!-- Payment Timer Warning -->
+        <div id="paymentTimerBanner" class="mb-8 animate-fade-in-up" style="animation-delay: 0s;">
+            <div class="card-glow relative overflow-hidden" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(245, 158, 11, 0.2)); backdrop-filter: blur(20px); border: 2px solid rgba(239, 68, 68, 0.5); border-radius: 1.5rem; padding: 1.5rem;">
+                <div class="flex items-center justify-between gap-4 flex-wrap">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #ef4444, #f59e0b); box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);">
+                            <i class="bi bi-clock-history text-white text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-white font-bold text-lg mb-1">Complete Payment Within</h3>
+                            <p class="text-gray-300 text-sm">Your reservation will expire if payment is not completed</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div id="paymentTimer" class="text-center">
+                            <div class="text-4xl font-black text-white mb-1" style="font-family: 'Orbitron', monospace;">
+                                <span id="timerMinutes">05</span>:<span id="timerSeconds">00</span>
+                            </div>
+                            <div class="text-xs text-gray-300 font-medium">Minutes Remaining</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Progress Bar -->
+                <div class="mt-4 h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div id="timerProgressBar" class="h-full bg-gradient-to-r from-red-500 to-orange-500 transition-all duration-1000 ease-linear" style="width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- Main Content -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Left Column - Booking Details -->
@@ -994,7 +1023,200 @@ document.addEventListener('DOMContentLoaded', function() {
         token.value = '{{ csrf_token }}';
         document.body.appendChild(token);
     }
+    
+    // Initialize payment timer
+    initializePaymentTimer();
 });
+
+// Payment Timer System
+let timerInterval = null;
+const RESERVATION_EXPIRES_AT_STR = '{{ booking.reservation_expires_at|date:"c" }}';
+const RESERVATION_EXPIRES_AT = RESERVATION_EXPIRES_AT_STR ? new Date(RESERVATION_EXPIRES_AT_STR) : null;
+const TOTAL_DURATION_MS = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+function initializePaymentTimer() {
+    // Check if reservation expiry time exists
+    if (!RESERVATION_EXPIRES_AT || isNaN(RESERVATION_EXPIRES_AT.getTime())) {
+        // No valid expiry time - hide timer banner silently
+        // This can happen for old bookings created before the reservation system
+        const timerBanner = document.getElementById('paymentTimerBanner');
+        if (timerBanner) {
+            timerBanner.style.display = 'none';
+        }
+        return;
+    }
+    
+    // Check if reservation has already expired
+    const now = new Date();
+    if (now >= RESERVATION_EXPIRES_AT) {
+        handleTimerExpired();
+        return;
+    }
+    
+    // Start the timer
+    updateTimer();
+    timerInterval = setInterval(updateTimer, 1000);
+}
+
+function updateTimer() {
+    if (!RESERVATION_EXPIRES_AT) {
+        return;
+    }
+    
+    const now = new Date();
+    const timeRemaining = RESERVATION_EXPIRES_AT - now;
+    
+    if (timeRemaining <= 0) {
+        handleTimerExpired();
+        return;
+    }
+    
+    // Calculate minutes and seconds
+    const minutes = Math.floor(timeRemaining / 60000);
+    const seconds = Math.floor((timeRemaining % 60000) / 1000);
+    
+    // Update display
+    const minutesEl = document.getElementById('timerMinutes');
+    const secondsEl = document.getElementById('timerSeconds');
+    
+    if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
+    if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
+    
+    // Update progress bar
+    const percentageRemaining = (timeRemaining / TOTAL_DURATION_MS) * 100;
+    const progressBar = document.getElementById('timerProgressBar');
+    if (progressBar) {
+        progressBar.style.width = percentageRemaining + '%';
+        
+        // Change color based on time remaining
+        if (percentageRemaining < 20) {
+            progressBar.style.background = 'linear-gradient(to right, #dc2626, #ef4444)'; // Red
+        } else if (percentageRemaining < 50) {
+            progressBar.style.background = 'linear-gradient(to right, #f59e0b, #fbbf24)'; // Orange/Yellow
+        }
+    }
+    
+    // Show warning when less than 1 minute
+    if (timeRemaining < 60000 && timeRemaining > 59000) {
+        showTimerWarning('Less than 1 minute remaining!');
+    }
+    
+    // Flash timer when less than 30 seconds
+    const timerElement = document.getElementById('paymentTimer');
+    if (timeRemaining < 30000) {
+        timerElement.style.animation = 'pulse 0.5s ease-in-out infinite';
+    }
+}
+
+function handleTimerExpired() {
+    // Stop the timer
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    
+    // Update display
+    document.getElementById('timerMinutes').textContent = '00';
+    document.getElementById('timerSeconds').textContent = '00';
+    document.getElementById('timerProgressBar').style.width = '0%';
+    
+    // Show expiry modal
+    showExpiryModal();
+}
+
+function showExpiryModal() {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4';
+    modal.innerHTML = `
+        <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl max-w-md w-full p-8 border-2 border-red-500/50 shadow-2xl animate-shake">
+            <div class="text-center">
+                <div class="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="bi bi-hourglass-bottom text-red-400 text-4xl"></i>
+                </div>
+                <h2 class="text-3xl font-black text-white mb-4">Payment Time Expired</h2>
+                <p class="text-gray-300 mb-6 leading-relaxed">
+                    Your 5-minute payment window has expired. Your reservation has been released and the spots are now available for other users.
+                </p>
+                <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mb-6">
+                    <p class="text-yellow-300 text-sm">
+                        <i class="bi bi-info-circle-fill"></i>
+                        Don't worry! You can book again if the slot is still available.
+                    </p>
+                </div>
+                <div class="flex gap-3">
+                    <a href="/booking/games/{{ booking.game.id }}/" 
+                       class="flex-1 bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white px-6 py-3 rounded-lg font-semibold transition-all shadow-lg">
+                        <i class="bi bi-arrow-clockwise"></i> Book Again
+                    </a>
+                    <a href="/" 
+                       class="flex-1 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg font-medium transition-colors border border-white/20">
+                        Go Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Disable payment button
+    const payButton = document.getElementById('payNowButton');
+    if (payButton) {
+        payButton.disabled = true;
+        payButton.classList.add('opacity-50', 'cursor-not-allowed');
+        payButton.innerHTML = '<i class="bi bi-hourglass-bottom"></i> Payment Expired';
+    }
+}
+
+function showTimerWarning(message) {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 z-50 animate-slide-in';
+    notification.innerHTML = `
+        <div class="bg-gradient-to-br from-yellow-900/95 to-orange-800/95 backdrop-blur-xl rounded-xl p-4 border-2 border-yellow-500/50 shadow-xl max-w-sm">
+            <div class="flex items-center gap-3">
+                <i class="bi bi-exclamation-triangle-fill text-yellow-300 text-2xl"></i>
+                <div>
+                    <p class="text-white font-bold text-sm">${message}</p>
+                    <p class="text-yellow-200 text-xs mt-1">Complete your payment quickly!</p>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
+    }, 5000);
+}
+
+// Add shake animation
+const shakeStyle = document.createElement('style');
+shakeStyle.textContent = `
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+        20%, 40%, 60%, 80% { transform: translateX(10px); }
+    }
+    .animate-shake {
+        animation: shake 0.5s ease-in-out;
+    }
+    @keyframes slide-in {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    .animate-slide-in {
+        animation: slide-in 0.3s ease-out;
+    }
+`;
+document.head.appendChild(shakeStyle);
 </script>
 {% csrf_token %}
 {% endblock %}

@@ -663,6 +663,13 @@ def hybrid_booking_confirm(request, booking_id):
         status='PENDING'
     )
     
+    # Fix for old bookings without reservation_expires_at
+    if not booking.reservation_expires_at:
+        from django.utils import timezone
+        from datetime import timedelta
+        booking.reservation_expires_at = timezone.now() + timedelta(minutes=5)
+        booking.save()
+    
     # Get booking options that were available
     from .booking_service import BookingService
     available_options = BookingService.get_booking_options(booking.game_slot)
@@ -740,11 +747,17 @@ def update_booking_spots(request, booking_id):
             spot_difference = new_spots - booking.spots_booked
             
             if spot_difference > 0:
-                # Increasing spots - check availability
-                if spot_difference > availability.available_spots:
+                # Increasing spots - check truly available spots (accounting for other pending reservations)
+                reserved_spots = availability.get_reserved_spots_count()
+                truly_available = availability.available_spots - reserved_spots
+                
+                # Add back the current booking's spots since we're modifying it
+                truly_available += booking.spots_booked
+                
+                if new_spots > truly_available:
                     return JsonResponse({
                         'success': False,
-                        'error': f'Only {availability.available_spots} additional spots available'
+                        'error': f'Only {truly_available} total spots available (including your current {booking.spots_booked})'
                     }, status=400)
             
             # Update booking
@@ -753,14 +766,12 @@ def update_booking_spots(request, booking_id):
             booking.subtotal = booking.price_per_spot * new_spots
             booking.total_amount = booking.subtotal + booking.platform_fee
             
-            # Update availability
-            if spot_difference > 0:
-                availability.booked_spots += spot_difference
-            else:
-                availability.booked_spots -= abs(spot_difference)
+            # CRITICAL: Do NOT update availability.booked_spots for PENDING bookings
+            # PENDING bookings are tracked separately via get_reserved_spots_count()
+            # Only CONFIRMED bookings update booked_spots (handled in Booking.save())
             
-            availability.save()
-            booking.save()
+            # Save booking (this will NOT update availability.booked_spots since status is PENDING)
+            booking.save(update_fields=['spots_booked', 'subtotal', 'total_amount'])
             
             return JsonResponse({
                 'success': True,
