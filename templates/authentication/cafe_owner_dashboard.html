@@ -50,18 +50,58 @@
         </div>
       </div>
 
+      <!-- Quick Actions - QR Scanner Prominent -->
+      <div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-8 mb-8 shadow-2xl">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div class="flex items-center gap-6">
+            <div class="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center">
+              <i class="bi bi-qr-code-scan text-white text-4xl"></i>
+            </div>
+            <div>
+              <h3 class="text-2xl font-black text-white mb-2">QR Code Scanner</h3>
+              <p class="text-purple-100">Scan customer QR codes to verify bookings and grant entry</p>
+            </div>
+          </div>
+          <a href="{% url 'booking:qr_scanner' %}" class="bg-white hover:bg-gray-100 text-purple-600 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center gap-3">
+            <i class="bi bi-camera-fill text-2xl"></i>
+            <span>Open Scanner</span>
+          </a>
+        </div>
+      </div>
+
       <!-- Management Tools -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6">
-          <h3 class="text-xl font-semibold text-white mb-4">Booking Management</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 hover:bg-white/15 transition-all">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
+              <i class="bi bi-calendar-check text-blue-400 text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-white">Bookings</h3>
+          </div>
           <p class="text-gray-300 mb-4">View and manage customer bookings</p>
-          <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">Manage Bookings</button>
+          <a href="{% url 'booking:active_bookings' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 inline-block">Manage Bookings</a>
         </div>
 
-        <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6">
-          <h3 class="text-xl font-semibold text-white mb-4">Station Management</h3>
-          <p class="text-gray-300 mb-4">Configure gaming stations and pricing</p>
-          <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">Manage Stations</button>
+        <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 hover:bg-white/15 transition-all">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
+              <i class="bi bi-controller text-green-400 text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-white">Games</h3>
+          </div>
+          <p class="text-gray-300 mb-4">Configure games and pricing</p>
+          <a href="{% url 'booking:game_management_list' %}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 inline-block">Manage Games</a>
+        </div>
+
+        <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 hover:bg-white/15 transition-all">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
+              <i class="bi bi-clock-history text-yellow-400 text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-white">Slots</h3>
+          </div>
+          <p class="text-gray-300 mb-4">Manage time slots and availability</p>
+          <a href="{% url 'booking:custom_slot_management' %}" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 inline-block">Manage Slots</a>
         </div>
       </div>
     </main>

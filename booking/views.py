@@ -678,9 +678,17 @@ def hybrid_booking_confirm(request, booking_id):
     max_additional_spots = 0
     if booking.booking_type == 'SHARED':
         current_availability = booking.game_slot.availability
-        # Max spots = current spots + available spots (capped at 4 total per booking)
+        
+        # Get truly available spots (excluding other pending reservations)
+        reserved_spots = current_availability.get_reserved_spots_count()
+        truly_available = current_availability.available_spots - reserved_spots
+        
+        # Add back the current booking's spots since we're modifying it
+        truly_available += booking.spots_booked
+        
+        # Max spots = current spots + truly available (capped at 4 total per booking)
         max_additional_spots = min(
-            current_availability.available_spots,
+            truly_available - booking.spots_booked,
             4 - booking.spots_booked  # Cap at 4 total spots per booking
         )
     

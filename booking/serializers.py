@@ -108,11 +108,12 @@ class GameSlotSerializer(serializers.ModelSerializer):
         ]
     
     def get_booking_options(self, obj):
-        """Get booking options for this slot"""
+        """Get booking options for this slot (optimized - no expiration here)"""
         from .booking_service import BookingService
         
         try:
-            options = BookingService.get_booking_options(obj)
+            # Use optimized version that skips expiration (already done in view)
+            options = BookingService.get_booking_options_fast(obj)
             return BookingOptionSerializer(options, many=True).data
         except Exception as e:
             return []

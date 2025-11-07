@@ -459,6 +459,11 @@
                     </span>
 
                     <div class="flex flex-wrap gap-2">
+                      {% if booking.status == 'CONFIRMED' or booking.status == 'IN_PROGRESS' %}
+                        {% if booking.qr_code %}
+                        <button onclick="showQRModal('{{ booking.id }}', '{{ booking.qr_code.url }}', '{{ booking.game.name }}', '{{ booking.game_slot.date|date:"M d, Y" }}', '{{ booking.game_slot.start_time|time:"h:i A" }}')" class="btn-qr action-btn" style="background: linear-gradient(135deg, #667eea, #a855f7); color: white; border: none;"><i class="bi bi-qr-code mr-1"></i>View QR</button>
+                        {% endif %}
+                      {% endif %}
                       {% if booking.status == 'CONFIRMED' and booking.start_datetime > now %}
                         <a href="{% url 'booking:cancel_booking' booking.id %}" class="btn-cancel action-btn" style="text-decoration: none; display: inline-block;" onclick="return confirm('Are you sure you want to cancel this booking? This action cannot be undone.');"><i class="bi bi-x-circle mr-1"></i>Cancel</a>
                       {% endif %}
@@ -587,5 +592,109 @@
         noResultsMsg.style.display = visibleCount === 0 ? 'block' : 'none'
       }
     }
+
+    // QR Code Modal Functions
+    function showQRModal(bookingId, qrUrl, gameName, date, time) {
+      const modal = document.getElementById('qrModal');
+      document.getElementById('modalQRImage').src = qrUrl;
+      document.getElementById('modalGameName').textContent = gameName;
+      document.getElementById('modalDate').textContent = date;
+      document.getElementById('modalTime').textContent = time;
+      document.getElementById('modalBookingId').textContent = '#' + bookingId.substring(0, 8);
+      document.getElementById('downloadQRBtn').onclick = function() {
+        downloadQR(qrUrl, bookingId);
+      };
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeQRModal() {
+      const modal = document.getElementById('qrModal');
+      modal.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+    }
+
+    function downloadQR(qrUrl, bookingId) {
+      const link = document.createElement('a');
+      link.href = qrUrl;
+      link.download = 'booking_' + bookingId + '_qr.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Close modal on escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeQRModal();
+      }
+    });
   </script>
+
+  <!-- QR Code Modal -->
+  <div id="qrModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px);">
+    <div class="relative max-w-md w-full" style="background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(20px); border-radius: 1.5rem; padding: 2rem; border: 1px solid rgba(255, 255, 255, 0.1);">
+      <!-- Close Button -->
+      <button onclick="closeQRModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center transition-all" style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2);">
+        <i class="bi bi-x-lg text-xl"></i>
+      </button>
+
+      <!-- Header -->
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7);">
+          <i class="bi bi-qr-code text-white text-3xl"></i>
+        </div>
+        <h2 class="text-2xl font-black text-white mb-2" style="font-family: 'Orbitron', sans-serif;">Your Entry Pass</h2>
+        <p class="text-gray-300 text-sm">Show this QR code at the venue</p>
+      </div>
+
+      <!-- QR Code -->
+      <div class="text-center mb-6">
+        <div class="inline-block p-4 rounded-xl" style="background: white;">
+          <img id="modalQRImage" src="" alt="Booking QR Code" class="w-64 h-64 mx-auto">
+        </div>
+      </div>
+
+      <!-- Booking Info -->
+      <div class="space-y-3 mb-6">
+        <div class="flex items-center justify-between p-3 rounded-lg" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.2);">
+          <span class="text-gray-300 text-sm">Game</span>
+          <span id="modalGameName" class="text-white font-bold"></span>
+        </div>
+        <div class="flex items-center justify-between p-3 rounded-lg" style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2);">
+          <span class="text-gray-300 text-sm">Date</span>
+          <span id="modalDate" class="text-white font-bold"></span>
+        </div>
+        <div class="flex items-center justify-between p-3 rounded-lg" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+          <span class="text-gray-300 text-sm">Time</span>
+          <span id="modalTime" class="text-white font-bold"></span>
+        </div>
+        <div class="flex items-center justify-between p-3 rounded-lg" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
+          <span class="text-gray-300 text-sm">Booking ID</span>
+          <span id="modalBookingId" class="text-white font-bold font-mono text-sm"></span>
+        </div>
+      </div>
+
+      <!-- Warning -->
+      <div class="mb-6 p-4 rounded-xl" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);">
+        <div class="flex items-start gap-3">
+          <i class="bi bi-exclamation-triangle-fill text-red-400 text-xl flex-shrink-0"></i>
+          <div>
+            <p class="text-red-300 font-semibold text-sm mb-1">Single Use Only</p>
+            <p class="text-red-200 text-xs">This QR code can only be scanned once at the venue. Do not share it with others.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="space-y-3">
+        <button id="downloadQRBtn" class="w-full py-3 rounded-lg font-bold transition-all" style="background: linear-gradient(135deg, #667eea, #a855f7); color: white;">
+          <i class="bi bi-download mr-2"></i>Download QR Code
+        </button>
+        <button onclick="window.print()" class="w-full py-3 rounded-lg font-bold transition-all" style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2);">
+          <i class="bi bi-printer mr-2"></i>Print QR Code
+        </button>
+      </div>
+    </div>
+  </div>
 {% endblock %}

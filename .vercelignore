@@ -1,55 +1,49 @@
-# Python cache
+# Development and debug files
+static/css/responsive-debug.css
+static/js/responsive-debug.js
+
+# Documentation files
+*.md
+!README.md
+
+# Test files
+**/test_*.py
+**/tests/
+
+# Development environment
+.env
+.env.local
+.venv/
+venv/
+env/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Cache files
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
-# Virtual environment
 .Python
-env/
-venv/
-.venv
-
-# Environment variables
-.env
-.env.local
-.env.*.local
 
 # Database
-db.sqlite3
-db.sqlite3-journal
+*.sqlite3
+*.db
+
+# Media files (if not needed in production)
+# media/
+
+# Static files (collected by Django)
+# staticfiles/
 
 # Logs
 *.log
 
-# Node
-node_modules/
-npm-debug.log*
-
-# Git
-.git/
-.gitignore
-
-# IDE
-.vscode/
-.idea/
-
-# OS
+# OS files
 .DS_Store
 Thumbs.db
-
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Documentation (not needed on Vercel)
-*.md
-!README.md
-
-# Scripts (not needed on Vercel)
-*.bat
-*.sh
-
-# Media files (user uploads, generated at runtime)
-media/

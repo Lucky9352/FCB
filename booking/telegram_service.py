@@ -192,7 +192,7 @@ class TelegramNotificationService:
                 f"   Phone: {customer_phone}\n"
                 f"   Email: {customer_email}\n\n"
                 
-                "🎯 <b>Booking Details:</b>\n"
+                " <b>Booking Details:</b>\n"
                 f"   Game: {game_name}\n"
                 f"   Date: {booking_date}\n"
                 f"   Time: {start_time} - {end_time} ({duration_str})\n"

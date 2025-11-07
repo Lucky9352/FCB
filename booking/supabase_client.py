@@ -4,7 +4,6 @@ import logging
 from typing import Dict, List, Optional, Callable
 from django.conf import settings
 from supabase import create_client, Client
-from supabase.lib.client_options import ClientOptions
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -35,13 +34,8 @@ class SupabaseRealTimeClient:
                 logger.info("Supabase credentials not configured. Using local conflict resolution.")
                 return
             
-            # Configure client options
-            client_options = ClientOptions(
-                auto_refresh_token=True,
-                persist_session=True
-            )
-            
-            self.client = create_client(supabase_url, supabase_key, options=client_options)
+            # Create client with the new API (v2.23.3+)
+            self.client = create_client(supabase_url, supabase_key)
             logger.info("Supabase client initialized successfully")
             
         except Exception as e:

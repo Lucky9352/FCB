@@ -450,7 +450,7 @@
                             Important Notice
                         </p>
                         <p class="text-sm leading-relaxed" style="color: rgba(251, 191, 36, 0.9);">
-                            Your booking is temporarily reserved. Please complete the payment within <strong>15 minutes</strong> to confirm your reservation. Unpaid bookings will be automatically cancelled.
+                            Your booking is temporarily reserved. Please complete the payment within <strong>5 minutes</strong> to confirm your reservation. Unpaid bookings will be automatically cancelled.
                         </p>
                     </div>
                 </div>
@@ -467,12 +467,16 @@ function proceedToPayment() {
     const button = document.getElementById('paymentButton');
     const originalHTML = button.innerHTML;
     
-    // Animated loading state
+    // Remove animation classes FIRST to prevent interference
+    button.classList.remove('hover-glow', 'btn-ripple', 'group');
+    
+    // Force remove any pseudo-element effects by resetting overflow
+    button.style.overflow = 'visible';
+    
+    // Animated loading state - direct children for proper centering
     button.innerHTML = `
-        <div class="flex items-center justify-center gap-3">
-            <div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-            <span class="font-bold">Processing Payment...</span>
-        </div>
+        <div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+        <span class="font-bold">Processing Payment...</span>
     `;
     button.disabled = true;
     button.style.opacity = '0.8';
@@ -520,6 +524,20 @@ function cancelBooking() {
         // Show loading state
         const cancelBtn = event.target;
         const originalHTML = cancelBtn.innerHTML;
+        
+        // Set flex properties FIRST to prevent layout shift
+        cancelBtn.style.display = 'flex';
+        cancelBtn.style.alignItems = 'center';
+        cancelBtn.style.justifyContent = 'center';
+        
+        // Then preserve button dimensions
+        const width = cancelBtn.offsetWidth;
+        const height = cancelBtn.offsetHeight;
+        cancelBtn.style.width = width + 'px';
+        cancelBtn.style.height = height + 'px';
+        cancelBtn.style.minWidth = width + 'px';
+        cancelBtn.style.minHeight = height + 'px';
+        
         cancelBtn.innerHTML = `
             <div class="flex items-center justify-center gap-2">
                 <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>

@@ -470,10 +470,8 @@
                             </div>
                             <p class="text-white font-bold text-xl mb-1"><span id="currentSpotsDisplay">{{ booking.spots_booked }}</span> Player{{ booking.spots_booked|pluralize }}</p>
                             <div class="text-sm mt-2" style="color: #d1d5db;">
-                                <div class="capacity-indicator">
-                                    {% for i in "x"|ljust:booking.game.capacity %}
-                                    <div class="capacity-dot {% if forloop.counter0 < booking.spots_booked %}your-booking{% elif forloop.counter0 < booking.game_slot.availability.booked_spots %}booked{% else %}available{% endif %}"></div>
-                                    {% endfor %}
+                                <div class="capacity-indicator" id="capacityDotsContainer">
+                                    <!-- Capacity dots will be rendered by JavaScript for accurate real-time state -->
                                 </div>
                             </div>
                         </div>
@@ -615,7 +613,7 @@
                             Important Notice
                         </p>
                         <p class="text-sm leading-relaxed" style="color: rgba(251, 191, 36, 0.9);">
-                            Your booking is temporarily reserved. Please complete the payment within <strong>15 minutes</strong> to confirm your reservation. Unpaid bookings will be automatically cancelled.
+                            Your booking is temporarily reserved. Please complete the payment within <strong>5 minutes</strong> to confirm your reservation. Unpaid bookings will be automatically cancelled.
                         </p>
                     </div>
                 </div>
@@ -633,6 +631,85 @@ let selectedNewSpots = parseInt('{{ booking.spots_booked }}');
 const bookingId = "{{ booking.id }}";
 const pricePerSpot = parseFloat('{{ booking.price_per_spot }}');
 const platformFee = parseFloat('{{ booking.platform_fee|default:0 }}');
+const gameCapacity = parseInt('{{ booking.game.capacity }}');
+const gameSlotId = '{{ booking.game_slot.id }}';
+
+// Render capacity dots with accurate state
+function renderCapacityDots(confirmedBookings, yourPendingSpots, totalCapacity) {
+    const container = document.getElementById('capacityDotsContainer');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    for (let i = 0; i < totalCapacity; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'capacity-dot';
+        
+        if (i < confirmedBookings) {
+            // Red dots for confirmed bookings by others
+            dot.classList.add('booked');
+        } else if (i < confirmedBookings + yourPendingSpots) {
+            // Blue/pulsing dots for your pending booking
+            dot.classList.add('your-booking');
+        } else {
+            // Green dots for available spots
+            dot.classList.add('available');
+        }
+        
+        container.appendChild(dot);
+    }
+}
+
+// Fetch real-time slot availability
+function fetchSlotAvailability() {
+    fetch(`/booking/api/slot-availability/${gameSlotId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const availability = data.availability;
+                const confirmedBookings = availability.booked_spots;
+                const yourPendingSpots = originalSpots;
+                
+                // Render capacity dots
+                renderCapacityDots(confirmedBookings, yourPendingSpots, gameCapacity);
+                
+                // Update max spots available for modification
+                updateMaxSpotsAvailable(availability.available_spots);
+            }
+        })
+        .catch(error => {
+            console.error('Failed to fetch slot availability:', error);
+        });
+}
+
+// Update max spots available
+function updateMaxSpotsAvailable(availableSpots) {
+    // Calculate truly available spots (excluding current booking)
+    const trulyAvailable = availableSpots;
+    const maxTotal = Math.min(originalSpots + trulyAvailable, 4);
+    
+    // Update spot selector buttons
+    const buttons = document.querySelectorAll('.spot-select-btn');
+    buttons.forEach((btn) => {
+        const btnSpots = parseInt(btn.dataset.spots);
+        if (btnSpots > maxTotal) {
+            btn.disabled = true;
+            btn.style.opacity = '0.3';
+            btn.style.cursor = 'not-allowed';
+        } else {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+        }
+    });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    fetchSlotAvailability();
+    // Refresh every 3 seconds
+    setInterval(fetchSlotAvailability, 3000);
+});
 
 // Select number of spots
 function selectSpots(spots) {
@@ -670,6 +747,9 @@ function selectSpots(spots) {
     
     // Update pricing preview
     updatePricingPreview(spots);
+    
+    // Update capacity dots preview (fetch latest data first)
+    fetchSlotAvailability();
 }
 
 // Update pricing preview
@@ -701,6 +781,19 @@ function updatePricingPreview(newSpots) {
 function updateBookingSpots() {
     const updateBtn = document.getElementById('updateSpotsButton');
     const messageDiv = document.getElementById('spotUpdateMessage');
+    
+    // Set flex properties FIRST to prevent layout shift
+    updateBtn.style.display = 'flex';
+    updateBtn.style.alignItems = 'center';
+    updateBtn.style.justifyContent = 'center';
+    
+    // Then preserve button dimensions
+    const width = updateBtn.offsetWidth;
+    const height = updateBtn.offsetHeight;
+    updateBtn.style.width = width + 'px';
+    updateBtn.style.height = height + 'px';
+    updateBtn.style.minWidth = width + 'px';
+    updateBtn.style.minHeight = height + 'px';
     
     // Show loading state
     updateBtn.innerHTML = '<div class="flex items-center justify-center gap-2"><div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div><span>Updating...</span></div>';
@@ -768,12 +861,29 @@ function proceedToPayment() {
     const button = document.getElementById('paymentButton');
     const originalHTML = button.innerHTML;
     
+    // Remove animation classes FIRST to prevent interference
+    button.classList.remove('hover-glow', 'btn-ripple', 'group');
+    
+    // Force remove any pseudo-element effects by resetting overflow
+    button.style.overflow = 'visible';
+    
+    // Set flex properties FIRST to prevent layout shift
+    button.style.display = 'flex';
+    button.style.alignItems = 'center';
+    button.style.justifyContent = 'center';
+    
+    // Then preserve button dimensions
+    const width = button.offsetWidth;
+    const height = button.offsetHeight;
+    button.style.width = width + 'px';
+    button.style.height = height + 'px';
+    button.style.minWidth = width + 'px';
+    button.style.minHeight = height + 'px';
+    
     // Animated loading state
     button.innerHTML = `
-        <div class="flex items-center justify-center gap-3">
-            <div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-            <span class="font-bold">Processing...</span>
-        </div>
+        <div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+        <span class="font-bold">Processing...</span>
     `;
     button.disabled = true;
     button.style.opacity = '0.8';
@@ -938,6 +1048,20 @@ function cancelBooking() {
     if (confirm('⚠️ Are you sure you want to cancel this booking?\n\nThis action cannot be undone.')) {
         const cancelBtn = event.target;
         const originalHTML = cancelBtn.innerHTML;
+        
+        // Set flex properties FIRST to prevent layout shift
+        cancelBtn.style.display = 'flex';
+        cancelBtn.style.alignItems = 'center';
+        cancelBtn.style.justifyContent = 'center';
+        
+        // Then preserve button dimensions
+        const width = cancelBtn.offsetWidth;
+        const height = cancelBtn.offsetHeight;
+        cancelBtn.style.width = width + 'px';
+        cancelBtn.style.height = height + 'px';
+        cancelBtn.style.minWidth = width + 'px';
+        cancelBtn.style.minHeight = height + 'px';
+        
         cancelBtn.innerHTML = `
             <div class="flex items-center justify-center gap-2">
                 <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
@@ -957,7 +1081,7 @@ function cancelBooking() {
             if (data.success) {
                 showNotification('success', 'Booking cancelled successfully');
                 setTimeout(() => {
-                    window.location.href = '{% url "booking:game_selection" %}';
+                    window.location.href = '{% url "booking:game_detail" game_id=booking.game.id %}';
                 }, 1000);
             } else {
                 showNotification('error', data.error || 'Error cancelling booking');

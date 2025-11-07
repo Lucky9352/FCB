@@ -40,6 +40,7 @@ urlpatterns = [
     # QR CODE VERIFICATION (Owner/Staff)
     path('qr-scanner/', verification_views.qr_scanner_view, name='qr_scanner'),
     path('verify-qr/', verification_views.verify_booking_qr, name='verify_booking_qr'),
+    path('verify-manual/<uuid:booking_id>/', verification_views.verify_booking_manual, name='verify_booking_manual'),
     path('complete/<uuid:booking_id>/', verification_views.complete_booking, name='complete_booking'),
     path('active-bookings/', verification_views.active_bookings_view, name='active_bookings'),
     
