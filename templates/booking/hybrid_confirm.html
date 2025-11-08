@@ -511,16 +511,14 @@
                     </div>
                     
                     <!-- Action Buttons - Enhanced -->
-                    <div class="space-y-3">
-                        <button onclick="proceedToPayment()" id="paymentButton"
-                                class="btn btn-primary btn-xl w-full hover-glow relative group" style="background: linear-gradient(135deg, #667eea, #764ba2); border: none; padding: 1.25rem 2.5rem; font-size: 1.25rem; font-weight: 700; border-radius: 0.75rem; color: white; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.75rem;">
-                            <i class="bi bi-credit-card text-xl"></i>
-                            <span class="font-bold">Proceed to Payment</span>
-                            <i class="bi bi-arrow-right text-xl transition-transform group-hover:translate-x-1"></i>
+                    <div class="space-y-3" style="max-width: 100%; position: relative; z-index: 10;">
+                        <button onclick="proceedToPayment()" id="paymentButton" style="background: linear-gradient(135deg, #667eea, #764ba2); border: 2px solid transparent; padding: 1rem; font-size: 1.125rem; font-weight: 600; border-radius: 0.75rem; color: white; cursor: pointer; transition: all 0.2s; display: block; width: 100%; text-align: center; position: relative; z-index: 10;">
+                            <i class="bi bi-credit-card text-lg"></i>
+                            <span>Proceed to Payment</span>
+                            <i class="bi bi-arrow-right text-lg"></i>
                         </button>
                         
-                        <button onclick="cancelBooking()" 
-                                class="btn btn-secondary btn-lg w-full" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255, 255, 255, 0.2); padding: 1rem 2rem; font-size: 1.125rem; font-weight: 600; border-radius: 0.75rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        <button onclick="cancelBooking()" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255, 255, 255, 0.2); padding: 1rem; font-size: 1.125rem; font-weight: 600; border-radius: 0.75rem; cursor: pointer; transition: all 0.2s; display: block; width: 100%; text-align: center; position: relative; z-index: 10;">
                             <i class="bi bi-x-circle"></i>
                             Cancel Booking
                         </button>
@@ -802,8 +800,10 @@ function proceedToPayment() {
     
     // Animated loading state
     button.innerHTML = `
-        <div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-        <span class="font-bold">Processing...</span>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+            <span>Processing...</span>
+        </div>
     `;
     button.disabled = true;
     button.style.opacity = '0.8';
@@ -880,11 +880,20 @@ function verifyPayment(razorpayResponse, bookingId) {
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     
     document.body.innerHTML = `
-        <div class="min-h-screen flex items-center justify-center" style="background: #111827;">
-            <div class="text-center">
-                <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto mb-4" style="border-color: #667eea;"></div>
-                <h2 class="text-2xl font-bold text-white mb-2">Verifying Payment...</h2>
-                <p class="text-gray-400">Please wait while we confirm your booking</p>
+        <style>
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+            .spinner {
+                animation: spin 1.5s linear infinite;
+            }
+        </style>
+        <div style="background: #111827; min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+            <div style="text-align: center; max-width: 28rem; margin: 0 auto; padding: 0 1rem;">
+                <div class="spinner" style="width: 4rem; height: 4rem; border-radius: 9999px; border: 4px solid transparent; border-bottom-color: #667eea; margin: 0 auto 1rem auto;"></div>
+                <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 0.5rem;">Verifying Payment...</h2>
+                <p style="color: #9ca3af;">Please wait while we confirm your booking</p>
             </div>
         </div>
     `;
@@ -893,8 +902,8 @@ function verifyPayment(razorpayResponse, bookingId) {
 }
 
 function pollPaymentStatus(bookingId, csrfToken, razorpayResponse, attempts) {
-    const maxWebhookAttempts = 5;
-    const maxTotalAttempts = 20;
+    const maxWebhookAttempts = 3;  // Reduced from 5 to 3 for faster API fallback
+    const maxTotalAttempts = 15;  // Reduced from 20 to 15
     
     fetch('/booking/payment/status/' + bookingId + '/', {
         method: 'GET',
@@ -909,7 +918,7 @@ function pollPaymentStatus(bookingId, csrfToken, razorpayResponse, attempts) {
         } else if (attempts < maxWebhookAttempts) {
             setTimeout(() => {
                 pollPaymentStatus(bookingId, csrfToken, razorpayResponse, attempts + 1);
-            }, 1000);
+            }, 500);  // Reduced from 1000ms to 500ms for faster polling
         } else if (attempts === maxWebhookAttempts) {
             verifyPaymentViaAPI(bookingId, csrfToken, razorpayResponse, attempts);
         } else if (attempts >= maxTotalAttempts) {
@@ -983,7 +992,7 @@ function cancelBooking() {
         cancelBtn.style.minHeight = height + 'px';
         
         cancelBtn.innerHTML = `
-            <div class="flex items-center justify-center gap-2">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
                 <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
                 <span>Cancelling...</span>
             </div>

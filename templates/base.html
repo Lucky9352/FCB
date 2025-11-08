@@ -558,14 +558,19 @@
                     
                     <!-- Social Media Icons -->
                     <div class="flex gap-2 flex-wrap flex-row justify-start">
-                        <a href="#" aria-label="Facebook" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-primary-600 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
-                            <i class="bi bi-facebook text-sm"></i>
+                        <a href="https://www.linkedin.com/company/tapnexfc" target="_blank" rel="noopener noreferrer" aria-label="Follow us on LinkedIn" title="LinkedIn" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-blue-600 flex items-center justify-center text-gray-400 hover:text-white transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                                <rect x="2" y="9" width="4" height="12"></rect>
+                                <circle cx="4" cy="4" r="2"></circle>
+                            </svg>
                         </a>
-                        <a href="#" aria-label="Twitter" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-primary-600 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
-                            <i class="bi bi-twitter text-sm"></i>
-                        </a>
-                        <a href="#" aria-label="Instagram" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-primary-600 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
-                            <i class="bi bi-instagram text-sm"></i>
+                        <a href="https://www.instagram.com/tapnex.fc/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Instagram" title="Instagram" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-gradient-to-br hover:from-purple-600 hover:to-pink-600 flex items-center justify-center text-gray-400 hover:text-white transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                                <path d="m16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                            </svg>
                         </a>
                     </div>
                 </div>
@@ -602,15 +607,13 @@
                 <div>
                     <h3 class="text-white font-semibold uppercase tracking-wider mb-3" style="font-size: 0.875rem;">Contact</h3>
                     <ul class="space-y-2">
-                        <li class="text-gray-400 text-sm leading-snug">
-                            📍 TapNex Arena<br>
-                            <span class="ml-5">Your Location Here</span>
+                        <li>
+                            <svg style="stroke: #aaa; vertical-align: middle;" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block flex-shrink-0"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
+                            <a href="mailto:info@tapnex.tech" class="hover:text-white transition-colors text-sm">info@tapnex.tech</a>
                         </li>
-                        <li class="text-gray-400 text-sm">
-                            📧 <a href="mailto:hello@tapnexarena.com" class="hover:text-white transition-colors">hello@tapnexarena.com</a>
-                        </li>
-                        <li class="text-gray-400 text-sm">
-                            📞 <a href="tel:+1234567890" class="hover:text-white transition-colors">+1 (234) 567-890</a>
+                        <li>
+                            <svg style="stroke: #aaa; vertical-align: middle;" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block flex-shrink-0"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg>
+                            <a href="tel:+918823004349" class="hover:text-white transition-colors text-sm">+91 88230 04349</a>
                         </li>
                     </ul>
                 </div>
@@ -631,6 +634,9 @@
     <!-- JavaScript Files -->
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    
+    <!-- QR Code Generator Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
     <script src="{% static 'js/animations.js' %}"></script>
     <script src="{% static 'js/mobile-enhancements.js' %}"></script>

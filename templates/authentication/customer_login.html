@@ -53,7 +53,7 @@
             {% endif %}
 
             <!-- Google OAuth Button -->
-            <div class="mb-6">
+            <div class="text-center mb-8">
               <button onclick="handleGoogleLogin()" id="google-login-btn" class="google-btn">
                 <svg class="google-icon" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -63,76 +63,59 @@
                 </svg>
                 <span>Continue with Google</span>
               </button>
-            </div>
-
-            <!-- Divider -->
-            <div class="divider">
-              <span class="divider-text">or sign in with email</span>
-            </div>
-
-            <!-- Form -->
-            <form class="space-y-6" method="post" action="{% url 'authentication:customer_email_login' %}" id="login-form">
-              {% csrf_token %}
-              <!-- Hidden field to preserve the 'next' parameter -->
-              {% if request.GET.next %}
-              <input type="hidden" name="next" value="{{ request.GET.next }}">
-              {% endif %}
-
-              <!-- Username/Email Field -->
-              <div class="form-group">
-                <label for="id_username" class="form-label">
-                  <i class="fas fa-user label-icon"></i>
-                  Email or Username
-                </label>
-                <div class="input-wrapper">
-                  <input id="id_username" name="username" type="text" autocomplete="email" required class="form-input" placeholder="Enter your email or username" />
-                  <div class="input-focus-ring"></div>
-                </div>
-                {% if form.username.errors %}
-                  <p class="form-error">
-                    <i class="fas fa-exclamation-circle"></i>
-                    {{ form.username.errors.0 }}
-                  </p>
-                {% endif %}
-              </div>
-
-              <!-- Password Field -->
-              <div class="form-group">
-                <label for="id_password" class="form-label">
-                  <i class="fas fa-lock label-icon"></i>
-                  Password
-                </label>
-                <div class="input-wrapper">
-                  <input id="id_password" name="password" type="password" autocomplete="current-password" required class="form-input" placeholder="Enter your password" />
-                  <button type="button" class="password-toggle-btn" onclick="togglePassword()" tabindex="-1" aria-label="Toggle password visibility"><i class="fas fa-eye" id="toggleIcon"></i></button>
-                  <div class="input-focus-ring"></div>
-                </div>
-                {% if form.password.errors %}
-                  <p class="form-error">
-                    <i class="fas fa-exclamation-circle"></i>
-                    {{ form.password.errors.0 }}
-                  </p>
-                {% endif %}
-              </div>
-
-              <!-- Submit Button -->
-              <div class="pt-4">
-                <button type="submit" id="submit-btn" class="submit-button">
-                  <i class="fas fa-sign-in-alt"></i>
-                  Sign In
-                  <div class="button-shine"></div>
-                </button>
-              </div>
-            </form>
-
-            <!-- Sign Up Prompt -->
-            <div class="signup-prompt">
-              <p>
-                Don't have an account?
-                <button onclick="handleGoogleSignup(this)" class="signup-link">
-                  Create Account with Google
-                </button>
+              
+              <p style="margin-top: 1rem; font-size: 0.8125rem; color: rgba(148, 163, 184, 0.8);">
+                Sign in or create your account with Google
               </p>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="features-grid">
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="fas fa-bolt"></i>
+                </div>
+                <div class="feature-content">
+                  <h4>Instant Booking</h4>
+                  <p>Reserve your gaming session in seconds</p>
+                </div>
+              </div>
+
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="fas fa-qrcode"></i>
+                </div>
+                <div class="feature-content">
+                  <h4>QR Entry Pass</h4>
+                  <p>Contactless check-in at the venue</p>
+                </div>
+              </div>
+
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="feature-content">
+                  <h4>Secure Payments</h4>
+                  <p>Safe transactions with Razorpay</p>
+                </div>
+              </div>
+
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="fas fa-history"></i>
+                </div>
+                <div class="feature-content">
+                  <h4>Booking History</h4>
+                  <p>Track all your gaming sessions</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Trust Badge -->
+            <div class="trust-badge">
+              <i class="fas fa-lock"></i>
+              <span>Your data is secure and never shared</span>
             </div>
           </div>
         </div>
@@ -552,60 +535,74 @@
   to { transform: rotate(360deg); }
 }
 
-/* === SIGNUP PROMPT === */
-.signup-prompt {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(71, 85, 105, 0.3);
-  text-align: center;
+/* === FEATURES GRID === */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.signup-prompt p {
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(71, 85, 105, 0.3);
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+}
+
+.feature-icon {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(233, 69, 96, 0.2), rgba(0, 212, 170, 0.2));
+  border-radius: 0.5rem;
+  color: #00d4aa;
+  font-size: 1.125rem;
+}
+
+.feature-content h4 {
   font-size: 0.875rem;
-  color: rgba(203, 213, 225, 0.8);
-}
-
-.signup-link {
-  background: none;
-  border: none;
-  color: #a78bfa;
   font-weight: 600;
-  cursor: pointer;
-  transition: color 0.2s ease;
-  padding: 0;
-  text-decoration: underline;
-  text-decoration-color: rgba(167, 139, 250, 0.3);
-  text-underline-offset: 2px;
-  display: inline-flex;
+  color: rgba(226, 232, 240, 0.95);
+  margin-bottom: 0.25rem;
+}
+
+.feature-content p {
+  font-size: 0.75rem;
+  color: rgba(148, 163, 184, 0.8);
+  line-height: 1.4;
+}
+
+/* === TRUST BADGE === */
+.trust-badge {
+  display: flex;
   align-items: center;
-  gap: 0.375rem;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 0.75rem;
+  color: rgba(134, 239, 172, 0.9);
+  font-size: 0.8125rem;
+  font-weight: 500;
 }
 
-.signup-link:hover:not(:disabled) {
-  color: #c4b5fd;
-  text-decoration-color: rgba(196, 181, 253, 0.5);
-}
-
-.signup-link:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.signup-text,
-.signup-loading {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-}
-
-.signup-loading.hidden {
-  display: none;
-}
-
-.spinner-small {
-  width: 0.875rem;
-  height: 0.875rem;
-  animation: spin 1s linear infinite;
+.trust-badge i {
+  font-size: 0.875rem;
 }
 
 /* === BACK HOME LINK === */
@@ -664,8 +661,24 @@
     font-size: 2rem;
   }
   
-  .form-input {
-    font-size: 16px; /* Prevents zoom on iOS */
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .feature-item {
+    padding: 0.875rem;
+  }
+  
+  .feature-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 1rem;
+  }
+  
+  .trust-badge {
+    font-size: 0.75rem;
+    padding: 0.625rem 0.875rem;
   }
 }
 
@@ -697,7 +710,7 @@
 </style>
 
   <script>
-// Google Login Handler (for main button)
+// Google Login Handler
 function handleGoogleLogin() {
   const button = document.getElementById('google-login-btn');
   button.disabled = true;

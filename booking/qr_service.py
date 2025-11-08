@@ -1,14 +1,10 @@
 """
 QR Code Generation Service for Booking Verification
-Fast and efficient QR code generation with unique verification tokens
+Dynamic QR code generation - no file storage needed
 """
 
-import qrcode
 import secrets
-from io import BytesIO
-from django.core.files.base import ContentFile
 from django.utils import timezone
-from django.conf import settings
 import logging
 
 logger = logging.getLogger(__name__)
@@ -24,9 +20,38 @@ class QRCodeService:
         return secrets.token_urlsafe(32)  # Generates ~43 character string
     
     @staticmethod
+    def generate_qr_data(booking):
+        """
+        Generate QR code data string for a booking (no file generation)
+        
+        Args:
+            booking: Booking model instance
+            
+        Returns:
+            str: QR code data string in format "booking_id|token|booking"
+        """
+        try:
+            # Generate verification token if not exists
+            if not booking.verification_token:
+                booking.verification_token = QRCodeService.generate_verification_token()
+                booking.save(update_fields=['verification_token'])
+            
+            # Create QR code data string
+            # Format: booking_id|verification_token|booking
+            qr_data = f"{booking.id}|{booking.verification_token}|booking"
+            
+            logger.info(f"QR data generated for booking {booking.id}")
+            return qr_data
+            
+        except Exception as e:
+            logger.error(f"Error generating QR data for booking {booking.id}: {str(e)}")
+            return None
+    
+    @staticmethod
     def generate_qr_code(booking):
         """
-        Generate QR code for a booking
+        Generate verification token for booking (backward compatibility)
+        No longer generates actual QR code file - just ensures token exists
         
         Args:
             booking: Booking model instance
@@ -38,51 +63,13 @@ class QRCodeService:
             # Generate verification token if not exists
             if not booking.verification_token:
                 booking.verification_token = QRCodeService.generate_verification_token()
+                booking.save(update_fields=['verification_token'])
             
-            # Create QR code data - JSON format for easy parsing
-            qr_data = {
-                'booking_id': str(booking.id),
-                'token': booking.verification_token,
-                'type': 'booking_verification',
-                'cafe': 'TapNex Gaming Cafe'
-            }
-            
-            # Convert to string (can be JSON or simple format)
-            # Using simple pipe-separated format for faster parsing
-            qr_content = f"{booking.id}|{booking.verification_token}|booking"
-            
-            # Create QR code instance with optimized settings for speed
-            qr = qrcode.QRCode(
-                version=1,  # Controls size (1 is smallest, auto-adjusts if needed)
-                error_correction=qrcode.constants.ERROR_CORRECT_M,  # Medium error correction (15%)
-                box_size=10,  # Size of each box in pixels
-                border=4,  # Border size in boxes
-            )
-            
-            # Add data and generate
-            qr.add_data(qr_content)
-            qr.make(fit=True)
-            
-            # Create image
-            img = qr.make_image(fill_color="black", back_color="white")
-            
-            # Save to BytesIO buffer
-            buffer = BytesIO()
-            img.save(buffer, format='PNG')
-            buffer.seek(0)
-            
-            # Save to booking model
-            filename = f'booking_{booking.id}_qr.png'
-            booking.qr_code.save(filename, ContentFile(buffer.read()), save=False)
-            
-            # Save booking with updated fields
-            booking.save(update_fields=['verification_token', 'qr_code'])
-            
-            logger.info(f"QR code generated successfully for booking {booking.id}")
+            logger.info(f"Verification token ensured for booking {booking.id}")
             return True
             
         except Exception as e:
-            logger.error(f"Error generating QR code for booking {booking.id}: {str(e)}")
+            logger.error(f"Error generating verification token for booking {booking.id}: {str(e)}")
             return False
     
     @staticmethod
@@ -163,7 +150,7 @@ class QRCodeService:
     @staticmethod
     def regenerate_qr_code(booking):
         """
-        Regenerate QR code for a booking (e.g., if lost or corrupted)
+        Regenerate verification token for a booking
         
         Args:
             booking: Booking instance
@@ -172,17 +159,13 @@ class QRCodeService:
             bool: True if successful
         """
         try:
-            # Delete old QR code if exists
-            if booking.qr_code:
-                booking.qr_code.delete(save=False)
+            # Generate new verification token
+            booking.verification_token = QRCodeService.generate_verification_token()
+            booking.save(update_fields=['verification_token'])
             
-            # Reset verification fields
-            booking.verification_token = ''
-            booking.qr_code = None
-            
-            # Generate new QR code
-            return QRCodeService.generate_qr_code(booking)
+            logger.info(f"Verification token regenerated for booking {booking.id}")
+            return True
             
         except Exception as e:
-            logger.error(f"Error regenerating QR code: {str(e)}")
+            logger.error(f"Error regenerating verification token: {str(e)}")
             return False

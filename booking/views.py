@@ -5,10 +5,12 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.db.models import Q, F
 from django.core.exceptions import ValidationError
+from django.views.decorators.http import require_http_methods
 from datetime import datetime, timedelta
 from authentication.decorators import customer_required
 from .models import GamingStation, Booking, Notification, Game
 from .notifications import NotificationService, InAppNotification
+from .qr_service import QRCodeService
 from authentication.models import Customer
 import json
 import logging
@@ -307,27 +309,46 @@ def game_selection(request):
     from .auto_slot_generator import auto_generate_slots_all_games
     from datetime import date, timedelta
     from django.db.models import Exists, OuterRef, Q, F
+    from .timezone_utils import get_local_now, get_local_today, get_local_time
     
     # Ensure slots are available (runs in background, doesn't block)
     auto_generate_slots_all_games(async_mode=True)
     
-    # Get selected date (default to today)
-    selected_date = request.GET.get('date', timezone.now().date().isoformat())
+    # Get current time in local timezone (IST)
+    now_local = get_local_now()
+    today_local = get_local_today()
+    current_time_local = get_local_time()
+    
+    # Get selected date (default to today in local timezone)
+    selected_date = request.GET.get('date', today_local.isoformat())
     try:
         selected_date = datetime.fromisoformat(selected_date).date()
     except ValueError:
-        selected_date = timezone.now().date()
+        selected_date = today_local
     
     # OPTIMIZED: Use a single query with subquery to check availability
     # This checks if any slot exists with availability, without loading all slot data
     # can_book_private = booked_spots == 0
     # can_book_shared = not is_private_booked AND available_spots > 0
-    available_slots_subquery = GameSlot.objects.filter(
+    
+    # Use local time for filtering
+    now = now_local
+    current_time = current_time_local
+    
+    # Build the availability filter
+    availability_filter = GameSlot.objects.filter(
         game=OuterRef('pk'),
         date=selected_date,
         is_active=True,
         availability__isnull=False
-    ).filter(
+    )
+    
+    # If selected date is today, only show slots that haven't started yet
+    if selected_date == now.date():
+        availability_filter = availability_filter.filter(start_time__gt=current_time)
+    
+    # Add availability conditions
+    available_slots_subquery = availability_filter.filter(
         Q(availability__booked_spots=0) |  # Can book private
         Q(availability__is_private_booked=False, availability__booked_spots__lt=F('availability__total_capacity'))  # Can book shared
     )
@@ -348,13 +369,11 @@ def game_selection(request):
             'has_availability': game.has_availability
         })
     
-    today = timezone.now().date()
-    
     context = {
         'games_with_availability': games_with_availability,
         'selected_date': selected_date,
-        'today': today,
-        'date_range': [today + timedelta(days=i) for i in range(7)]  # Next 7 days from today
+        'today': today_local,
+        'date_range': [today_local + timedelta(days=i) for i in range(7)]  # Next 7 days from today
     }
     
     return render(request, 'booking/game_selection.html', context)
@@ -365,14 +384,8 @@ def hybrid_booking_create(request):
     """Create a hybrid booking (private or shared) with enhanced validation"""
     if request.method == 'POST':
         try:
-            print(f"📥 Booking request received")
-            print(f"User: {request.user}")
-            print(f"Authenticated: {request.user.is_authenticated}")
-            print(f"Request body: {request.body[:200]}")
-            
             # Check if user is authenticated
             if not request.user.is_authenticated:
-                print("❌ User not authenticated")
                 return JsonResponse({
                     'success': False,
                     'error': 'Authentication required',
@@ -382,7 +395,6 @@ def hybrid_booking_create(request):
             
             # Check if user has customer profile
             if not hasattr(request.user, 'customer_profile'):
-                print(f"❌ User {request.user} has no customer_profile")
                 return JsonResponse({
                     'success': False,
                     'error': 'Customer profile required',
@@ -476,8 +488,6 @@ def hybrid_booking_create(request):
                 spots_requested=spots_requested
             )
             
-            print(f"✅ Booking created: {booking.id}")
-            
             return JsonResponse({
                 'success': True,
                 'booking_id': str(booking.id),
@@ -493,7 +503,7 @@ def hybrid_booking_create(request):
             })
             
         except ValidationError as e:
-            print(f"❌ Validation Error: {str(e)}")
+            logger.error(f"Validation Error: {str(e)}")
             return JsonResponse({
                 'success': False,
                 'error': 'Booking validation failed',
@@ -501,9 +511,7 @@ def hybrid_booking_create(request):
                 'error_type': 'validation'
             }, status=400)
         except Exception as e:
-            print(f"❌ System Error: {type(e).__name__}: {str(e)}")
-            import traceback
-            traceback.print_exc()
+            logger.error(f"System Error: {type(e).__name__}: {str(e)}")
             return JsonResponse({
                 'success': False,
                 'error': 'Booking creation failed',
@@ -784,12 +792,15 @@ def game_detail(request, game_id):
     # Get the game (optimized query)
     game = get_object_or_404(Game, id=game_id, is_active=True)
     
-    # Get selected date (default to today)
-    selected_date = request.GET.get('date', timezone.now().date().isoformat())
+    # Get selected date (default to today in IST)
+    from .timezone_utils import get_local_today
+    today_local = get_local_today()
+    
+    selected_date = request.GET.get('date', today_local.isoformat())
     try:
         selected_date = datetime.fromisoformat(selected_date).date()
     except ValueError:
-        selected_date = timezone.now().date()
+        selected_date = today_local
     
     # Generate date range for navigation (7 days)
     date_range = [selected_date + timedelta(days=i) for i in range(7)]
@@ -799,10 +810,69 @@ def game_detail(request, game_id):
         'game': game,
         'selected_date': selected_date,
         'date_range': date_range,
-        'today': timezone.now().date(),
+        'today': today_local,
         'is_authenticated': request.user.is_authenticated,
         'use_ajax_loading': True,  # Flag to enable AJAX loading in template
     }
     
     return render(request, 'booking/game_detail.html', context)
+
+
+@customer_required
+@require_http_methods(["GET"])
+def get_qr_data(request, booking_id):
+    """
+    Get QR code data for a booking (for dynamic frontend generation)
+    
+    GET /booking/api/qr-data/<booking_id>/
+    
+    Returns:
+        JSON with QR data string: "booking_id|verification_token|booking"
+    """
+    try:
+        # Get booking - must be owned by current user
+        booking = get_object_or_404(
+            Booking,
+            id=booking_id,
+            customer=request.user.customer_profile
+        )
+        
+        # Only allow QR data for confirmed bookings
+        if booking.status not in ['CONFIRMED', 'IN_PROGRESS']:
+            return JsonResponse({
+                'success': False,
+                'error': 'QR code only available for confirmed bookings'
+            }, status=400)
+        
+        # Auto-generate token for old bookings that don't have one
+        if not booking.verification_token:
+            logger.info(f"Auto-generating verification token for existing booking {booking_id}")
+            booking.verification_token = QRCodeService.generate_verification_token()
+            booking.save(update_fields=['verification_token'])
+        
+        # Generate QR data string
+        qr_data = QRCodeService.generate_qr_data(booking)
+        
+        if not qr_data:
+            return JsonResponse({
+                'success': False,
+                'error': 'Failed to generate QR data'
+            }, status=500)
+        
+        return JsonResponse({
+            'success': True,
+            'qr_data': qr_data,
+            'booking_id': str(booking.id),
+            'game_name': booking.game.name,
+            'slot_date': booking.game_slot.date.isoformat(),
+            'slot_time': f"{booking.game_slot.start_time.strftime('%I:%M %p')} - {booking.game_slot.end_time.strftime('%I:%M %p')}",
+            'customer_name': booking.customer.user.get_full_name() or booking.customer.user.username,
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting QR data for booking {booking_id}: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': 'Internal server error'
+        }, status=500)
 
