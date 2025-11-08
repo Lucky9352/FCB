@@ -181,11 +181,13 @@ LOGOUT_REDIRECT_URL = '/'
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = 'none'  # Disabled for Google OAuth
+ACCOUNT_SESSION_REMEMBER = True  # Remember user login across browser sessions
 
 # Social Account Settings
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_STORE_TOKENS = True  # Store OAuth tokens for seamless re-authentication
 
 # Google OAuth Configuration
 SOCIALACCOUNT_PROVIDERS = {
@@ -211,9 +213,9 @@ SOCIALACCOUNT_ADAPTER = 'authentication.adapters.CustomSocialAccountAdapter'
 
 # Session Configuration
 SESSION_TIMEOUT = 1800  # 30 minutes in seconds
-SESSION_COOKIE_AGE = 1800  # 30 minutes
+SESSION_COOKIE_AGE = 1209600  # 2 weeks (14 days) - Remember user for 2 weeks
 SESSION_SAVE_EVERY_REQUEST = True
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Keep user logged in even after closing browser
 
 # Email Configuration
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')

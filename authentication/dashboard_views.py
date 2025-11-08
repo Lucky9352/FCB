@@ -50,16 +50,17 @@ def customer_dashboard(request):
     
     # Use database aggregation for statistics (single query, NO CACHE)
     stats = all_customer_bookings.aggregate(
-        total=Count('id'),
-        completed=Count('id', filter=Q(status='COMPLETED')),
+        total=Count('id', filter=Q(payment_status='PAID')),  # Only count bookings with successful payment
+        completed=Count('id', filter=Q(status='COMPLETED', is_verified=True)),  # Only QR scanned bookings
         pending=Count('id', filter=Q(status='PENDING')),
         confirmed=Count('id', filter=Q(status='CONFIRMED')),
-        total_spent=Sum('total_amount', filter=Q(payment_status='PAID'))
+        total_spent=Sum('total_amount', filter=Q(payment_status='PAID'))  # Already considers both private and shared
     )
     
-    # Calculate total hours efficiently
+    # Calculate total hours efficiently - only for QR scanned (verified) completed bookings
     completed_with_duration = customer.bookings.filter(
-        status='COMPLETED'
+        status='COMPLETED',
+        is_verified=True  # Only count QR scanned sessions
     ).select_related('game').only('id', 'game__id', 'game__slot_duration_minutes')
     
     total_hours = sum(

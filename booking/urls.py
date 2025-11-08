@@ -51,6 +51,9 @@ urlpatterns = [
     path('api/stations/status/', api_realtime.station_status_api, name='station_status_api'),
     path('api/stations/update/', api_realtime.StationUpdateView.as_view(), name='station_update_api'),
     
+    # QR Code API
+    path('api/qr-data/<uuid:booking_id>/', views.get_qr_data, name='get_qr_data'),
+    
     # Game Management URLs
     path('games/manage/', include('booking.game_management_urls', namespace='game_management')),
 ]

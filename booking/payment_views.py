@@ -188,12 +188,9 @@ def verify_razorpay_payment(request):
         
         logger.info(f"Payment verified successfully for booking {booking_id}")
         
-        # Generate QR code for booking verification
-        qr_generated = QRCodeService.generate_qr_code(booking)
-        if qr_generated:
-            logger.info(f"QR code generated for booking {booking_id}")
-        else:
-            logger.warning(f"Failed to generate QR code for booking {booking_id}")
+        # Ensure verification token exists (no file generation)
+        QRCodeService.generate_qr_code(booking)
+        logger.info(f"Verification token ensured for booking {booking_id}")
         
         # Create transfer to owner if not done during order creation
         # (This happens if transfer was not included in order due to account not configured)
@@ -258,7 +255,6 @@ def verify_razorpay_payment(request):
             'message': 'Payment verified successfully',
             'booking_id': str(booking.id),
             'status': booking.status,
-            'qr_generated': qr_generated,
             'transfer_status': booking.transfer_status
         })
         
@@ -400,13 +396,10 @@ def handle_payment_captured(payment_entity):
                 
                 logger.info(f"Payment captured for booking {booking.id}")
                 
-                # Generate QR code if not exists
-                if not booking.qr_code or not booking.verification_token:
-                    qr_generated = QRCodeService.generate_qr_code(booking)
-                    if qr_generated:
-                        logger.info(f"QR code generated for booking {booking.id} via webhook")
-                    else:
-                        logger.warning(f"Failed to generate QR code for booking {booking.id} via webhook")
+                # Ensure verification token exists
+                if not booking.verification_token:
+                    QRCodeService.generate_qr_code(booking)
+                    logger.info(f"Verification token ensured for booking {booking.id} via webhook")
                 
                 # Send notification AFTER database lock is released
                 try:
@@ -484,13 +477,10 @@ def handle_order_paid(order_entity):
                 
                 logger.info(f"Order paid for booking {booking.id}")
                 
-                # Generate QR code if not exists
-                if not booking.qr_code or not booking.verification_token:
-                    qr_generated = QRCodeService.generate_qr_code(booking)
-                    if qr_generated:
-                        logger.info(f"QR code generated for booking {booking.id} via order.paid webhook")
-                    else:
-                        logger.warning(f"Failed to generate QR code for booking {booking.id} via order.paid webhook")
+                # Ensure verification token exists
+                if not booking.verification_token:
+                    QRCodeService.generate_qr_code(booking)
+                    logger.info(f"Verification token ensured for booking {booking.id} via order.paid webhook")
                 
                 # Send notification AFTER database lock is released
                 try:
@@ -668,16 +658,12 @@ def payment_success(request, booking_id):
             # If updated more than 10 minutes ago, redirect to my bookings
             return redirect('booking:my_bookings')
         
-        # Generate QR code if it doesn't exist yet
-        if not booking.qr_code or not booking.verification_token:
-            logger.info(f"Generating QR code for booking {booking_id} on success page")
-            qr_generated = QRCodeService.generate_qr_code(booking)
-            if qr_generated:
-                # Refresh booking to get the updated qr_code field
-                booking.refresh_from_db()
-                logger.info(f"QR code generated successfully for booking {booking_id}")
-            else:
-                logger.warning(f"Failed to generate QR code for booking {booking_id}")
+        # Ensure verification token exists
+        if not booking.verification_token:
+            logger.info(f"Ensuring verification token for booking {booking_id} on success page")
+            QRCodeService.generate_qr_code(booking)
+            booking.refresh_from_db()
+            logger.info(f"Verification token ensured for booking {booking_id}")
         
         context = {
             'booking': booking,

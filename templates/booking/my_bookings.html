@@ -923,9 +923,7 @@
                   <!-- Actions Row -->
                   <div class="flex gap-2 pt-3" style="border-top: 1px solid rgba(255, 255, 255, 0.1);">
                     {% if booking.status == 'CONFIRMED' or booking.status == 'IN_PROGRESS' %}
-                      {% if booking.qr_code %}
-                      <button onclick="showQRModal('{{ booking.id }}', '{{ booking.qr_code.url }}', '{{ booking.game.name }}', '{{ booking.game_slot.date|date:"M d, Y" }}', '{{ booking.game_slot.start_time|time:"h:i A" }}', '{{ booking.razorpay_payment_id|default:"" }}')" class="btn-qr action-btn flex-1" style="background: linear-gradient(135deg, #667eea, #a855f7); color: white; border: none; display: flex; align-items: center; justify-content: center;"><i class="bi bi-qr-code mr-1.5"></i><span>View QR</span></button>
-                      {% endif %}
+                      <button onclick="showQRModal('{{ booking.id }}', '{{ booking.game.name }}', '{{ booking.game_slot.date|date:"M d, Y" }}', '{{ booking.game_slot.start_time|time:"h:i A" }}', '{{ booking.razorpay_payment_id|default:"" }}')" class="btn-qr action-btn flex-1" style="background: linear-gradient(135deg, #667eea, #a855f7); color: white; border: none; display: flex; align-items: center; justify-content: center;"><i class="bi bi-qr-code mr-1.5"></i><span>View QR</span></button>
                     {% endif %}
                     <a href="{% url 'booking:booking_details' booking.id %}" class="btn-details action-btn flex-1" style="text-decoration: none; display: flex; align-items: center; justify-content: center;"><i class="bi bi-eye mr-1.5"></i><span>Details</span></a>
                   </div>
@@ -1046,9 +1044,20 @@
     }
 
     // QR Code Modal Functions
-    function showQRModal(bookingId, qrUrl, gameName, date, time, paymentId) {
+    let currentBookingId = null;
+    
+    function showQRModal(bookingId, gameName, date, time, paymentId) {
+      currentBookingId = bookingId;
       const modal = document.getElementById('qrModal');
-      document.getElementById('modalQRImage').src = qrUrl;
+      const qrLoading = document.getElementById('qr-loading');
+      const qrContainer = document.getElementById('qr-container');
+      const qrError = document.getElementById('qr-error');
+      
+      // Show loading state
+      qrLoading.classList.remove('hidden');
+      qrContainer.classList.add('hidden');
+      qrError.classList.add('hidden');
+      
       document.getElementById('modalGameName').textContent = gameName;
       document.getElementById('modalDate').textContent = date;
       document.getElementById('modalTime').textContent = time;
@@ -1064,26 +1073,89 @@
         paymentIdSection.style.display = 'none';
       }
       
-      document.getElementById('downloadQRBtn').onclick = function() {
-        downloadQR(qrUrl, bookingId);
-      };
       modal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
+      
+      // Generate QR code
+      generateModalQR(bookingId);
+    }
+    
+    function generateModalQR(bookingId) {
+      const qrLoading = document.getElementById('qr-loading');
+      const qrContainer = document.getElementById('qr-container');
+      const qrError = document.getElementById('qr-error');
+      const canvas = document.getElementById('modalQRCanvas');
+      
+      // Check if QRCode library is loaded
+      if (typeof QRCode === 'undefined') {
+        setTimeout(() => generateModalQR(bookingId), 100);
+        return;
+      }
+      
+      fetch(`/booking/api/qr-data/${bookingId}/`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.qr_data) {
+            // Clear canvas container and generate QR code
+            canvas.innerHTML = '';
+            
+            // Generate QR code using QRCode.js
+            new QRCode(canvas, {
+              text: data.qr_data,
+              width: 280,
+              height: 280,
+              colorDark: '#000000',
+              colorLight: '#ffffff',
+              correctLevel: QRCode.CorrectLevel.M
+            });
+            
+            qrLoading.classList.add('hidden');
+            qrContainer.classList.remove('hidden');
+          } else {
+            qrLoading.classList.add('hidden');
+            qrError.classList.remove('hidden');
+          }
+        })
+        .catch(error => {
+          qrLoading.classList.add('hidden');
+          qrError.classList.remove('hidden');
+        });
     }
 
     function closeQRModal() {
       const modal = document.getElementById('qrModal');
       modal.classList.add('hidden');
       document.body.style.overflow = 'auto';
+      currentBookingId = null;
     }
 
-    function downloadQR(qrUrl, bookingId) {
-      const link = document.createElement('a');
-      link.href = qrUrl;
-      link.download = 'booking_' + bookingId + '_qr.png';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    function downloadQR() {
+      const qrContainer = document.getElementById('modalQRCanvas');
+      if (qrContainer && currentBookingId) {
+        // Find the canvas or image inside the QR container
+        const canvas = qrContainer.querySelector('canvas');
+        const img = qrContainer.querySelector('img');
+        
+        if (canvas) {
+          canvas.toBlob(function(blob) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'booking_' + currentBookingId + '_qr.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+          });
+        } else if (img) {
+          const link = document.createElement('a');
+          link.href = img.src;
+          link.download = 'booking_' + currentBookingId + '_qr.png';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      }
     }
 
     // Close modal on escape key
@@ -1146,8 +1218,20 @@
 
       <!-- QR Code -->
       <div class="text-center mb-5 sm:mb-6">
-        <div class="inline-block p-3 sm:p-4 rounded-xl sm:rounded-2xl" style="background: white;">
-          <img id="modalQRImage" src="" alt="Booking QR Code" class="w-48 h-48 sm:w-56 sm:h-56 lg:w-64 lg:h-64 mx-auto">
+        <div id="qr-loading" class="p-6 rounded-xl" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3);">
+          <div class="animate-spin w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto mb-3"></div>
+          <p class="text-indigo-300 font-medium text-sm">Generating QR Code...</p>
+        </div>
+        
+        <div id="qr-container" class="hidden">
+          <div class="inline-block p-3 sm:p-4 rounded-xl sm:rounded-2xl" style="background: white;">
+            <div id="modalQRCanvas" class="mx-auto"></div>
+          </div>
+        </div>
+        
+        <div id="qr-error" class="hidden p-6 rounded-xl" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);">
+          <i class="bi bi-exclamation-triangle-fill text-red-400 text-3xl mb-2"></i>
+          <p class="text-red-300 font-medium text-sm">Unable to generate QR code</p>
         </div>
       </div>
 
@@ -1203,7 +1287,7 @@
 
       <!-- Actions -->
       <div class="space-y-2 sm:space-y-2.5">
-        <button id="downloadQRBtn" class="w-full py-2.5 sm:py-3 rounded-lg font-bold transition-all text-sm sm:text-base hover:scale-[1.02] active:scale-[0.98]" style="background: linear-gradient(135deg, #667eea, #a855f7); color: white;">
+        <button onclick="downloadQR()" class="w-full py-2.5 sm:py-3 rounded-lg font-bold transition-all text-sm sm:text-base hover:scale-[1.02] active:scale-[0.98]" style="background: linear-gradient(135deg, #667eea, #a855f7); color: white;">
           <i class="bi bi-download mr-2"></i>Download QR Code
         </button>
         <button onclick="window.print()" class="w-full py-2.5 sm:py-3 rounded-lg font-bold transition-all text-sm sm:text-base hover:scale-[1.02] active:scale-[0.98]" style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.25);" onmouseover="this.style.background='rgba(255, 255, 255, 0.15)'; this.style.borderColor='rgba(255, 255, 255, 0.35)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.borderColor='rgba(255, 255, 255, 0.25)'">
@@ -1273,4 +1357,8 @@
       }
     }
   </style>
+{% endblock %}
+
+{% block extra_js %}
+  <!-- Scripts load here after QRCode library from base.html -->
 {% endblock %}

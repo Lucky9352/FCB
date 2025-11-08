@@ -461,13 +461,7 @@ class Booking(models.Model):
         unique=False,  # Allow blank/empty tokens for non-QR bookings
         db_index=True,
         blank=True,
-        help_text="Unique token for QR code verification"
-    )
-    qr_code = models.ImageField(
-        upload_to='booking_qr_codes/', 
-        blank=True, 
-        null=True,
-        help_text="Generated QR code for booking verification"
+        help_text="Unique token for QR code verification (dynamically generated, no file storage)"
     )
     is_verified = models.BooleanField(
         default=False,

@@ -644,9 +644,6 @@
   .ml-4 {
     margin-left: calc(var(--spacing) * 4);
   }
-  .ml-5 {
-    margin-left: calc(var(--spacing) * 5);
-  }
   .ml-6 {
     margin-left: calc(var(--spacing) * 6);
   }
@@ -1385,6 +1382,9 @@
   .border-gray-300 {
     border-color: var(--color-gray-300);
   }
+  .border-gray-400 {
+    border-color: var(--color-gray-400);
+  }
   .border-gray-600 {
     border-color: var(--color-gray-600);
   }
@@ -1430,6 +1430,9 @@
   .border-indigo-300 {
     border-color: var(--color-indigo-300);
   }
+  .border-indigo-400 {
+    border-color: var(--color-indigo-400);
+  }
   .border-indigo-500 {
     border-color: var(--color-indigo-500);
   }
@@ -1438,9 +1441,6 @@
     @supports (color: color-mix(in lab, red, red)) {
       border-color: color-mix(in oklab, var(--color-indigo-500) 30%, transparent);
     }
-  }
-  .border-indigo-600 {
-    border-color: var(--color-indigo-600);
   }
   .border-purple-400\/30 {
     border-color: color-mix(in srgb, oklch(71.4% 0.203 305.504) 30%, transparent);
@@ -2688,6 +2688,9 @@
   .italic {
     font-style: italic;
   }
+  .underline {
+    text-decoration-line: underline;
+  }
   .placeholder-gray-400 {
     &::placeholder {
       color: var(--color-gray-400);
@@ -2943,6 +2946,13 @@
       }
     }
   }
+  .group-hover\:border-indigo-400 {
+    &:is(:where(.group):hover *) {
+      @media (hover: hover) {
+        border-color: var(--color-indigo-400);
+      }
+    }
+  }
   .group-hover\:text-green-200 {
     &:is(:where(.group):hover *) {
       @media (hover: hover) {
@@ -3131,6 +3141,13 @@
     &:hover {
       @media (hover: hover) {
         background-color: var(--color-blue-50);
+      }
+    }
+  }
+  .hover\:bg-blue-600 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-blue-600);
       }
     }
   }
@@ -3400,6 +3417,14 @@
       }
     }
   }
+  .hover\:bg-gradient-to-br {
+    &:hover {
+      @media (hover: hover) {
+        --tw-gradient-position: to bottom right in oklab;
+        background-image: linear-gradient(var(--tw-gradient-stops));
+      }
+    }
+  }
   .hover\:from-green-500\/30 {
     &:hover {
       @media (hover: hover) {
@@ -3415,6 +3440,14 @@
     &:hover {
       @media (hover: hover) {
         --tw-gradient-from: var(--color-indigo-700);
+        --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+      }
+    }
+  }
+  .hover\:from-purple-600 {
+    &:hover {
+      @media (hover: hover) {
+        --tw-gradient-from: var(--color-purple-600);
         --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
       }
     }
@@ -3442,6 +3475,14 @@
     &:hover {
       @media (hover: hover) {
         --tw-gradient-to: var(--color-orange-700);
+        --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+      }
+    }
+  }
+  .hover\:to-pink-600 {
+    &:hover {
+      @media (hover: hover) {
+        --tw-gradient-to: var(--color-pink-600);
         --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
       }
     }
@@ -3803,11 +3844,6 @@
       height: calc(var(--spacing) * 24);
     }
   }
-  .sm\:h-56 {
-    @media (width >= 40rem) {
-      height: calc(var(--spacing) * 56);
-    }
-  }
   .sm\:w-10 {
     @media (width >= 40rem) {
       width: calc(var(--spacing) * 10);
@@ -3836,11 +3872,6 @@
   .sm\:w-24 {
     @media (width >= 40rem) {
       width: calc(var(--spacing) * 24);
-    }
-  }
-  .sm\:w-56 {
-    @media (width >= 40rem) {
-      width: calc(var(--spacing) * 56);
     }
   }
   .sm\:w-auto {
@@ -4237,11 +4268,6 @@
       height: calc(var(--spacing) * 60);
     }
   }
-  .lg\:h-64 {
-    @media (width >= 64rem) {
-      height: calc(var(--spacing) * 64);
-    }
-  }
   .lg\:h-auto {
     @media (width >= 64rem) {
       height: auto;
@@ -4250,11 +4276,6 @@
   .lg\:w-28 {
     @media (width >= 64rem) {
       width: calc(var(--spacing) * 28);
-    }
-  }
-  .lg\:w-64 {
-    @media (width >= 64rem) {
-      width: calc(var(--spacing) * 64);
     }
   }
   .lg\:grid-cols-2 {
