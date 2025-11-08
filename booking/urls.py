@@ -8,12 +8,6 @@ from . import api_realtime
 app_name = 'booking'
 
 urlpatterns = [
-    # OLD BOOKING SYSTEM (Backward Compatibility)
-    path('select/', views.booking_selection, name='selection'),
-    path('create/', views.booking_create, name='create'),
-    path('confirm/<uuid:booking_id>/', views.booking_confirm, name='confirm'),
-    path('success/<uuid:booking_id>/', views.booking_success, name='success'),
-    
     # NEW HYBRID BOOKING SYSTEM
     path('games/', views.game_selection, name='game_selection'),
     path('games/<uuid:game_id>/', views.game_detail, name='game_detail'),
@@ -40,6 +34,7 @@ urlpatterns = [
     # QR CODE VERIFICATION (Owner/Staff)
     path('qr-scanner/', verification_views.qr_scanner_view, name='qr_scanner'),
     path('verify-qr/', verification_views.verify_booking_qr, name='verify_booking_qr'),
+    path('verify-manual/<uuid:booking_id>/', verification_views.verify_booking_manual, name='verify_booking_manual'),
     path('complete/<uuid:booking_id>/', verification_views.complete_booking, name='complete_booking'),
     path('active-bookings/', verification_views.active_bookings_view, name='active_bookings'),
     
@@ -49,10 +44,8 @@ urlpatterns = [
     
     # AJAX endpoints
     path('api/availability/', views.get_availability, name='get_availability'),
+    path('api/game-availability/<uuid:game_id>/', views.get_game_availability, name='get_game_availability'),
     path('api/slot-availability/<int:game_slot_id>/', views.get_slot_availability, name='get_slot_availability'),
-    
-    # Test page
-    path('test-api/', lambda request: render(request, 'booking/test_api.html'), name='test_api'),
     
     # Real-time API endpoints
     path('api/stations/status/', api_realtime.station_status_api, name='station_status_api'),

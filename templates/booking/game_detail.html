@@ -12,55 +12,193 @@
 
 {% block extra_css %}
 <style>
+    /* Hero Background with Orbs */
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.3;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+    
+    .orb-1 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%);
+        top: -150px;
+        right: -150px;
+        animation-delay: 0s;
+    }
+    
+    .orb-2 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+        bottom: -100px;
+        left: -100px;
+        animation-delay: 7s;
+    }
+    
+    @keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(30px, -30px) scale(1.1); }
+        66% { transform: translate(-30px, 30px) scale(0.9); }
+    }
+    
+    /* Grid Pattern */
+    .grid-pattern {
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+    
+    /* Slot Card Styles - Ultra Compact & Clickable */
     .slot-card {
+        position: relative;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 2px solid transparent;
+        background: rgba(30, 41, 59, 0.6);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.875rem;
+        padding: 1rem;
+        z-index: 1;
     }
-    .slot-card:hover {
-        transform: translateY(-4px);
-        border-color: rgba(233, 69, 96, 0.5);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    
+    .slot-card-clickable {
+        cursor: pointer;
     }
+    
+    .slot-card-clickable:hover {
+        transform: translateY(-3px);
+        border-color: rgba(102, 126, 234, 0.5);
+        background: rgba(30, 41, 59, 0.75);
+    }
+    
+    .slot-card-clickable:active {
+        transform: translateY(-1px);
+    }
+    
+    .slot-card-clickable::before {
+        content: '';
+        position: absolute;
+        inset: -1px;
+        border-radius: inherit;
+        padding: 1px;
+        background: linear-gradient(135deg, #667eea, #a855f7);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: -1;
+    }
+    
+    .slot-card-clickable:hover::before {
+        opacity: 0.4;
+    }
+    
+    .slot-card-disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .slot-card-disabled:hover {
+        transform: none;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Time Filter Buttons - Match Date Tab Style */
+    .time-filter-btn {
+        position: relative;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        z-index: 10;
+        cursor: pointer;
+    }
+    
+    .time-filter-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #a855f7 100%);
+        transform: scale(1.03);
+        color: white;
+    }
+    
+    .time-filter-btn:hover:not(.active) {
+        transform: translateY(-1px);
+        background: rgba(102, 126, 234, 0.1);
+        z-index: 20;
+    }
+    
+    .time-filter-btn i {
+        margin-right: 0.25rem;
+        font-size: 0.75rem;
+    }
+    
+    /* Capacity Dots */
     .capacity-indicator {
         display: inline-flex;
         align-items: center;
-        gap: 4px;
+        gap: 5px;
+        flex-wrap: wrap;
     }
+    
     .capacity-dot {
         width: 10px;
         height: 10px;
         border-radius: 50%;
         transition: all 0.3s ease;
     }
+    
     .capacity-dot.booked {
         background-color: #ef4444;
-        box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
     }
+    
     .capacity-dot.reserved {
         background-color: #f59e0b;
-        box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
         animation: pulse-reserved 2s ease-in-out infinite;
     }
+    
     .capacity-dot.available {
         background-color: #10b981;
-        box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
     }
     
     @keyframes pulse-reserved {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.6; }
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.1); }
     }
+    
+    /* Date Tab Styles */
     .date-tab {
+        position: relative;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        z-index: 10;
     }
+    
     .date-tab.active {
-        background: linear-gradient(135deg, #e94560 0%, #00d4aa 100%);
-        transform: scale(1.05);
+        background: linear-gradient(135deg, #667eea 0%, #a855f7 100%);
+        transform: scale(1.03);
     }
+    
     .date-tab:hover:not(.active) {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        transform: translateY(-1px);
+        background: rgba(102, 126, 234, 0.1);
+        z-index: 20;
     }
+    
     .scrollbar-hide {
         -ms-overflow-style: none;
         scrollbar-width: none;
@@ -69,12 +207,13 @@
         display: none;
     }
     
-    /* Skeleton loading animation */
+    /* Loading Animations */
     .skeleton {
         animation: skeleton-loading 1s linear infinite alternate;
         background: linear-gradient(90deg, #2d2d2d 25%, #3d3d3d 50%, #2d2d2d 75%);
         background-size: 200% 100%;
     }
+    
     @keyframes skeleton-loading {
         0% { background-position: 200% 0; }
         100% { background-position: -200% 0; }
@@ -83,21 +222,22 @@
     .fade-in {
         animation: fadeIn 0.4s ease-out;
     }
+    
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
     }
     
-    /* Loading spinner */
     .loading-spinner {
         display: inline-block;
         width: 50px;
         height: 50px;
         border: 5px solid rgba(255, 255, 255, 0.1);
-        border-top-color: #e94560;
+        border-top-color: #667eea;
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
     }
+    
     @keyframes spin {
         to { transform: rotate(360deg); }
     }
@@ -116,32 +256,106 @@
         z-index: 10;
     }
     
-    /* Pulse animation for loading text */
     .pulse {
         animation: pulse 1.5s ease-in-out infinite;
     }
+    
     @keyframes pulse {
         0%, 100% { opacity: 1; }
         50% { opacity: 0.5; }
     }
     
-    /* Spot selector button styles */
-    .spot-selector-btn {
+    /* Button Styles with Proper Z-Index - Compact */
+    .book-btn {
+        position: relative;
+        z-index: 10;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: linear-gradient(135deg, #667eea, #a855f7);
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 0.625rem 1rem;
+        border-radius: 0.625rem;
+        cursor: pointer;
+        overflow: hidden;
+        font-size: 0.875rem;
     }
     
-    .spot-selector-btn:hover {
+    .book-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+    
+    .book-btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    .book-btn:hover::after {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .book-btn:active {
+        transform: translateY(0);
+    }
+    
+    .book-btn:disabled,
+    .btn-disabled {
+        background: rgba(107, 114, 128, 0.3) !important;
+        color: rgba(156, 163, 175, 0.8) !important;
+        cursor: not-allowed !important;
+        opacity: 0.6;
+        pointer-events: none;
+    }
+    
+    .book-btn:disabled:hover,
+    .btn-disabled:hover {
+        transform: none !important;
+    }
+    
+    /* Spot Selector Button Styles */
+    .spot-selector-btn {
+        position: relative;
+        z-index: 10;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        color: white;
+    }
+    
+    .spot-selector-btn:hover:not(.active) {
+        transform: scale(1.05);
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.1);
+    }
+    
+    .spot-selector-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #a855f7 100%);
+        color: white;
+        border-color: #667eea;
         transform: scale(1.05);
     }
     
-    .spot-selector-btn.scale-110 {
-        transform: scale(1.1);
-    }
-    
-    /* Modal animation */
-    #spotSelectionModal {
+    /* Modal Styles */
+    #unifiedBookingModal,
+    #loginPromptModal {
+        z-index: 9999;
         animation: modalFadeIn 0.3s ease-out;
         backdrop-filter: blur(10px);
+        -webkit-overflow-scrolling: touch;
     }
     
     @keyframes modalFadeIn {
@@ -155,28 +369,823 @@
         }
     }
     
-    /* Disabled button style */
-    .btn-disabled {
-        background: rgba(107, 114, 128, 0.3) !important;
-        color: rgba(156, 163, 175, 0.8) !important;
-        cursor: not-allowed !important;
-        opacity: 0.6;
+    /* Info Box Hover Effect */
+    .info-box {
+        position: relative;
+        overflow: hidden;
     }
     
-    .btn-disabled:hover {
-        transform: none !important;
-        box-shadow: none !important;
+    .info-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .info-box:hover::before {
+        left: 100%;
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 640px) {
+        /* Slot Cards Mobile */
+        .slot-card {
+            padding: 0.75rem !important;
+            border-radius: 0.75rem !important;
+        }
+        
+        .slot-card h3,
+        .slot-card .text-lg {
+            font-size: 0.875rem !important;
+        }
+        
+        .slot-card .text-sm {
+            font-size: 0.75rem !important;
+        }
+        
+        .slot-card .text-xs {
+            font-size: 0.6875rem !important;
+        }
+        
+        /* Book Button Mobile */
+        .book-btn {
+            padding: 0.5rem 0.75rem !important;
+            font-size: 0.75rem !important;
+            border-radius: 0.5rem !important;
+        }
+        
+        .book-btn i {
+            font-size: 0.75rem !important;
+        }
+        
+        /* Capacity Dots Mobile */
+        .capacity-dot {
+            width: 7px !important;
+            height: 7px !important;
+        }
+        
+        .capacity-indicator {
+            gap: 4px !important;
+        }
+        
+        /* Time Filter Buttons */
+        .time-filter-btn {
+            padding: 0.375rem 0.625rem !important;
+            font-size: 0.6875rem !important;
+            min-width: 65px !important;
+        }
+        
+        /* Slot Card Icons */
+        .slot-card i {
+            font-size: 0.875rem !important;
+        }
+        
+        /* Slot Card Badges */
+        .slot-card .rounded-full {
+            padding: 0.25rem 0.5rem !important;
+            font-size: 0.625rem !important;
+        }
+        
+        .time-filter-btn i {
+            margin-right: 0.25rem !important;
+            font-size: 0.625rem !important;
+        }
+        
+        .time-filter-btn .font-bold {
+            font-size: 0.6875rem !important;
+        }
+        
+        /* Time filter container */
+        .mb-6.flex.flex-wrap {
+            gap: 0.5rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        /* Modal Mobile Optimization */
+        #unifiedBookingModal > div,
+        #loginPromptModal > div {
+            max-width: 95vw !important;
+            margin: 0.5rem !important;
+            padding: 1.25rem !important;
+            max-height: 95vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Modal Header */
+        #unifiedBookingModal h3,
+        #loginPromptModal h3 {
+            font-size: 1.25rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        #unifiedBookingModal .text-center.mb-6,
+        #loginPromptModal .text-center.mb-6 {
+            margin-bottom: 1rem !important;
+        }
+        
+        #unifiedBookingModal .text-center p,
+        #loginPromptModal .text-center p {
+            font-size: 0.8125rem !important;
+        }
+        
+        /* Modal Icon */
+        #unifiedBookingModal .w-20,
+        #loginPromptModal .w-20 {
+            width: 3.5rem !important;
+            height: 3.5rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+        
+        #unifiedBookingModal .w-20 i,
+        #loginPromptModal .w-20 i {
+            font-size: 1.75rem !important;
+        }
+        
+        /* Full Table Toggle */
+        #fullTableToggle {
+            padding: 0.75rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        #fullTableToggle .w-12 {
+            width: 2.25rem !important;
+            height: 2.25rem !important;
+        }
+        
+        #fullTableToggle .text-white {
+            font-size: 0.8125rem !important;
+        }
+        
+        #fullTableToggle .text-xs {
+            font-size: 0.6875rem !important;
+        }
+        
+        #fullTablePrice {
+            font-size: 0.9375rem !important;
+        }
+        
+        #fullTableToggle .flex.items-center.gap-3 {
+            gap: 0.625rem !important;
+        }
+        
+        /* Spot Selection Section */
+        #spotSelectionSection {
+            margin-bottom: 1rem !important;
+        }
+        
+        #spotSelectionSection .text-white.font-semibold {
+            font-size: 0.8125rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+        
+        #spotSelectionSection i {
+            font-size: 0.875rem !important;
+        }
+        
+        /* Spot Selection Grid */
+        #spotSelectionGrid {
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 0.5rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        .spot-selector-btn {
+            padding: 0.625rem !important;
+            font-size: 0.8125rem !important;
+            border-radius: 0.625rem !important;
+            min-height: 2.5rem !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        
+        /* Total Price Display */
+        #totalPriceDisplay {
+            font-size: 1.5rem !important;
+        }
+        
+        #bookingTypeDisplay {
+            font-size: 0.6875rem !important;
+        }
+        
+        .rounded-xl.p-5.mb-6 {
+            padding: 0.875rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        .rounded-xl.p-5.mb-6 .flex.justify-between {
+            margin-bottom: 0.375rem !important;
+        }
+        
+        .rounded-xl.p-5.mb-6 .text-gray-200 {
+            font-size: 0.8125rem !important;
+        }
+        
+        /* Action Buttons */
+        #unifiedBookingModal .flex.space-x-3,
+        #loginPromptModal .flex.flex-col {
+            flex-direction: column !important;
+            gap: 0.625rem !important;
+        }
+        
+        #unifiedBookingModal .flex.space-x-3 {
+            margin-top: auto !important;
+        }
+        
+        #unifiedBookingModal button,
+        #loginPromptModal button,
+        #loginPromptModal a {
+            width: 100% !important;
+            padding: 0.75rem 0.875rem !important;
+            font-size: 0.8125rem !important;
+        }
+        
+        /* Login Prompt Modal Specific */
+        #loginPromptModal .p-4.rounded-xl {
+            padding: 0.75rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        #loginPromptModal .w-10 {
+            width: 2rem !important;
+            height: 2rem !important;
+        }
+        
+        #loginPromptModal .text-lg {
+            font-size: 0.9375rem !important;
+        }
+        
+        #loginPromptModal .text-xs {
+            font-size: 0.6875rem !important;
+        }
+        
+        #loginPromptModal .space-y-2 {
+            gap: 0.375rem !important;
+        }
+        
+        #loginPromptModal .text-center.pt-2 p {
+            font-size: 0.6875rem !important;
+            padding-top: 0.5rem !important;
+        }
+        
+        /* Smooth scrolling for modal content */
+        #unifiedBookingModal > div::-webkit-scrollbar,
+        #loginPromptModal > div::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        #unifiedBookingModal > div::-webkit-scrollbar-track,
+        #loginPromptModal > div::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+        
+        #unifiedBookingModal > div::-webkit-scrollbar-thumb,
+        #loginPromptModal > div::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.5);
+            border-radius: 3px;
+        }
+        
+        #unifiedBookingModal > div::-webkit-scrollbar-thumb:hover,
+        #loginPromptModal > div::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 126, 234, 0.7);
+        }
+        
+        /* Current Date Display Card */
+        .mb-6.slot-card {
+            padding: 0.875rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        #selectedDateDisplay {
+            font-size: 0.9375rem !important;
+        }
+        
+        #currentTimeDisplay {
+            font-size: 0.75rem !important;
+        }
+        
+        /* Combined Section Mobile */
+        .slot-card.mb-6.p-6 {
+            padding: 1rem !important;
+            margin-bottom: 1.5rem !important;
+        }
+        
+        .slot-card.mb-6.p-6 h2 {
+            font-size: 1.25rem !important;
+        }
+        
+        /* Date Tabs Mobile */
+        .date-tab {
+            min-width: 70px !important;
+            padding: 0.375rem 0.5rem !important;
+            border-radius: 0.5rem !important;
+        }
+        
+        .date-tab .font-bold {
+            font-size: 0.6875rem !important;
+            margin-bottom: 0.125rem !important;
+        }
+        
+        .date-tab .text-xs {
+            font-size: 0.5625rem !important;
+        }
+        
+        /* Date tabs container */
+        .flex.space-x-2.overflow-x-auto {
+            gap: 0.375rem !important;
+            padding-bottom: 0.5rem !important;
+        }
+        
+        .mb-4 {
+            margin-bottom: 0.875rem !important;
+        }
+        
+        /* Time Filter Buttons Mobile */
+        .time-filter-btn {
+            min-width: 65px !important;
+            padding: 0.375rem 0.5rem !important;
+            border-radius: 0.5rem !important;
+        }
+        
+        .time-filter-btn .font-bold {
+            font-size: 0.6875rem !important;
+        }
+        
+        .time-filter-btn i {
+            font-size: 0.6875rem !important;
+        }
+        
+        /* Improve touch targets on mobile */
+        .spot-selector-btn,
+        #fullTableToggle,
+        .time-filter-btn,
+        .date-tab {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        /* Prevent zoom on double tap */
+        button, a {
+            touch-action: manipulation;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .orb-1, .orb-2 {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Slow down animations on mobile */
+        .gradient-orb {
+            animation: floatOrb 40s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .animate-pulse,
+        .pulse-reserved {
+            animation: pulse-reserved 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+        
+        /* Page Layout Mobile Optimization */
+        .min-h-screen {
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+        }
+        
+        .max-w-7xl {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+        
+        /* Back Button Mobile */
+        .mb-6 a {
+            font-size: 0.875rem !important;
+            padding: 0.5rem 0 !important;
+        }
+        
+        .mb-6 a svg {
+            width: 1rem !important;
+            height: 1rem !important;
+            margin-right: 0.375rem !important;
+        }
+        
+        /* Game Header Mobile */
+        .slot-card.mb-10 {
+            margin-bottom: 2rem !important;
+        }
+        
+        .slot-card.mb-10 .grid {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .slot-card.mb-10 .lg\:col-span-2 {
+            height: 250px !important;
+        }
+        
+        .slot-card.mb-10 .lg\:col-span-3 {
+            padding: 1.25rem !important;
+        }
+        
+        .slot-card.mb-10 h1 {
+            font-size: 1.75rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+        
+        .slot-card.mb-10 p {
+            font-size: 0.875rem !important;
+            margin-bottom: 1.5rem !important;
+        }
+        
+        /* Game Details Icons Mobile */
+        .slot-card.mb-10 .bi {
+            font-size: 0.875rem !important;
+        }
+        
+        /* Game Details Grid Mobile */
+        .slot-card.mb-10 .grid.grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.5rem !important;
+        }
+        
+        .slot-card.mb-10 .grid.grid-cols-2 > div {
+            padding: 0.75rem !important;
+        }
+        
+        .slot-card.mb-10 .grid.grid-cols-2 .text-sm {
+            font-size: 0.75rem !important;
+        }
+        
+        .slot-card.mb-10 .text-2xl {
+            font-size: 1.125rem !important;
+        }
+        
+        /* Pool Balls Decoration Mobile */
+        .slot-card.mb-10 .w-24.h-24 {
+            width: 3.5rem !important;
+            height: 3.5rem !important;
+        }
+        
+        .slot-card.mb-10 .w-24.h-24 .text-4xl {
+            font-size: 1.5rem !important;
+        }
+        
+        .slot-card.mb-10 .flex.gap-6 {
+            gap: 0.75rem !important;
+        }
+        
+        .slot-card.mb-10 .mb-6 {
+            margin-bottom: 0.75rem !important;
+        }
+        
+        /* Cue stick - hide on mobile */
+        .slot-card.mb-10 .absolute.bottom-16 {
+            display: none !important;
+        }
+        
+        /* Booking Type Badge Mobile */
+        .slot-card.mb-10 .absolute.top-4 span {
+            padding: 0.375rem 0.75rem !important;
+            font-size: 0.75rem !important;
+        }
+        
+        /* Section Headers Mobile */
+        h2.text-3xl {
+            font-size: 1.25rem !important;
+        }
+        
+        .flex.items-center.gap-3 i.text-3xl {
+            font-size: 1.25rem !important;
+        }
+        
+        /* Available Slots Section */
+        .flex.items-center.justify-between.mb-6 {
+            margin-bottom: 1rem !important;
+        }
+        
+        #liveIndicator {
+            font-size: 0.625rem !important;
+        }
+        
+        /* Selected Date Display Card */
+        .slot-card.mb-6 {
+            padding: 0.875rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        #selectedDateDisplay {
+            font-size: 0.875rem !important;
+        }
+        
+        #currentTimeDisplay {
+            font-size: 0.75rem !important;
+        }
+        
+        .slot-card.mb-6 .px-3 {
+            padding: 0.25rem 0.625rem !important;
+            font-size: 0.625rem !important;
+        }
+        
+        /* Date Selection Section Mobile */
+        .mb-10 {
+            margin-bottom: 1.5rem !important;
+        }
+        
+        .mb-10 .flex.items-center.gap-3 {
+            gap: 0.5rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        .mb-10 .bi-calendar-event {
+            font-size: 1.5rem !important;
+        }
+        
+        /* Date Tabs Mobile */
+        .date-tab {
+            min-width: 90px !important;
+            padding: 0.625rem 0.75rem !important;
+        }
+        
+        .date-tab .font-bold {
+            font-size: 0.8125rem !important;
+            margin-bottom: 0.25rem !important;
+        }
+        
+        .date-tab .text-sm {
+            font-size: 0.6875rem !important;
+        }
+        
+        /* Date tabs container */
+        .flex.space-x-4.overflow-x-auto {
+            gap: 0.5rem !important;
+            padding-bottom: 0.75rem !important;
+        }
+        
+        /* Slots Grid Mobile */
+        #slotsContainer > div {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.75rem !important;
+        }
+        
+        /* Loading States Mobile */
+        .loading-overlay {
+            min-height: 300px !important;
+        }
+        
+        .loading-spinner {
+            width: 40px !important;
+            height: 40px !important;
+            border-width: 4px !important;
+        }
+        
+        .loading-message p {
+            font-size: 0.875rem !important;
+        }
+        
+        .loading-message p.text-sm {
+            font-size: 0.75rem !important;
+        }
+        
+        /* Skeleton Loader Mobile */
+        .skeleton {
+            height: 100px !important;
+        }
+        
+        /* Empty State Mobile */
+        .text-center.py-12 {
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
+        }
+        
+        .text-center.py-12 i {
+            font-size: 3rem !important;
+        }
+        
+        .text-center.py-12 h3 {
+            font-size: 1.125rem !important;
+        }
+        
+        .text-center.py-12 p {
+            font-size: 0.875rem !important;
+        }
+    }
+    
+    /* Extra small screens optimization */
+    @media (max-width: 375px) {
+        /* Game Header Extra Compact */
+        .slot-card.mb-10 .lg\:col-span-3 {
+            padding: 1rem !important;
+        }
+        
+        .slot-card.mb-10 h1 {
+            font-size: 1.5rem !important;
+        }
+        
+        /* Pool Balls Even Smaller */
+        .slot-card.mb-10 .w-24.h-24 {
+            width: 2.75rem !important;
+            height: 2.75rem !important;
+        }
+        
+        .slot-card.mb-10 .w-24.h-24 .text-4xl {
+            font-size: 1.25rem !important;
+        }
+        
+        .slot-card.mb-10 .flex.gap-6 {
+            gap: 0.5rem !important;
+        }
+        
+        /* Game Details Grid - Keep 2 columns but tighter */
+        .slot-card.mb-10 .grid.grid-cols-2 {
+            gap: 0.375rem !important;
+        }
+        
+        .slot-card.mb-10 .grid.grid-cols-2 > div {
+            padding: 0.625rem !important;
+        }
+        
+        .slot-card.mb-10 .text-2xl {
+            font-size: 1rem !important;
+        }
+        
+        /* Modal Extra Compact */
+        #unifiedBookingModal > div,
+        #loginPromptModal > div {
+            padding: 1rem !important;
+            margin: 0.375rem !important;
+        }
+        
+        #unifiedBookingModal h3,
+        #loginPromptModal h3 {
+            font-size: 1.125rem !important;
+        }
+        
+        #unifiedBookingModal .w-20,
+        #loginPromptModal .w-20 {
+            width: 3rem !important;
+            height: 3rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        #unifiedBookingModal .w-20 i,
+        #loginPromptModal .w-20 i {
+            font-size: 1.5rem !important;
+        }
+        
+        #fullTableToggle {
+            padding: 0.625rem !important;
+        }
+        
+        #fullTableToggle .w-12 {
+            width: 2rem !important;
+            height: 2rem !important;
+        }
+        
+        #fullTableToggle .text-white {
+            font-size: 0.75rem !important;
+        }
+        
+        #fullTablePrice {
+            font-size: 0.875rem !important;
+        }
+        
+        #spotSelectionGrid {
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 0.375rem !important;
+        }
+        
+        .spot-selector-btn {
+            padding: 0.5rem !important;
+            font-size: 0.75rem !important;
+        }
+        
+        #totalPriceDisplay {
+            font-size: 1.375rem !important;
+        }
+        
+        #bookingTypeDisplay {
+            font-size: 0.625rem !important;
+        }
+        
+        #unifiedBookingModal button,
+        #loginPromptModal button,
+        #loginPromptModal a {
+            padding: 0.625rem 0.75rem !important;
+            font-size: 0.75rem !important;
+        }
+        
+        /* Date Tabs Extra Small */
+        .date-tab {
+            min-width: 70px !important;
+            padding: 0.5rem 0.5rem !important;
+        }
+        
+        .date-tab .font-bold {
+            font-size: 0.6875rem !important;
+        }
+        
+        .date-tab .text-xs {
+            font-size: 0.625rem !important;
+        }
+        
+        /* Time Filter Buttons Extra Small */
+        .time-filter-btn {
+            min-width: 60px !important;
+            padding: 0.375rem 0.375rem !important;
+        }
+        
+        .time-filter-btn .font-bold {
+            font-size: 0.625rem !important;
+        }
+        
+        .time-filter-btn i {
+            font-size: 0.5625rem !important;
+        }
+        
+        /* Combined Section Extra Small */
+        .slot-card.mb-6.p-6 {
+            padding: 0.875rem !important;
+        }
+        
+        .slot-card.mb-6.p-6 h2 {
+            font-size: 1.125rem !important;
+        }
+        
+        /* Slot Cards Extra Small */
+        .slot-card {
+            padding: 0.625rem !important;
+        }
+        
+        .slot-card h3,
+        .slot-card .text-lg {
+            font-size: 0.8125rem !important;
+        }
+        
+        .slot-card .text-sm {
+            font-size: 0.6875rem !important;
+        }
+        
+        .slot-card .text-xs {
+            font-size: 0.625rem !important;
+        }
+        
+        /* Book Button Extra Small */
+        .book-btn {
+            padding: 0.375rem 0.625rem !important;
+            font-size: 0.6875rem !important;
+        }
+        
+        /* Capacity Dots Extra Small */
+        .capacity-dot {
+            width: 6px !important;
+            height: 6px !important;
+        }
+        
+        .capacity-indicator {
+            gap: 3px !important;
+        }
+        
+        /* Back Button Extra Small */
+        .mb-6 a {
+            font-size: 0.8125rem !important;
+        }
+        
+        /* Loading States Extra Small */
+        .loading-spinner {
+            width: 35px !important;
+            height: 35px !important;
+        }
+    }
+    
+    @media (min-width: 1536px) {
+        /* 6 columns on very large screens */
+        #slotsContainer > div {
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen py-8" style="background: linear-gradient(to bottom right, #111827, #1a202e, #1f2937);">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen py-8 relative" style="background: #111827;">
+    <!-- Animated Background -->
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="grid-pattern"></div>
+    </div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10" style="overflow: visible !important;">
         
         <!-- Back Button -->
         <div class="mb-6">
-            <a href="{% url 'home' %}" class="inline-flex items-center text-white hover:text-gaming-highlight transition-colors">
+            <a href="{% url 'home' %}" class="inline-flex items-center text-white hover:text-purple-400 transition-colors font-medium">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
@@ -185,7 +1194,7 @@
         </div>
 
         <!-- Game Header -->
-        <div class="card border-2 border-white/10 mb-8 overflow-hidden">
+        <div class="slot-card mb-10 overflow-hidden" style="padding: 0;">
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-0">
                 <!-- Game Image -->
                 <div class="lg:col-span-2 h-96 lg:h-auto relative overflow-hidden">
@@ -249,12 +1258,12 @@
                     <!-- Booking Type Badge -->
                     <div class="absolute top-4 right-4">
                         {% if game.booking_type == 'HYBRID' %}
-                        <span class="badge badge-success text-sm shadow-lg">
-                            🤝 Private + Shared Available
+                        <span class="px-4 py-2 rounded-full text-sm font-bold shadow-lg" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); backdrop-filter: blur(10px);">
+                            <i class="bi bi-people-fill"></i> Flexible Booking
                         </span>
                         {% else %}
-                        <span class="badge badge-primary text-sm shadow-lg">
-                            🔒 Private Booking Only
+                        <span class="px-4 py-2 rounded-full text-sm font-bold shadow-lg" style="background: rgba(102, 126, 234, 0.2); color: #818cf8; border: 1px solid rgba(102, 126, 234, 0.4); backdrop-filter: blur(10px);">
+                            <i class="bi bi-lock-fill"></i> Private Only
                         </span>
                         {% endif %}
                     </div>
@@ -295,7 +1304,7 @@
                         <div class="bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl p-5 border border-green-400/30 hover:border-green-400/50 transition-all">
                             <div class="text-green-200 text-sm mb-2 flex items-center gap-2">
                                 <i class="bi bi-wallet2"></i>
-                                Shared Price (per person)
+                                Shared Price
                             </div>
                             <div class="text-white text-2xl font-bold">₹{{ game.shared_price }}</div>
                         </div>
@@ -317,42 +1326,67 @@
             </div>
         </div>
 
-        <!-- Date Selection -->
-        <div class="mb-10">
-            <h2 class="text-3xl font-black text-white mb-6 flex items-center gap-3">
-                <i class="bi bi-calendar-event text-primary-400"></i>
-                Select Date
-            </h2>
-            <div class="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide py-2">
-                {% for date in date_range %}
-                <button type="button"
-                        onclick="selectDate('{{ date.isoformat }}')" 
-                        class="date-tab flex-shrink-0 px-8 py-4 rounded-xl text-center min-w-[140px] transition-all duration-300 {% if date == selected_date %}active text-white shadow-2xl{% else %}bg-white/5 text-gray-300 hover:bg-white/10{% endif %} border-2 border-white/10"
-                        data-date="{{ date.isoformat }}">
-                    <div class="font-bold text-lg mb-1">
-                        {% if date == today %}Today{% else %}{{ date|date:"M d" }}{% endif %}
-                    </div>
-                    <div class="text-sm opacity-80">{{ date|date:"D" }}</div>
-                </button>
-                {% endfor %}
+        <!-- Current Date/Time Display Card -->
+        <div class="mb-6 slot-card">
+            <div class="flex flex-col gap-1 items-center text-center">
+                <span class="text-white font-semibold text-lg" id="selectedDateDisplay">{{ selected_date|date:"l, F d, Y" }}</span>
+                <span class="text-gray-400 text-sm font-mono" id="currentTimeDisplay"></span>
             </div>
         </div>
 
-        <!-- Available Slots for Selected Date -->
-        <div>
-            <h2 class="text-3xl font-black text-white mb-6 flex items-center gap-3">
-                <i class="bi bi-clock-history text-secondary-400"></i>
-                <span>Available Time Slots</span>
-                <span id="liveIndicator" class="ml-auto flex items-center gap-2 text-xs font-medium text-success opacity-0 transition-opacity duration-300">
-                    <span class="w-2 h-2 rounded-full bg-success animate-pulse"></span>
-                    Live Updates Active
-                </span>
-            </h2>
-            <div class="mb-4 card p-4 flex items-center justify-between">
-                <span class="text-gray-300 font-medium" id="selectedDateDisplay">{{ selected_date|date:"l, F d, Y" }}</span>
-                {% if selected_date == today %}
-                <span class="badge badge-primary">Today</span>
-                {% endif %}
+        <!-- Combined Date Selection & Time Slots Section -->
+        <div class="slot-card mb-6 p-6" style="overflow: visible !important; padding-bottom: 2.5rem !important;">
+            <!-- Section Header -->
+            <div class="mb-5">
+                <h2 class="text-2xl font-black text-white leading-none"><i class="bi bi-calendar-week"></i> Select Date & Time</h2>
+            </div>
+            
+            <!-- Date Tabs -->
+            <div class="mb-4" style="overflow: visible !important; padding: 0.5rem;">
+                <div class="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1" style="overflow-y: visible !important; margin: -0.5rem; padding: 0.5rem;">
+                    {% for date in date_range %}
+                    <button type="button"
+                            onclick="selectDate('{{ date.isoformat }}')" 
+                            class="date-tab flex-shrink-0 px-4 py-2 rounded-lg text-center min-w-[95px] transition-all duration-300 {% if date == selected_date %}active text-white{% else %}text-gray-300{% endif %} border border-white/10"
+                            data-date="{{ date.isoformat }}">
+                        <div class="font-bold text-sm mb-0.5">
+                            {% if date == today %}Today{% else %}{{ date|date:"M d" }}{% endif %}
+                        </div>
+                        <div class="text-xs opacity-80">{{ date|date:"D" }}</div>
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Time Filter Buttons -->
+            <div class="mb-4" style="overflow: visible !important; padding: 0.5rem;">
+                <div class="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1" id="timeFilterContainer" style="overflow-y: visible !important; margin: -0.5rem; padding: 0.5rem;">
+                    <button onclick="filterSlotsByTime('all')" class="time-filter-btn active flex-shrink-0 px-4 py-2 rounded-lg text-center min-w-[75px] transition-all duration-300 border border-white/10" data-filter="all">
+                        <div class="font-bold text-sm">
+                            <i class="bi bi-clock"></i> All
+                        </div>
+                    </button>
+                    <button onclick="filterSlotsByTime('morning')" class="time-filter-btn flex-shrink-0 px-4 py-2 rounded-lg text-center min-w-[75px] transition-all duration-300 text-gray-300 border border-white/10" data-filter="morning">
+                        <div class="font-bold text-sm">
+                            <i class="bi bi-sunrise"></i> Morning
+                        </div>
+                    </button>
+                    <button onclick="filterSlotsByTime('afternoon')" class="time-filter-btn flex-shrink-0 px-4 py-2 rounded-lg text-center min-w-[75px] transition-all duration-300 text-gray-300 border border-white/10" data-filter="afternoon">
+                        <div class="font-bold text-sm">
+                            <i class="bi bi-sun"></i> Afternoon
+                        </div>
+                    </button>
+                    <button onclick="filterSlotsByTime('evening')" class="time-filter-btn flex-shrink-0 px-4 py-2 rounded-lg text-center min-w-[75px] transition-all duration-300 text-gray-300 border border-white/10" data-filter="evening">
+                        <div class="font-bold text-sm">
+                            <i class="bi bi-sunset"></i> Evening
+                        </div>
+                    </button>
+                    <button onclick="filterSlotsByTime('night')" class="time-filter-btn flex-shrink-0 px-4 py-2 rounded-lg text-center min-w-[75px] transition-all duration-300 text-gray-300 border border-white/10" data-filter="night">
+                        <div class="font-bold text-sm">
+                            <i class="bi bi-moon-stars"></i> Night
+                        </div>
+                    </button>
+                </div>
             </div>
             
             <!-- Slots Container - Loaded via AJAX -->
@@ -372,27 +1406,31 @@
 </div>
 
 <!-- Unified Booking Modal -->
-<div id="unifiedBookingModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4" onclick="closeUnifiedModal(event)">
-    <div class="bg-gradient-to-br from-gaming-secondary to-gaming-accent rounded-2xl max-w-md w-full p-8 border border-white/20" onclick="event.stopPropagation()">
+<div id="unifiedBookingModal" class="fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center p-4" style="z-index: 9999; overflow-y: auto;" onclick="closeUnifiedModal(event)">
+    <div class="rounded-2xl max-w-md w-full p-8 border border-white/20 relative my-auto" style="background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(20px);" onclick="event.stopPropagation()">
         <div class="text-center mb-6">
-            <div class="text-6xl mb-4">🎮</div>
-            <h3 class="text-2xl font-bold text-white mb-2">Book Your Spot</h3>
+            <div class="w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7);">
+                <i class="bi bi-controller text-white text-4xl"></i>
+            </div>
+            <h3 class="text-3xl font-black text-white mb-2">Book Your Spot</h3>
             <p class="text-gray-300 text-sm">Select individual spots or book the full table</p>
         </div>
 
         <!-- Full Table Toggle -->
-        <div id="fullTableToggle" class="mb-6 p-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl border-2 border-blue-400/30 cursor-pointer hover:border-blue-400/50 transition-all" onclick="toggleFullTable()">
+        <div id="fullTableToggle" class="mb-6 p-4 rounded-xl border-2 cursor-pointer transition-all relative z-10" style="background: rgba(102, 126, 234, 0.1); border-color: rgba(102, 126, 234, 0.3);" onclick="toggleFullTable()">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <i class="bi bi-lock-fill text-blue-300 text-2xl"></i>
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgba(102, 126, 234, 0.2);">
+                        <i class="bi bi-lock-fill text-indigo-300 text-xl"></i>
+                    </div>
                     <div>
                         <div class="text-white font-bold">Book Full Table</div>
-                        <div class="text-blue-200 text-xs">Exclusive access for your group</div>
+                        <div class="text-indigo-200 text-xs">Exclusive access for your group</div>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span id="fullTablePrice" class="text-blue-300 font-bold text-lg">₹0</span>
-                    <div id="fullTableCheckbox" class="w-6 h-6 rounded border-2 border-blue-300 flex items-center justify-center transition-all">
+                    <span id="fullTablePrice" class="text-indigo-300 font-bold text-lg">₹0</span>
+                    <div id="fullTableCheckbox" class="w-6 h-6 rounded border-2 border-indigo-300 flex items-center justify-center transition-all">
                         <i class="bi bi-check text-white text-xl hidden"></i>
                     </div>
                 </div>
@@ -401,8 +1439,8 @@
 
         <!-- Individual Spot Selection -->
         <div id="spotSelectionSection">
-            <div class="text-white font-medium mb-3 flex items-center gap-2">
-                <i class="bi bi-people-fill text-purple-300"></i>
+            <div class="text-white font-semibold mb-4 flex items-center gap-2">
+                <i class="bi bi-people-fill text-purple-300 text-lg"></i>
                 <span>Or select individual spots</span>
             </div>
             <div id="spotSelectionGrid" class="grid grid-cols-4 gap-3 mb-6">
@@ -411,12 +1449,12 @@
         </div>
 
         <!-- Total Price Display -->
-        <div class="bg-white/10 rounded-lg p-4 mb-6 border border-white/20">
-            <div class="flex justify-between items-center">
-                <span class="text-gray-300">Total Price:</span>
-                <span id="totalPriceDisplay" class="text-gaming-highlight text-2xl font-bold">₹0</span>
+        <div class="rounded-xl p-5 mb-6 border-2 relative overflow-hidden" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(168, 85, 247, 0.15)); border-color: rgba(102, 126, 234, 0.4);">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-gray-200 font-medium">Total Amount</span>
+                <span id="totalPriceDisplay" class="text-white text-3xl font-black" style="font-family: 'Orbitron', sans-serif;">₹0</span>
             </div>
-            <div class="text-xs text-gray-400 mt-1">
+            <div class="text-xs text-gray-300">
                 <span id="bookingTypeDisplay">Select spots to continue</span>
             </div>
         </div>
@@ -424,14 +1462,68 @@
         <!-- Action Buttons -->
         <div class="flex space-x-3">
             <button onclick="closeUnifiedModal()" 
-                    class="flex-1 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg font-medium transition-colors border border-white/20">
-                Cancel
+                    class="flex-1 px-6 py-3.5 rounded-xl font-semibold transition-all border-2 relative z-10" style="background: rgba(255, 255, 255, 0.05); color: white; border-color: rgba(255, 255, 255, 0.2);"
+                    onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'"
+                    onmouseout="this.style.background='rgba(255, 255, 255, 0.05)'">
+                <i class="bi bi-x-circle mr-1"></i> Cancel
             </button>
             <button id="confirmBookingButton" onclick="confirmUnifiedBooking()" 
-                    class="flex-1 bg-gaming-highlight hover:bg-gaming-highlight/80 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="flex-1 px-6 py-3.5 rounded-xl font-bold transition-all relative z-10 book-btn"
                     disabled>
-                Confirm Booking
+                <i class="bi bi-check-circle mr-1"></i> Confirm Booking
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- Login Prompt Modal (for non-authenticated users) -->
+<div id="loginPromptModal" class="fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center p-4" style="z-index: 9999; overflow-y: auto;" onclick="closeLoginPrompt(event)">
+    <div class="rounded-2xl max-w-md w-full p-8 border border-white/20 relative my-auto" style="background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(20px);" onclick="event.stopPropagation()">
+        <div class="text-center mb-6">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7);">
+                <i class="bi bi-lock-fill text-white text-4xl"></i>
+            </div>
+            <h3 class="text-3xl font-black text-white mb-2">Login Required</h3>
+            <p class="text-gray-300 text-sm">Please login to book this time slot</p>
+        </div>
+
+        <!-- Slot Details -->
+        <div class="mb-6 p-4 rounded-xl border-2" style="background: rgba(102, 126, 234, 0.1); border-color: rgba(102, 126, 234, 0.3);">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7);">
+                    <i class="bi bi-clock text-white"></i>
+                </div>
+                <div>
+                    <div class="text-white font-bold text-lg" id="loginPromptTime">--:--</div>
+                    <div class="text-gray-400 text-xs">Selected Time Slot</div>
+                </div>
+            </div>
+            
+            <!-- Pricing Info -->
+            <div id="loginPromptPricing" class="space-y-2 pt-3 border-t border-white/10">
+                <!-- Dynamically filled -->
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col space-y-3">
+            <a href="{% url 'authentication:customer_login' %}?next={{ request.path }}" 
+               class="w-full px-6 py-3.5 rounded-xl font-bold transition-all text-center text-white relative z-10"
+               style="background: linear-gradient(135deg, #667eea, #a855f7);"
+               onmouseover="this.style.transform='translateY(-2px)'"
+               onmouseout="this.style.transform='translateY(0)'">
+                <i class="bi bi-box-arrow-in-right mr-2"></i> Login to Book
+            </a>
+            <button onclick="closeLoginPrompt()" 
+                    class="w-full px-6 py-3.5 rounded-xl font-semibold transition-all border-2 relative z-10" 
+                    style="background: rgba(255, 255, 255, 0.05); color: white; border-color: rgba(255, 255, 255, 0.2);"
+                    onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'"
+                    onmouseout="this.style.background='rgba(255, 255, 255, 0.05)'">
+                <i class="bi bi-x-circle mr-1"></i> Cancel
+            </button>
+            <div class="text-center pt-2">
+                <p class="text-gray-400 text-sm">New user? Login with Google to create an account automatically</p>
+            </div>
         </div>
     </div>
 </div>
@@ -497,23 +1589,27 @@ function selectDate(dateStr) {
     // Restart polling immediately
     setTimeout(() => {
         startPolling();
-    }, 1000);
+    }, 500); // Reduced from 1000ms to 500ms
 }
 
 // Load slots via API (OPTIMIZED WITH AJAX)
 function loadSlotsForDate(dateStr) {
     const container = document.getElementById('slotsContainer');
     
-    // Show beautiful loading spinner with message
+    // Show skeleton loader with loading text
     container.innerHTML = `
-        <div class="loading-overlay">
-            <div class="loading-message fade-in">
-                <div class="loading-spinner mx-auto mb-4"></div>
-                <p class="text-white text-lg font-medium pulse">Loading slots...</p>
-                <p class="text-gray-400 text-sm mt-2">Please wait a moment</p>
-            </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            ${Array(8).fill(0).map(() => `
+                <div class="slot-card skeleton" style="height: 120px;">
+                    <div class="h-4 bg-white/10 rounded w-3/4 mb-3"></div>
+                    <div class="h-3 bg-white/10 rounded w-1/2 mb-3"></div>
+                    <div class="h-8 bg-white/10 rounded w-full"></div>
+                </div>
+            `).join('')}
         </div>
     `;
+    
+    const startTime = Date.now();
     
     // Fetch slots from API
     fetch(`/api/games/${gameId}/slots/?date=${dateStr}`)
@@ -532,7 +1628,7 @@ function loadSlotsForDate(dateStr) {
         });
 }
 
-// Render slots from API data
+// Render slots from API data - Simple version (show all at once)
 function renderSlots(slots) {
     const container = document.getElementById('slotsContainer');
     
@@ -547,68 +1643,115 @@ function renderSlots(slots) {
         return;
     }
     
-    let html = '<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">';
-    
-    slots.forEach(slot => {
-        const availability = slot.availability;
-        const bookingOptions = slot.booking_options;
-        
-        html += `
-            <div class="slot-card card hover-lift fade-in">
-                <!-- Time Header -->
-                <div class="flex items-center justify-between mb-4 pb-4 border-b border-white/10">
-                    <div class="flex items-center gap-3">
-                        <i class="bi bi-clock text-primary-400 text-2xl"></i>
-                        <span class="text-white font-black text-2xl">
-                            ${slot.time_display}
-                        </span>
-                    </div>
-                    <div class="capacity-indicator">
-                        ${renderCapacityDots(availability)}
-                        <span class="text-sm text-gray-400 ml-2 font-medium">
-                            ${availability.truly_available_spots !== undefined ? availability.truly_available_spots : availability.available_spots}/${availability.total_capacity}
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Reservation Info (if any) -->
-                ${availability.reserved_spots > 0 ? `
-                <div class="mb-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                    <div class="flex items-center gap-2 text-yellow-300 text-xs">
-                        <i class="bi bi-clock-history"></i>
-                        <span class="font-medium">${availability.reserved_spots} spot${availability.reserved_spots !== 1 ? 's' : ''} reserved (payment pending)</span>
-                    </div>
-                </div>
-                ` : ''}
-
-                <!-- Booking Options -->
-                <div class="space-y-3">
-                    ${renderBookingOptions(slot, bookingOptions)}
-                </div>
-
-                ${availability.truly_available_spots === 0 && availability.reserved_spots === 0 ? `
-                <div class="mt-4 text-center">
-                    <span class="inline-flex items-center gap-2 bg-error/20 text-error px-4 py-2 rounded-lg text-sm font-bold border border-error/30">
-                        <i class="bi bi-x-circle-fill"></i>
-                        Fully Booked
-                    </span>
-                </div>
-                ` : ''}
-                
-                ${availability.truly_available_spots === 0 && availability.reserved_spots > 0 ? `
-                <div class="mt-4 text-center">
-                    <span class="inline-flex items-center gap-2 bg-yellow-500/20 text-yellow-300 px-4 py-2 rounded-lg text-sm font-bold border border-yellow-500/30">
-                        <i class="bi bi-hourglass-split"></i>
-                        All Spots Reserved (Check back in a few minutes)
-                    </span>
-                </div>
-                ` : ''}
-            </div>
-        `;
+    // Set "All Slots" as default active filter
+    document.querySelectorAll('.time-filter-btn').forEach(btn => {
+        if (btn.dataset.filter === 'all') {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
     });
     
-    html += '</div>';
-    container.innerHTML = html;
+    // Create grid container
+    const gridDiv = document.createElement('div');
+    gridDiv.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3';
+    container.innerHTML = '';
+    container.appendChild(gridDiv);
+    
+    // Render all slots at once (no progressive loading)
+    slots.forEach((slot, index) => {
+        const slotCard = createSlotCard(slot);
+        gridDiv.appendChild(slotCard);
+        
+        // Stagger animation slightly for visual effect
+        setTimeout(() => {
+            slotCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            slotCard.style.opacity = '1';
+            slotCard.style.transform = 'translateY(0)';
+        }, index * 15); // Very fast stagger
+    });
+}
+
+// Create a slot card element
+function createSlotCard(slot) {
+    const availability = slot.availability;
+    const bookingOptions = slot.booking_options;
+    const timeCategory = getTimeCategory(slot.time_display);
+    
+    // Extract pricing info
+    let sharedPrice = 0;
+    let privatePrice = 0;
+    let canBookPrivate = false;
+    let canBookShared = false;
+    let maxSpotsPerBooking = 4;
+    
+    bookingOptions.forEach(option => {
+        if (option.type === 'PRIVATE') {
+            privatePrice = option.price;
+            canBookPrivate = option.available;
+        } else if (option.type === 'SHARED') {
+            sharedPrice = option.price_per_spot || option.price || 0;
+            maxSpotsPerBooking = option.max_spots_per_booking || 4;
+            canBookShared = option.available;
+        }
+    });
+    
+    const trulyAvailable = availability.truly_available_spots !== undefined ? availability.truly_available_spots : availability.available_spots;
+    const totalCapacity = availability.total_capacity;
+    const reservedSpots = availability.reserved_spots || 0;
+    const isAvailable = trulyAvailable > 0;
+    
+    // Create slot card element
+    const slotCard = document.createElement('div');
+    slotCard.className = `slot-card ${isAvailable ? 'slot-card-clickable' : 'slot-card-disabled'}`;
+    slotCard.setAttribute('data-time-category', timeCategory);
+    slotCard.style.opacity = '0';
+    slotCard.style.transform = 'translateY(20px)';
+    
+    if (isAvailable) {
+        slotCard.onclick = () => {
+            if (isAuthenticated === 'true') {
+                showUnifiedBookingModal(slot.id, trulyAvailable, sharedPrice, privatePrice, totalCapacity, Math.min(trulyAvailable, maxSpotsPerBooking), canBookPrivate, canBookShared);
+            } else {
+                showLoginPrompt(slot.time_display, sharedPrice, privatePrice, canBookPrivate, canBookShared);
+            }
+        };
+        slotCard.setAttribute('role', 'button');
+        slotCard.setAttribute('tabindex', '0');
+    }
+    
+    slotCard.innerHTML = `
+        <!-- Time with Icon -->
+        <div class="flex items-center gap-2 mb-3">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #667eea, #a855f7);">
+                <i class="bi bi-clock text-white text-xs"></i>
+            </div>
+            <span class="text-white font-bold text-base">
+                ${slot.time_display}
+            </span>
+        </div>
+        
+        <!-- Capacity Dots -->
+        <div class="flex items-center justify-between">
+            <div class="capacity-indicator">
+                ${renderCapacityDots(availability)}
+            </div>
+            <span class="text-xs text-gray-400 font-medium">
+                ${trulyAvailable}/${totalCapacity}
+            </span>
+        </div>
+
+        <!-- Status Indicator (only for unavailable) -->
+        ${!isAvailable ? `
+            <div class="mt-3 pt-3 border-t border-white/10 text-center">
+                <span class="text-xs text-gray-500 font-medium">
+                    <i class="bi bi-x-circle mr-1"></i> ${reservedSpots > 0 ? 'Reserved' : 'Fully Booked'}
+                </span>
+            </div>
+        ` : ''}
+    `;
+    
+    return slotCard;
 }
 
 // Render capacity indicator dots with real-time updates (booked, reserved, available)
@@ -617,14 +1760,6 @@ function renderCapacityDots(availability) {
     const bookedSpots = availability.booked_spots || 0;
     const reservedSpots = availability.reserved_spots || 0;
     const totalCapacity = availability.total_capacity || 0;
-    
-    console.log('🔴 renderCapacityDots called:', {
-        booked: bookedSpots,
-        reserved: reservedSpots,
-        total: totalCapacity,
-        truly_available: availability.truly_available_spots,
-        available_spots: availability.available_spots
-    });
     
     for (let i = 0; i < totalCapacity; i++) {
         let dotClass = 'available';
@@ -691,111 +1826,8 @@ function updateCapacityDotsWithAnimation(slotElement, newAvailability) {
     }
 }
 
-// Render booking options (unified booking card)
-function renderBookingOptions(slot, options) {
-    if (!options || options.length === 0) {
-        return '<p class="text-gray-400 text-sm">No booking options available</p>';
-    }
-    
-    // Extract pricing info from options
-    let privatePrice = 0;
-    let sharedPrice = 0;
-    let capacity = 0;
-    let availableSpots = 0;
-    let maxSpotsPerBooking = 4;
-    let canBookPrivate = false;
-    let canBookShared = false;
-    
-    options.forEach(option => {
-        if (option.type === 'PRIVATE') {
-            privatePrice = option.price;
-            capacity = option.capacity;
-            canBookPrivate = option.available;
-        } else if (option.type === 'SHARED') {
-            sharedPrice = option.price_per_spot || option.price || 0;
-            availableSpots = option.available_spots || 0;
-            maxSpotsPerBooking = option.max_spots_per_booking || 4;
-            canBookShared = option.available;
-        }
-    });
-    
-    // Determine if any booking is available
-    const anyAvailable = canBookPrivate || canBookShared;
-    const disabled = !anyAvailable;
-    
-    return renderUnifiedBookingOption(slot, {
-        privatePrice,
-        sharedPrice,
-        capacity,
-        availableSpots,
-        maxSpotsPerBooking,
-        canBookPrivate,
-        canBookShared,
-        disabled
-    });
-}
-
-// Render unified booking option  
-function renderUnifiedBookingOption(slot, bookingInfo) {
-    const { privatePrice, sharedPrice, capacity, availableSpots, maxSpotsPerBooking, canBookPrivate, canBookShared, disabled } = bookingInfo;
-    
-    // CRITICAL: Always use slot.availability data, never fall back to options
-    const availability = slot.availability || {};
-    
-    // Use truly_available_spots if available, otherwise calculate it
-    let trulyAvailable;
-    if (availability.truly_available_spots !== undefined) {
-        trulyAvailable = availability.truly_available_spots;
-    } else if (availability.available_spots !== undefined && availability.reserved_spots !== undefined) {
-        trulyAvailable = Math.max(0, availability.available_spots - availability.reserved_spots);
-    } else {
-        trulyAvailable = availability.available_spots || availableSpots || 0;
-    }
-    
-    const reservedSpots = availability.reserved_spots || 0;
-    const totalCapacity = availability.total_capacity || capacity || 0;
-    
-    // Debug logging - KEEP THIS TO VERIFY DATA
-    console.log('🎮 Slot Booking Card:', {
-        slot_id: slot.id,
-        time: slot.time_display,
-        available_spots: availability.available_spots,
-        truly_available_spots: availability.truly_available_spots,
-        reserved_spots: reservedSpots,
-        booked_spots: availability.booked_spots,
-        total_capacity: availability.total_capacity,
-        calculated_truly_available: trulyAvailable
-    });
-    
-    return `
-        <div class="bg-gradient-to-br from-purple-500/20 to-pink-600/20 border-2 border-purple-400/30 rounded-xl p-4 hover:border-purple-400/50 transition-all">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-purple-200 font-bold flex items-center gap-2">
-                    <i class="bi bi-calendar-check"></i>
-                    Book This Slot
-                </span>
-                <span class="text-purple-300 font-black text-xl">₹${sharedPrice}/spot</span>
-            </div>
-            <div class="text-purple-200 text-sm mb-3 opacity-90">
-                <span class="text-green-300 font-bold">${trulyAvailable} available</span>
-                ${reservedSpots > 0 ? ` • <span class="text-yellow-300">${reservedSpots} reserved</span>` : ''}
-                • ${totalCapacity} total
-            </div>
-            ${isAuthenticated === 'true' ? `
-                <button onclick="showUnifiedBookingModal('${slot.id}', ${trulyAvailable}, ${sharedPrice}, ${privatePrice}, ${totalCapacity}, ${Math.min(trulyAvailable, maxSpotsPerBooking)}, ${canBookPrivate}, ${canBookShared})" 
-                        ${disabled || trulyAvailable === 0 ? 'disabled' : ''}
-                        class="w-full ${disabled || trulyAvailable === 0 ? 'btn-disabled' : 'btn btn-primary hover-glow'} transition-all">
-                    ${disabled || trulyAvailable === 0 ? '<i class="bi bi-x-circle"></i> Not Available' : '<i class="bi bi-calendar-check"></i> Select Spots'}
-                </button>
-            ` : `
-                <a href="/accounts/login/?next=${encodeURIComponent(window.location.pathname)}" 
-                   class="btn btn-primary w-full text-center hover-glow">
-                    <i class="bi bi-box-arrow-in-right"></i> Login to Book
-                </a>
-            `}
-        </div>
-    `;
-}
+// These functions are no longer needed as we render directly in renderSlots
+// Keeping them as stubs in case they're referenced elsewhere
 
 // Show error message
 function showError(message) {
@@ -854,8 +1886,15 @@ function showUnifiedBookingModal(slotId, availableSpots, spotPrice, fullTablePri
     
     // Show/hide spot selection based on availability
     const spotSelectionSection = document.getElementById('spotSelectionSection');
+    const spotSelectionLabel = spotSelectionSection.querySelector('span');
     if (canBookShared) {
         spotSelectionSection.style.display = 'block';
+        // Update label text based on whether full table option is available
+        if (canBookPrivate) {
+            spotSelectionLabel.textContent = 'Or select individual spots';
+        } else {
+            spotSelectionLabel.textContent = 'Select individual spots';
+        }
     } else {
         spotSelectionSection.style.display = 'none';
     }
@@ -981,7 +2020,7 @@ function updateUnifiedPriceDisplay() {
         
         // Check if auto-converted (selected all spots individually)
         if (selectedSpots === totalCapacity) {
-            bookingTypeDisplay.innerHTML = `Full table (${totalCapacity} spots) • <span class="text-green-300">✓ Private price applied</span>`;
+            bookingTypeDisplay.innerHTML = `Full table (${totalCapacity} spots)`;
         } else {
             bookingTypeDisplay.textContent = `Full table (${totalCapacity} spots) • Private booking price`;
         }
@@ -1077,17 +2116,54 @@ function bookSlot(slotId, bookingType, spotsRequested, event) {
     let clickedButton = null;
     if (event && event.target) {
         clickedButton = event.target;
+        
+        // Remove animation classes FIRST to prevent interference
+        clickedButton.classList.remove('hover-glow', 'btn-ripple', 'group');
+        clickedButton.style.overflow = 'visible';
+        
+        // Set flex properties FIRST to prevent layout shift
+        clickedButton.style.display = 'flex';
+        clickedButton.style.alignItems = 'center';
+        clickedButton.style.justifyContent = 'center';
+        clickedButton.style.gap = '0.5rem';
+        
+        // Then preserve button dimensions
+        const width = clickedButton.offsetWidth;
+        const height = clickedButton.offsetHeight;
+        clickedButton.style.width = width + 'px';
+        clickedButton.style.height = height + 'px';
+        clickedButton.style.minWidth = width + 'px';
+        clickedButton.style.minHeight = height + 'px';
+        
         clickedButton.disabled = true;
         const originalText = clickedButton.innerHTML;
-        clickedButton.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Processing...';
+        clickedButton.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> <span>Processing...</span>';
         clickedButton.dataset.originalText = originalText;
     }
     
     // Disable confirm button in modal to prevent double-clicks
     const confirmButton = document.getElementById('confirmBookingButton');
     if (confirmButton) {
+        // Remove animation classes FIRST to prevent interference
+        confirmButton.classList.remove('hover-glow', 'btn-ripple', 'group');
+        confirmButton.style.overflow = 'visible';
+        
+        // Set flex properties FIRST to prevent layout shift
+        confirmButton.style.display = 'flex';
+        confirmButton.style.alignItems = 'center';
+        confirmButton.style.justifyContent = 'center';
+        confirmButton.style.gap = '0.5rem';
+        
+        // Then preserve button dimensions
+        const width = confirmButton.offsetWidth;
+        const height = confirmButton.offsetHeight;
+        confirmButton.style.width = width + 'px';
+        confirmButton.style.height = height + 'px';
+        confirmButton.style.minWidth = width + 'px';
+        confirmButton.style.minHeight = height + 'px';
+        
         confirmButton.disabled = true;
-        confirmButton.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Processing...';
+        confirmButton.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> <span>Processing...</span>';
     }
     
     // Create booking using AJAX
@@ -1249,12 +2325,64 @@ style.textContent = `
 document.head.appendChild(style);
 {% endif %}
 
+// Login Prompt Modal Functions (for non-authenticated users)
+function showLoginPrompt(timeDisplay, sharedPrice, privatePrice, canBookPrivate, canBookShared) {
+    // Set time display
+    document.getElementById('loginPromptTime').textContent = timeDisplay;
+    
+    // Build pricing info
+    const pricingDiv = document.getElementById('loginPromptPricing');
+    let pricingHTML = '';
+    
+    if (canBookShared && sharedPrice) {
+        pricingHTML += `
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="bi bi-person text-green-400"></i>
+                    <span class="text-gray-300 text-sm">Shared (per person)</span>
+                </div>
+                <span class="text-white font-bold">₹${sharedPrice}</span>
+            </div>
+        `;
+    }
+    
+    if (canBookPrivate && privatePrice) {
+        pricingHTML += `
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="bi bi-lock text-blue-400"></i>
+                    <span class="text-gray-300 text-sm">Private (full table)</span>
+                </div>
+                <span class="text-white font-bold">₹${privatePrice}</span>
+            </div>
+        `;
+    }
+    
+    if (!pricingHTML) {
+        pricingHTML = '<div class="text-gray-400 text-sm text-center">Pricing information available after login</div>';
+    }
+    
+    pricingDiv.innerHTML = pricingHTML;
+    
+    // Show modal
+    document.getElementById('loginPromptModal').classList.remove('hidden');
+    document.getElementById('loginPromptModal').classList.add('flex');
+}
+
+function closeLoginPrompt(event) {
+    // Close if clicking on backdrop or called directly
+    if (!event || event.target.id === 'loginPromptModal') {
+        document.getElementById('loginPromptModal').classList.add('hidden');
+        document.getElementById('loginPromptModal').classList.remove('flex');
+    }
+}
+
 // Smart polling system - adapts based on activity
 let pollingInterval = null;
 let currentPollingInterval = 5000; // Start with 5 seconds
-const MIN_POLLING_INTERVAL = 3000; // Minimum 3 seconds when active
-const MAX_POLLING_INTERVAL = 15000; // Maximum 15 seconds when idle
-const ACTIVE_POLLING_INTERVAL = 3000; // Fast polling when changes detected
+const MIN_POLLING_INTERVAL = 2000; // Minimum 2 seconds when active
+const MAX_POLLING_INTERVAL = 10000; // Maximum 10 seconds when idle
+const ACTIVE_POLLING_INTERVAL = 2000; // Fast polling when changes detected
 let consecutiveNoChanges = 0;
 let isModalOpen = false;
 let currentModalSlotId = null;
@@ -1318,7 +2446,7 @@ function pollSlots() {
             }
         })
         .catch(error => {
-            console.error('Polling error:', error);
+            // Silently handle polling error
         })
         .finally(() => {
             isFetching = false;
@@ -1568,16 +2696,159 @@ document.addEventListener('visibilitychange', function() {
 document.addEventListener('DOMContentLoaded', function() {
     loadSlotsForDate(currentDate);
     
-    // Start real-time polling immediately after initial load
+    // Start real-time polling after initial load completes
     setTimeout(() => {
         startPolling();
-    }, 1000); // Wait 1 second before starting polling
+    }, 1000); // Wait 1 second before starting polling to let initial load complete
 });
 
 // Clean up on page unload
 window.addEventListener('beforeunload', function() {
     stopPolling();
 });
+
+// Time filtering functions
+function getTimeCategory(timeDisplay) {
+    // Extract hour from time display (e.g., "11:46 AM" -> 11)
+    const match = timeDisplay.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!match) return 'all';
+    
+    let hour = parseInt(match[1]);
+    const period = match[3].toUpperCase();
+    
+    // Convert to 24-hour format
+    if (period === 'PM' && hour !== 12) {
+        hour += 12;
+    } else if (period === 'AM' && hour === 12) {
+        hour = 0;
+    }
+    
+    // Categorize by time
+    if (hour >= 6 && hour < 12) return 'morning';
+    if (hour >= 12 && hour < 17) return 'afternoon';
+    if (hour >= 17 && hour < 21) return 'evening';
+    return 'night';
+}
+
+function filterSlotsByTime(category) {
+    // Update active button
+    document.querySelectorAll('.time-filter-btn').forEach(btn => {
+        if (btn.dataset.filter === category) {
+            btn.classList.add('active');
+            btn.classList.remove('text-gray-300');
+            btn.classList.add('text-white');
+        } else {
+            btn.classList.remove('active');
+            btn.classList.add('text-gray-300');
+            btn.classList.remove('text-white');
+        }
+    });
+    
+    // Filter slots
+    const slots = document.querySelectorAll('.slot-card[data-time-category]');
+    let visibleCount = 0;
+    
+    slots.forEach(slot => {
+        const slotCategory = slot.dataset.timeCategory;
+        if (category === 'all' || slotCategory === category) {
+            slot.style.display = '';
+            slot.classList.add('fade-in');
+            visibleCount++;
+        } else {
+            slot.style.display = 'none';
+        }
+    });
+    
+    // Show message if no slots in category
+    const container = document.getElementById('slotsContainer');
+    const existingMessage = container.querySelector('.no-slots-message');
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+    
+    // Only show filter-specific message if:
+    // 1. No visible slots for this filter
+    // 2. Filter is not 'all'
+    // 3. There ARE slots for the day (total slots > 0)
+    const totalSlots = slots.length;
+    
+    if (visibleCount === 0 && category !== 'all' && totalSlots > 0) {
+        const categoryNames = {
+            'morning': 'Morning (6 AM - 12 PM)',
+            'afternoon': 'Afternoon (12 PM - 5 PM)',
+            'evening': 'Evening (5 PM - 9 PM)',
+            'night': 'Night (9 PM onwards)'
+        };
+        
+        const message = document.createElement('div');
+        message.className = 'no-slots-message text-center py-12 fade-in';
+        message.innerHTML = `
+            <div class="text-gray-400 text-5xl mb-4">🕐</div>
+            <p class="text-white text-xl font-bold mb-2">No ${categoryNames[category]} slots available</p>
+            <p class="text-gray-400">Try selecting a different time period</p>
+        `;
+        container.appendChild(message);
+    }
+    
+    // Scroll to top of slots
+    if (category !== 'all') {
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+// Add keyboard support for clickable slot cards
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && e.target.classList.contains('slot-card-clickable')) {
+        e.target.click();
+    }
+});
+
+// Update current time display in IST
+function updateCurrentTime() {
+    const timeDisplay = document.getElementById('currentTimeDisplay');
+    const dateDisplay = document.getElementById('selectedDateDisplay');
+    
+    if (timeDisplay || dateDisplay) {
+        // Get current time in IST (Asia/Kolkata timezone)
+        const now = new Date();
+        const istTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+        
+        // Update time display
+        if (timeDisplay) {
+            let hours = istTime.getHours();
+            const minutes = istTime.getMinutes();
+            const seconds = istTime.getSeconds();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            
+            // Convert to 12-hour format
+            hours = hours % 12;
+            hours = hours ? hours : 12; // 0 should be 12
+            
+            // Pad with zeros
+            const minutesStr = minutes.toString().padStart(2, '0');
+            const secondsStr = seconds.toString().padStart(2, '0');
+            
+            timeDisplay.textContent = `${hours}:${minutesStr}:${secondsStr} ${ampm} IST`;
+        }
+        
+        // Update date display
+        if (dateDisplay) {
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                timeZone: 'Asia/Kolkata'
+            };
+            const dateStr = istTime.toLocaleDateString('en-US', options);
+            dateDisplay.textContent = dateStr;
+        }
+    }
+}
+
+// Update time immediately and then every second
+updateCurrentTime();
+setInterval(updateCurrentTime, 1000);
 
 </script>
 {% endblock %}

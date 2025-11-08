@@ -1,12 +1,11 @@
 """
 REST API Views for Booking System
-Provides fast, cacheable endpoints for game and slot data
+Provides fast, real-time endpoints for game and slot data
 """
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from django.core.cache import cache
 from django.db.models import Prefetch
 from datetime import datetime, timedelta
 from django.utils import timezone
@@ -23,24 +22,13 @@ class GameDetailAPI(APIView):
     """
     
     def get(self, request, game_id):
-        """Get game details"""
-        
-        # Try cache first
-        cache_key = f'game_detail_{game_id}'
-        cached_data = cache.get(cache_key)
-        
-        if cached_data:
-            return Response(cached_data)
-        
-        # Get game from database
+        """Get game details - REAL-TIME (NO CACHE)"""
+        # Get game from database (real-time)
         game = get_object_or_404(Game, id=game_id, is_active=True)
         
         # Serialize
         serializer = GameSerializer(game, context={'request': request})
         data = serializer.data
-        
-        # Cache for 10 minutes (game details don't change often)
-        cache.set(cache_key, data, 600)
         
         return Response(data)
 

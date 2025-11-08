@@ -18,6 +18,13 @@
     <!-- Tailwind Output -->
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
     
+    <!-- Mobile Responsive Styles -->
+    <link rel="stylesheet" href="{% static 'css/mobile-variables.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive-mobile.css' %}">
+    
+    <!-- Logo Size Fixes -->
+    <link rel="stylesheet" href="{% static 'css/logo-fixes.css' %}">
+    
     <!-- Google Fonts - Inter & Orbitron -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,6 +39,15 @@
     
     <!-- Theme Color -->
     <meta name="theme-color" content="#111827">
+    
+    <!-- Mobile Web App Capable -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TapNex Arena">
+    
+    <!-- Disable auto-zoom on input focus (iOS) -->
+    <meta name="format-detection" content="telephone=no">
     
     <!-- Preloader Styles -->
     <style>
@@ -53,6 +69,18 @@
             animation: pulse 2s ease-in-out infinite;
         }
         
+        /* Slower pulse on mobile - Override all pulse animations */
+        @media (max-width: 768px) {
+            .spinner-pulse,
+            .animate-pulse,
+            .pulse-dot,
+            .animate-pulse-slow,
+            *[class*="animate-pulse"],
+            *[class*="pulse"] {
+                animation: pulse 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+            }
+        }
+        
         /* Header fixes */
         .navbar {
             display: block !important;
@@ -63,16 +91,14 @@
         }
         
         .navbar .container {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
         }
         
         /* Logo and brand styling */
         .navbar .logo-text {
             color: white !important;
-            font-size: 1.25rem;
             font-weight: 600;
-            margin-left: 0.75rem;
         }
         
         .navbar .logo-text .gradient-part {
@@ -82,15 +108,28 @@
             -webkit-text-fill-color: transparent;
         }
         
+        /* Responsive logo text */
+        @media (max-width: 640px) {
+            .navbar .logo-text {
+                font-size: 0.875rem;
+            }
+        }
+        
+        @media (min-width: 641px) {
+            .navbar .logo-text {
+                font-size: 1rem;
+            }
+        }
+        
         /* Navigation links styling - clean and minimal */
         .nav-link {
             color: rgba(255, 255, 255, 0.8) !important;
             font-weight: 500;
-            font-size: 0.95rem;
-            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            padding: 0.5rem 0.75rem;
             border-radius: 0.5rem;
             transition: all 0.2s ease;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             text-decoration: none;
             white-space: nowrap;
@@ -102,18 +141,18 @@
         }
         
         .nav-link i {
-            display: none; /* Hide icons for cleaner look like the reference */
+            font-size: 1rem;
         }
         
-        /* Sign In button styling - exactly like the reference */
+        /* Sign In button styling */
         .btn-sign-in {
             background: #4f46e5 !important;
             color: white !important;
             border: none;
-            padding: 0.6rem 1.5rem;
+            padding: 0.5rem 1.25rem;
             border-radius: 0.5rem;
             font-weight: 500;
-            font-size: 0.9rem;
+            font-size: 0.875rem;
             transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
@@ -124,56 +163,119 @@
         .btn-sign-in:hover {
             background: #4338ca !important;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
         }
         
-        .btn-get-started {
-            background: linear-gradient(135deg, #e94560, #00d4aa) !important;
-            color: white !important;
-            border: none;
-            padding: 0.6rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 500;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            text-decoration: none;
+        .btn-sign-in i {
+            display: none;
         }
         
-        .btn-get-started:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(233, 69, 96, 0.4);
-        }
-        
-        /* Hide other button classes */
-        .btn-ghost {
-            display: none !important;
-        }
-        
-        /* Force navigation visibility */
-        .navbar .hidden.lg\\:flex {
-            display: flex !important;
-        }
-        
+        /* Desktop navigation visibility */
         @media (min-width: 1024px) {
-            .navbar .hidden.lg\\:flex {
+            .nav-items {
                 display: flex !important;
                 visibility: visible !important;
+                align-items: center;
             }
         }
         
-        /* Better spacing for navigation container */
-        .navbar .flex.justify-between {
-            min-height: 4rem;
+        @media (max-width: 1023px) {
+            .nav-items {
+                display: none !important;
+            }
         }
         
-        /* Navigation gap */
-        .nav-items {
-            gap: 2rem !important;
+        /* Mobile menu improvements */
+        .mobile-menu {
         }
-    </style>
+        
+        @media (max-width: 640px) {
+            .mobile-menu {
+                max-width: 85vw;
+            }
+        }
+        
+        /* Smooth scrolling for mobile menu */
+        .mobile-menu .overflow-y-auto {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+        
+        .mobile-menu .overflow-y-auto::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .mobile-menu .overflow-y-auto::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .mobile-menu .overflow-y-auto::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+        
+        .mobile-menu .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Ensure mobile menu and overlay are hidden on desktop */
+        @media (min-width: 1024px) {
+            .mobile-menu,
+            .mobile-menu-overlay {
+                display: none !important;
+            }
+        }
+        
+        /* Modern Hamburger Menu Icon */
+        .hamburger-icon {
+            width: 24px;
+            height: 18px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .hamburger-line {
+            width: 100%;
+            height: 2.5px;
+            background: white;
+            border-radius: 2px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: block;
+        }
+        
+        .mobile-menu-toggle:hover .hamburger-line {
+            background: linear-gradient(135deg, #e94560, #00d4aa);
+        }
+        
+        /* Hide hamburger when menu is open (close button in menu header will be used) */
+        .mobile-menu-toggle.active {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        /* Mobile menu toggle button enhancement */
+        .mobile-menu-toggle {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .mobile-menu-toggle:active {
+            transform: scale(0.95);
+        }
+        
+        /* Ensure mobile menu toggle is hidden on desktop */
+        @media (min-width: 1024px) {
+            .mobile-menu-toggle {
+                display: none !important;
+            }
+        }
+        
+        /* Show only on mobile/tablet */
+        @media (max-width: 1023px) {
+            .mobile-menu-toggle {
+                display: flex !important;
+            }
+        }
     </style>
     
     {% block extra_css %}{% endblock %}
@@ -193,26 +295,26 @@
     
     <!-- Modern Navigation -->
     <nav class="navbar fixed top-0 left-0 right-0 z-50 backdrop-filter backdrop-blur-lg transition-all duration-300">
-        <div class="container mx-auto px-6">
+        <div class="container mx-auto px-4 sm:px-6">
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
-                <div class="flex items-center">
+                <div class="flex items-center flex-shrink-0">
                     <a href="{% url 'home' %}" class="flex items-center group">
-                        <img src="{% static 'images/tapnex_logo.png' %}" alt="TapNex Arena" class="h-8 w-auto" onerror="this.src='{% static 'images/logos/tn-logo.svg' %}'">
-                        <span class="logo-text">
+                        <img src="{% static 'images/tapnex_logo.png' %}" alt="TapNex Arena" class="h-5 sm:h-6 md:h-7 w-auto" onerror="this.src='{% static 'images/logos/tn-logo.svg' %}'" style="max-height: 28px;">
+                        <span class="logo-text ml-2 text-sm sm:text-base">
                             TapNex<span class="gradient-part">Arena</span>
                         </span>
                     </a>
                 </div>
                 
                 <!-- Desktop Navigation -->
-                <div class="hidden lg:flex items-center nav-items" style="display: flex !important; visibility: visible !important;">
+                <div class="hidden lg:flex items-center nav-items gap-1">
                     {% if user.is_authenticated %}
                         {% if user.is_superuser %}
                             <a href="{% url 'authentication:tapnex_dashboard' %}" class="nav-link">
                                 Dashboard
                             </a>
-                        {% elif user.customer %}
+                        {% elif user.customer_profile %}
                             <a href="{% url 'authentication:customer_dashboard' %}" class="nav-link">
                                 Dashboard
                             </a>
@@ -229,17 +331,17 @@
                         {% endif %}
                         
                         <!-- User Menu -->
-                        <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2 ml-2">
                             <!-- Notifications (for customers) -->
                             {% if user.customer_profile %}
                             <div class="relative">
-                                <button id="notifications-button" class="relative text-gray-300 hover:text-white transition-colors">
-                                    <i class="bi bi-bell text-xl"></i>
-                                    <span id="notification-badge" class="absolute -top-1 -right-1 bg-error text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden font-semibold">0</span>
+                                <button id="notifications-button" class="relative text-gray-300 hover:text-white transition-colors p-2">
+                                    <i class="bi bi-bell text-lg"></i>
+                                    <span id="notification-badge" class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center hidden font-semibold text-[10px]">0</span>
                                 </button>
                                 
                                 <!-- Notifications Dropdown -->
-                                <div id="notifications-dropdown" class="absolute right-0 mt-4 w-80 glass-strong rounded-xl shadow-2xl hidden animate-fade-in-down">
+                                <div id="notifications-dropdown" class="absolute right-0 mt-2 w-80 glass-strong rounded-xl shadow-2xl hidden animate-fade-in-down">
                                     <div class="p-4 border-b border-white/10">
                                         <h3 class="text-white font-semibold">Notifications</h3>
                                     </div>
@@ -249,23 +351,22 @@
                             {% endif %}
                             
                             <!-- User Avatar & Name -->
-                            <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-2 px-2">
                                 {% if user.customer and user.customer.avatar_url %}
-                                    <img src="{{ user.customer.avatar_url }}" alt="Profile" class="w-10 h-10 rounded-full border-2 border-primary-500 hover:border-secondary-500 transition-colors">
+                                    <img src="{{ user.customer.avatar_url }}" alt="Profile" class="w-8 h-8 rounded-full border-2 border-primary-500 hover:border-secondary-500 transition-colors">
                                 {% else %}
-                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-600 to-secondary-600 flex items-center justify-center text-white font-semibold hover-glow">
+                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-600 to-secondary-600 flex items-center justify-center text-white font-semibold text-sm">
                                         {{ user.first_name.0|default:user.username.0|upper }}
                                     </div>
                                 {% endif %}
                                 <div class="hidden xl:block">
-                                    <p class="text-white text-sm font-medium">
+                                    <p class="text-white text-sm font-medium leading-tight">
                                         {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}
                                     </p>
-                                    <p class="text-gray-400 text-xs">{{ user.email|truncatechars:20 }}</p>
                                 </div>
                             </div>
                             
-                            <a href="{% url 'authentication:logout' %}" class="btn btn-secondary btn-sm">
+                            <a href="{% url 'authentication:logout' %}" class="nav-link text-red-400 hover:text-red-300 hover:bg-red-500/10">
                                 <i class="bi bi-box-arrow-right"></i>
                                 <span class="hidden xl:inline">Logout</span>
                             </a>
@@ -281,107 +382,128 @@
                             Contact
                         </a>
                         
-                        <a href="{% url 'authentication:customer_login' %}" class="btn-sign-in">
-                            <i class="bi bi-box-arrow-in-right"></i>
+                        <a href="{% url 'authentication:customer_login' %}" class="btn-sign-in ml-2">
                             Sign In
                         </a>
                     {% endif %}
                 </div>
 
                 <!-- Mobile Menu Toggle -->
-                <button class="lg:hidden mobile-menu-toggle text-white text-xl hover:text-gray-300 transition-colors p-2">
-                    <i class="bi bi-list"></i>
+                <button class="lg:hidden mobile-menu-toggle relative w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition-all duration-200 -mr-2" aria-label="Toggle menu">
+                    <div class="hamburger-icon">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </div>
                 </button>
             </div>
         </div>
     </nav>
 
     <!-- Mobile Menu -->
-    <div class="mobile-menu fixed top-0 right-0 bottom-0 w-80 bg-dark-400 transform translate-x-full transition-transform duration-300 z-50 lg:hidden">
-        <div class="flex flex-col h-full">
+    <div class="mobile-menu fixed top-0 right-0 w-full max-w-xs transform translate-x-full transition-transform duration-300 z-50 lg:hidden" style="height: 100vh; height: 100dvh;">
+        <div class="flex flex-col h-full bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950 backdrop-blur-xl shadow-2xl">
             <!-- Mobile Menu Header -->
-            <div class="flex items-center justify-between p-6 border-b border-white/10">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-white/10">
                 <span class="text-white font-bold text-lg">Menu</span>
-                <button class="mobile-menu-close text-white text-2xl">
-                    <i class="bi bi-x-lg"></i>
+                <button class="mobile-menu-close w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/10 transition-all duration-200" aria-label="Close menu">
+                    <i class="bi bi-x-lg text-lg text-white"></i>
                 </button>
             </div>
 
             <!-- Mobile Menu Content -->
-            <div class="flex-1 overflow-y-auto p-6">
+            <div class="flex-1 overflow-y-auto px-4 py-5">
                 {% if user.is_authenticated %}
-                    <!-- User Info -->
-                    <div class="flex items-center gap-3 mb-6 pb-6 border-b border-white/10">
-                        {% if user.customer and user.customer.avatar_url %}
-                            <img src="{{ user.customer.avatar_url }}" alt="Profile" class="w-12 h-12 rounded-full border-2 border-primary-500">
-                        {% else %}
-                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-600 to-secondary-600 flex items-center justify-center text-white font-semibold">
-                                {{ user.first_name.0|default:user.username.0|upper }}
+                    <!-- User Info Card -->
+                    <div class="bg-gradient-to-br from-primary-600/20 to-secondary-600/20 rounded-xl p-4 mb-5 border border-white/10">
+                        <div class="flex items-center gap-3">
+                            {% if user.customer and user.customer.avatar_url %}
+                                <img src="{{ user.customer.avatar_url }}" alt="Profile" class="w-12 h-12 rounded-full border-2 border-primary-500 flex-shrink-0">
+                            {% else %}
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-600 to-secondary-600 flex items-center justify-center text-white font-bold text-base flex-shrink-0 shadow-lg">
+                                    {{ user.first_name.0|default:user.username.0|upper }}
+                                </div>
+                            {% endif %}
+                            <div class="min-w-0 flex-1">
+                                <p class="text-white font-semibold text-base truncate">
+                                    {% if user.first_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username }}{% endif %}
+                                </p>
+                                <p class="text-gray-400 text-xs truncate">{{ user.email }}</p>
                             </div>
-                        {% endif %}
-                        <div>
-                            <p class="text-white font-medium">
-                                {% if user.first_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username }}{% endif %}
-                            </p>
-                            <p class="text-gray-400 text-sm">{{ user.email|truncatechars:25 }}</p>
                         </div>
                     </div>
 
                     <!-- Mobile Navigation Links -->
-                    <div class="space-y-2">
+                    <nav class="space-y-1.5">
                         {% if user.is_superuser %}
-                            <a href="{% url 'authentication:tapnex_dashboard' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
-                                <i class="bi bi-speedometer2"></i>Dashboard
+                            <a href="{% url 'authentication:tapnex_dashboard' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium">
+                                <i class="bi bi-speedometer2 text-lg text-primary-400"></i>
+                                <span>Dashboard</span>
                             </a>
-                        {% elif user.customer %}
-                            <a href="{% url 'authentication:customer_dashboard' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
-                                <i class="bi bi-grid-fill"></i>Dashboard
+                        {% elif user.customer_profile %}
+                            <a href="{% url 'authentication:customer_dashboard' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium">
+                                <i class="bi bi-grid-fill text-lg text-primary-400"></i>
+                                <span>Dashboard</span>
                             </a>
-                            <a href="{% url 'booking:game_selection' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
-                                <i class="bi bi-calendar-check"></i>Book Tables
+                            <a href="{% url 'booking:game_selection' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium">
+                                <i class="bi bi-calendar-check text-lg text-secondary-400"></i>
+                                <span>Book Tables</span>
                             </a>
-                            <a href="{% url 'booking:my_bookings' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
-                                <i class="bi bi-calendar-check"></i>My Bookings
+                            <a href="{% url 'booking:my_bookings' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium">
+                                <i class="bi bi-clock-history text-lg text-blue-400"></i>
+                                <span>My Bookings</span>
                             </a>
                         {% elif user.cafeowner %}
-                            <a href="{% url 'authentication:cafe_owner_dashboard' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
-                                <i class="bi bi-speedometer2"></i>Dashboard
+                            <a href="{% url 'authentication:cafe_owner_dashboard' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium">
+                                <i class="bi bi-speedometer2 text-lg text-primary-400"></i>
+                                <span>Dashboard</span>
                             </a>
                         {% endif %}
-                        
-                        <a href="{% url 'authentication:logout' %}" class="flex items-center gap-3 text-error hover:text-error-light hover:bg-error/10 p-3 rounded-lg transition-all">
-                            <i class="bi bi-box-arrow-right"></i>Logout
+                    </nav>
+                    
+                    <!-- Logout Button -->
+                    <div class="mt-5 pt-5 border-t border-white/10">
+                        <a href="{% url 'authentication:logout' %}" class="flex items-center justify-center gap-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 px-4 py-3.5 rounded-xl transition-all font-medium">
+                            <i class="bi bi-box-arrow-right text-lg"></i>
+                            <span>Logout</span>
                         </a>
                     </div>
                 {% else %}
-                    <div class="space-y-2">
-                        <a href="{% url 'home' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
-                            <i class="bi bi-house-door"></i>Home
+                    <!-- Primary Navigation Only -->
+                    <nav class="space-y-1.5">
+                        <a href="{% url 'home' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium">
+                            <i class="bi bi-house-door text-lg text-primary-400"></i>
+                            <span>Home</span>
                         </a>
-                        <a href="{% url 'booking:game_selection' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
-                            <i class="bi bi-grid-3x3-gap"></i>Book Tables
+                        <a href="{% url 'about' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium">
+                            <i class="bi bi-info-circle text-lg text-blue-400"></i>
+                            <span>About</span>
                         </a>
-                        <a href="{% url 'home' %}#features" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
-                            <i class="bi bi-star"></i>Features
+                        <a href="{% url 'contact' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium">
+                            <i class="bi bi-envelope text-lg text-purple-400"></i>
+                            <span>Contact</span>
                         </a>
-                        <a href="{% url 'about' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
-                            <i class="bi bi-info-circle"></i>About
+                    </nav>
+                    
+                    <!-- CTA Buttons -->
+                    <div class="space-y-3 mt-6 pt-6 border-t border-white/10">
+                        <a href="{% url 'authentication:customer_login' %}" class="flex items-center justify-center gap-2 bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-semibold py-3.5 px-4 rounded-xl hover:shadow-lg hover:shadow-primary-500/30 transition-all">
+                            <i class="bi bi-rocket-takeoff text-base"></i>
+                            <span>Get Started</span>
                         </a>
-                        <a href="{% url 'contact' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all">
-                            <i class="bi bi-envelope"></i>Contact
+                        <a href="{% url 'authentication:customer_login' %}" class="flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-white font-medium py-3.5 px-4 rounded-xl hover:bg-white/10 transition-all">
+                            <i class="bi bi-box-arrow-in-right text-base"></i>
+                            <span>Sign In</span>
                         </a>
-                        <div class="pt-4 border-t border-white/10 space-y-3">
-                            <a href="{% url 'authentication:customer_login' %}" class="btn btn-primary btn-block btn-ripple">
-                                <i class="bi bi-rocket-takeoff"></i>
-                                Get Started
-                            </a>
-                            <a href="{% url 'authentication:customer_login' %}" class="btn btn-ghost btn-block">
-                                <i class="bi bi-box-arrow-in-right"></i>
-                                Sign In
-                            </a>
-                        </div>
                     </div>
                 {% endif %}
+            </div>
+            
+            <!-- Footer -->
+            <div class="px-5 py-4 border-t border-white/10 bg-black/20">
+                <p class="text-gray-500 text-xs text-center">
+                    © 2025 TapNex Arena
+                </p>
             </div>
         </div>
     </div>
@@ -412,109 +534,97 @@
         {% endblock %}
     </main>
 
-    <!-- Modern Footer -->
-    <footer class="bg-dark-600 border-t border-white/10 mt-auto">
-        <div class="container mx-auto px-4 py-12">
-            <!-- Footer Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-                <!-- Brand Column -->
-                <div>
-                    <div class="flex items-center gap-2 mb-4">
-                        <img src="{% static 'images/tapnex_logo.png' %}" alt="TapNex Arena" class="h-8 w-auto" onerror="this.src='{% static 'images/logos/tn-logo.svg' %}'">
-                        <span class="text-white text-lg font-bold font-gaming">TapNex<span class="gradient-text-neon">Arena</span></span>
+    <!-- Footer Component - Fully Responsive & Standalone -->
+    <footer class="bg-[#111827] border-t border-white/10 mt-auto">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-0 sm:py-8 max-w-7xl">
+            
+            <!-- 4-Column Responsive Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-12 items-start">
+                
+                <!-- Column 1: Brand, Description & Social -->
+                <div class="col-span-2 lg:col-span-1 text-left">
+                    <!-- Logo -->
+                    <div class="flex items-center gap-2 mb-2 flex-row">
+                        <img src="{% static 'images/tapnex_logo.png' %}" alt="TapNex Arena Logo" class="h-6 w-auto flex-shrink-0" onerror="this.style.display='none'">
+                        <span class="text-white font-bold text-sm whitespace-nowrap">
+                            TapNex<span style="background: linear-gradient(135deg, #e94560, #00d4aa); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Arena</span>
+                        </span>
                     </div>
-                    <p class="text-gray-400 text-sm mb-4">
-                        Professional 8-ball pool and table tennis venue. Book your perfect gaming session with our seamless platform powered by TapNex.
+                    
+                    <!-- Description -->
+                    <p class="text-gray-400 text-sm leading-snug mb-3 text-left">
+                        Professional 8-ball pool and table tennis venue. Book your perfect gaming session.
                     </p>
-                    <div class="flex gap-3">
-                        <a href="#" class="w-10 h-10 rounded-lg glass flex items-center justify-center text-gray-400 hover:text-white hover:bg-primary-600 transition-all">
-                            <i class="bi bi-facebook"></i>
+                    
+                    <!-- Social Media Icons -->
+                    <div class="flex gap-2 flex-wrap flex-row justify-start">
+                        <a href="#" aria-label="Facebook" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-primary-600 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                            <i class="bi bi-facebook text-sm"></i>
                         </a>
-                        <a href="#" class="w-10 h-10 rounded-lg glass flex items-center justify-center text-gray-400 hover:text-white hover:bg-primary-600 transition-all">
-                            <i class="bi bi-twitter"></i>
+                        <a href="#" aria-label="Twitter" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-primary-600 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                            <i class="bi bi-twitter text-sm"></i>
                         </a>
-                        <a href="#" class="w-10 h-10 rounded-lg glass flex items-center justify-center text-gray-400 hover:text-white hover:bg-primary-600 transition-all">
-                            <i class="bi bi-instagram"></i>
-                        </a>
-                        <a href="#" class="w-10 h-10 rounded-lg glass flex items-center justify-center text-gray-400 hover:text-white hover:bg-primary-600 transition-all">
-                            <i class="bi bi-discord"></i>
+                        <a href="#" aria-label="Instagram" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-primary-600 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                            <i class="bi bi-instagram text-sm"></i>
                         </a>
                     </div>
                 </div>
-
-                <!-- Quick Links -->
+                
+                <!-- Column 2: Quick Links -->
                 <div>
-                    <h3 class="text-white font-semibold mb-4">Quick Links</h3>
+                    <h3 class="text-white font-semibold uppercase tracking-wider mb-3" style="font-size: 0.875rem;">Quick Links</h3>
+                    <nav>
+                        <ul class="space-y-1">
+                            <li><a href="{% url 'home' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Home</a></li>
+                            <li><a href="{% url 'about' %}" class="text-gray-400 hover:text-white transition-colors text-sm">About Us</a></li>
+                            <li><a href="{% url 'contact' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Contact</a></li>
+                            {% if not user.is_authenticated %}
+                            <li><a href="{% url 'authentication:customer_login' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Get Started</a></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                
+                <!-- Column 3: Legal -->
+                <div>
+                    <h3 class="text-white font-semibold uppercase tracking-wider mb-3" style="font-size: 0.875rem;">Legal</h3>
+                    <nav>
+                        <ul class="space-y-1">
+                            <li><a href="{% url 'privacy' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Privacy Policy</a></li>
+                            <li><a href="{% url 'terms' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Terms & Conditions</a></li>
+                            <li><a href="{% url 'refund_policy' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Refund Policy</a></li>
+                            <li><a href="{% url 'shipping_policy' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Shipping Policy</a></li>
+                        </ul>
+                    </nav>
+                </div>
+                
+                <!-- Column 4: Contact -->
+                <div>
+                    <h3 class="text-white font-semibold uppercase tracking-wider mb-3" style="font-size: 0.875rem;">Contact</h3>
                     <ul class="space-y-2">
-                        <li><a href="{% url 'home' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Home</a></li>
-                        <li><a href="{% url 'about' %}" class="text-gray-400 hover:text-white transition-colors text-sm">About Us</a></li>
-                        <li><a href="{% url 'contact' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Contact</a></li>
-                        {% if not user.is_authenticated %}
-                        <li><a href="{% url 'authentication:customer_login' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Get Started</a></li>
-                        {% endif %}
+                        <li class="text-gray-400 text-sm leading-snug">
+                            📍 TapNex Arena<br>
+                            <span class="ml-5">Your Location Here</span>
+                        </li>
+                        <li class="text-gray-400 text-sm">
+                            📧 <a href="mailto:hello@tapnexarena.com" class="hover:text-white transition-colors">hello@tapnexarena.com</a>
+                        </li>
+                        <li class="text-gray-400 text-sm">
+                            📞 <a href="tel:+1234567890" class="hover:text-white transition-colors">+1 (234) 567-890</a>
+                        </li>
                     </ul>
                 </div>
+                
 
-                <!-- Legal -->
-                <div>
-                    <h3 class="text-white font-semibold mb-4">Legal</h3>
-                    <ul class="space-y-2">
-                        <li><a href="{% url 'privacy' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Privacy Policy</a></li>
-                        <li><a href="{% url 'terms' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Terms & Conditions</a></li>
-                        <li><a href="{% url 'refund_policy' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Refund Policy</a></li>
-                        <li><a href="{% url 'shipping_policy' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Shipping Policy</a></li>
-                    </ul>
-                </div>
-
-                <!-- Contact Info -->
-                <div>
-                    <h3 class="text-white font-semibold mb-4">Contact Info</h3>
-                    <ul class="space-y-3">
-                        <li class="flex items-start gap-2 text-gray-400 text-sm">
-                            <i class="bi bi-geo-alt text-primary-400 mt-0.5"></i>
-                            <span>TapNex Arena<br>Your Location Here</span>
-                        </li>
-                        <li class="flex items-center gap-2 text-gray-400 text-sm">
-                            <i class="bi bi-envelope text-primary-400"></i>
-                            <a href="mailto:hello@tapnexarena.com" class="hover:text-white transition-colors">hello@tapnexarena.com</a>
-                        </li>
-                        <li class="flex items-center gap-2 text-gray-400 text-sm">
-                            <i class="bi bi-telephone text-primary-400"></i>
-                            <a href="tel:+1234567890" class="hover:text-white transition-colors">+1 (234) 567-890</a>
-                        </li>
-                    </ul>
-                </div>
             </div>
-
-            <!-- Footer Bottom -->
-            <div class="border-t border-white/10 pt-8">
-                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div class="flex flex-col md:flex-row items-center gap-3">
-                        <p class="text-gray-400 text-sm text-center md:text-left">
-                            &copy; 2025 TapNex Arena. All rights reserved.
-                        </p>
-                        <div class="flex items-center gap-3 text-xs text-gray-500">
-                            <span>•</span>
-                            <div class="flex items-center gap-1.5">
-                                <span>Powered by</span>
-                                <img src="{% static 'images/tapnex_logo.png' %}" alt="TapNex" class="h-4 w-auto opacity-75 hover:opacity-100 transition-opacity" onerror="this.style.display='none'">
-                                <span class="text-primary-400">TapNex</span>
-                            </div>
-                            <span>•</span>
-                            <div class="flex items-center gap-1.5">
-                                <span>A</span>
-                                <img src="{% static 'images/nexgen_logo.png' %}" alt="NexGen FC" class="h-5 w-auto opacity-75 hover:opacity-100 transition-opacity" onerror="this.style.display='none'">
-                                <span class="text-secondary-400">NexGen FC</span>
-                                <span>venture</span>
-                            </div>
-                        </div>
-                    </div>
-                    <a href="{% url 'authentication:cafe_owner_login' %}" class="text-gray-400 hover:text-white text-xs transition-colors flex items-center gap-2">
-                        <i class="bi bi-shield-lock"></i>
-                        <span>Staff Login</span>
-                    </a>
-                </div>
+            
+            <!-- Copyright Section - Full Width, Centered -->
+            <div class="mt-6 pt-4 border-t border-white/10">
+                <p class="text-gray-500 text-xs text-left">
+                    © <span id="current-year"></span> TapNex Arena. All rights reserved.
+                </p>
             </div>
+            
         </div>
     </footer>
 
@@ -523,6 +633,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     
     <script src="{% static 'js/animations.js' %}"></script>
+    <script src="{% static 'js/mobile-enhancements.js' %}"></script>
     
     {% block extra_js %}{% endblock %}
     
@@ -540,12 +651,14 @@
             function openMobileMenu() {
                 mobileMenu.classList.remove('translate-x-full');
                 mobileMenuOverlay.classList.remove('hidden');
+                mobileMenuToggle.classList.add('active');
                 document.body.style.overflow = 'hidden';
             }
 
             function closeMobileMenu() {
                 mobileMenu.classList.add('translate-x-full');
                 mobileMenuOverlay.classList.add('hidden');
+                mobileMenuToggle.classList.remove('active');
                 document.body.style.overflow = '';
             }
 
@@ -700,6 +813,14 @@
                     // Error marking notification as read
                 });
             };
+
+            // ============================================
+            // DYNAMIC YEAR
+            // ============================================
+            const yearElement = document.getElementById('current-year');
+            if (yearElement) {
+                yearElement.textContent = new Date().getFullYear();
+            }
 
             // ============================================
             // PRELOADER

@@ -243,8 +243,15 @@ def verify_razorpay_payment(request):
         else:
             logger.info(f"Telegram notification already sent for booking {booking_id}")
         
-        # TODO: Send confirmation email/SMS with QR code
-        # TODO: Update slot availability
+        # Send confirmation email and create in-app notification
+        try:
+            from booking.notifications import NotificationService, InAppNotification
+            NotificationService.send_booking_confirmation_email(booking)
+            InAppNotification.notify_booking_confirmed(booking)
+            logger.info(f"Confirmation email and notification sent for booking {booking_id}")
+        except Exception as e:
+            logger.error(f"Failed to send confirmation email/notification for booking {booking_id}: {e}")
+            # Don't fail the payment if notification fails
         
         return JsonResponse({
             'success': True,
@@ -393,6 +400,14 @@ def handle_payment_captured(payment_entity):
                 
                 logger.info(f"Payment captured for booking {booking.id}")
                 
+                # Generate QR code if not exists
+                if not booking.qr_code or not booking.verification_token:
+                    qr_generated = QRCodeService.generate_qr_code(booking)
+                    if qr_generated:
+                        logger.info(f"QR code generated for booking {booking.id} via webhook")
+                    else:
+                        logger.warning(f"Failed to generate QR code for booking {booking.id} via webhook")
+                
                 # Send notification AFTER database lock is released
                 try:
                     from booking.telegram_service import telegram_service
@@ -468,6 +483,14 @@ def handle_order_paid(order_entity):
                 ])
                 
                 logger.info(f"Order paid for booking {booking.id}")
+                
+                # Generate QR code if not exists
+                if not booking.qr_code or not booking.verification_token:
+                    qr_generated = QRCodeService.generate_qr_code(booking)
+                    if qr_generated:
+                        logger.info(f"QR code generated for booking {booking.id} via order.paid webhook")
+                    else:
+                        logger.warning(f"Failed to generate QR code for booking {booking.id} via order.paid webhook")
                 
                 # Send notification AFTER database lock is released
                 try:
@@ -644,6 +667,17 @@ def payment_success(request, booking_id):
         if booking.updated_at and (timezone.now() - booking.updated_at).total_seconds() > 600:
             # If updated more than 10 minutes ago, redirect to my bookings
             return redirect('booking:my_bookings')
+        
+        # Generate QR code if it doesn't exist yet
+        if not booking.qr_code or not booking.verification_token:
+            logger.info(f"Generating QR code for booking {booking_id} on success page")
+            qr_generated = QRCodeService.generate_qr_code(booking)
+            if qr_generated:
+                # Refresh booking to get the updated qr_code field
+                booking.refresh_from_db()
+                logger.info(f"QR code generated successfully for booking {booking_id}")
+            else:
+                logger.warning(f"Failed to generate QR code for booking {booking_id}")
         
         context = {
             'booking': booking,

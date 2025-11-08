@@ -206,36 +206,30 @@
         height: 12px;
         border-radius: 50%;
         transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     
     .capacity-dot.booked {
         background-color: #ef4444;
-        box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
     }
     
     .capacity-dot.your-booking {
         background-color: #667eea;
         animation: pulse-booking 2s ease-in-out infinite;
-        box-shadow: 0 0 12px rgba(102, 126, 234, 0.5);
         position: relative;
         z-index: 1;
     }
     
     .capacity-dot.available {
         background-color: #10b981;
-        box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
     }
     
     @keyframes pulse-booking {
         0%, 100% { 
             transform: scale(1);
-            box-shadow: 0 0 12px rgba(102, 126, 234, 0.5);
             opacity: 1;
         }
         50% { 
             transform: scale(1.15);
-            box-shadow: 0 0 16px rgba(102, 126, 234, 0.7);
             opacity: 0.95;
         }
     }
@@ -257,7 +251,6 @@
         transform: scale(1.05);
         border-color: #667eea;
         background: rgba(102, 126, 234, 0.1);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
     }
     
     .spot-select-btn.active {
@@ -265,7 +258,6 @@
         color: white;
         border-color: #667eea;
         transform: scale(1.05);
-        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
     }
     
     /* Responsive Adjustments */
@@ -277,12 +269,66 @@
         .booking-hero h1 {
             font-size: 2rem;
         }
+
+        /* Ultra compact 2x2 grid for mobile */
+        @media (max-width: 640px) {
+            .info-box {
+                padding: 0.5rem !important;
+                gap: 0.5rem !important;
+            }
+
+            .info-box .w-8 {
+                width: 1.75rem !important;
+                height: 1.75rem !important;
+            }
+
+            .info-box .text-lg {
+                font-size: 0.875rem !important;
+            }
+
+            .info-box .text-xs {
+                font-size: 0.625rem !important;
+                line-height: 1.2 !important;
+            }
+
+            .capacity-indicator {
+                gap: 3px !important;
+                padding: 4px 0 !important;
+            }
+
+            .capacity-dot {
+                width: 6px !important;
+                height: 6px !important;
+            }
+        }
+
+        /* Slow down animations on mobile */
+        .float-animation {
+            animation: float 8s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .animate-pulse-slow,
+        .pulse-booking {
+            animation: pulse-booking 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .gradient-orb {
+            animation: floatOrb 40s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .shimmer-effect {
+            animation: shimmer 4s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
     }
     
     /* Button Hover Effects */
     #paymentButton:hover {
         transform: translateY(-2px);
-        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.5);
     }
     
     #paymentButton:active {
@@ -310,60 +356,12 @@
     
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        <!-- Progress Indicator - Enhanced -->
-        <div class="mb-10 animate-fade-in-up" style="background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.5rem; padding: 2rem;">
-            <div class="flex items-center justify-between flex-wrap gap-6">
-                <!-- Step 1 -->
-                <div class="progress-step flex items-center gap-3">
-                    <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg" style="box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);">
-                        <i class="bi bi-check-lg text-white text-2xl"></i>
-                    </div>
-                    <div class="progress-step-text">
-                        <div class="text-green-400 font-bold text-base">Select Game</div>
-                        <div class="text-gray-400 text-xs">Completed</div>
-                    </div>
-                </div>
-                
-                <div class="progress-line flex-1 rounded-full hidden lg:block"></div>
-                
-                <!-- Step 2 -->
-                <div class="progress-step flex items-center gap-3">
-                    <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg" style="box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);">
-                        <i class="bi bi-check-lg text-white text-2xl"></i>
-                    </div>
-                    <div class="progress-step-text">
-                        <div class="text-green-400 font-bold text-base">Choose Time</div>
-                        <div class="text-gray-400 text-xs">Completed</div>
-                    </div>
-                </div>
-                
-                <div class="progress-line flex-1 rounded-full hidden lg:block"></div>
-                
-                <!-- Step 3 -->
-                <div class="progress-step flex items-center gap-3">
-                    <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-2xl animate-pulse-slow border-2" style="border-color: rgba(99, 102, 241, 0.5); box-shadow: 0 20px 40px rgba(99, 102, 241, 0.5);">
-                        <span class="text-white font-black text-xl">3</span>
-                    </div>
-                    <div class="progress-step-text">
-                        <div class="text-white font-bold text-base">Confirm & Pay</div>
-                        <div class="text-indigo-400 text-xs font-medium">Current Step</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Payment Timer Warning -->
         <div id="paymentTimerBanner" class="mb-8 animate-fade-in-up" style="animation-delay: 0s;">
             <div class="card-glow relative overflow-hidden" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(245, 158, 11, 0.2)); backdrop-filter: blur(20px); border: 2px solid rgba(239, 68, 68, 0.5); border-radius: 1.5rem; padding: 1.5rem;">
                 <div class="flex items-center justify-between gap-4 flex-wrap">
-                    <div class="flex items-center gap-4">
-                        <div class="w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #ef4444, #f59e0b); box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);">
-                            <i class="bi bi-clock-history text-white text-2xl"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-white font-bold text-lg mb-1">Complete Payment Within</h3>
-                            <p class="text-gray-300 text-sm">Your reservation will expire if payment is not completed</p>
-                        </div>
+                    <div>
+                        <h3 class="text-white font-bold text-lg mb-1">Complete Payment Within 5 Minutes</h3>
                     </div>
                     <div class="flex items-center gap-3">
                         <div id="paymentTimer" class="text-center">
@@ -396,139 +394,71 @@
 
                 <!-- Game Details Card - Enhanced -->
                 <div class="card-glow animate-fade-in-up" style="animation-delay: 0.1s; background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.5rem; padding: 2rem;">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7);">
-                            <i class="bi bi-controller text-white text-xl"></i>
-                        </div>
-                        <h2 class="text-2xl font-black text-white">Game Details</h2>
-                    </div>
+                    <h2 class="text-2xl font-black text-white mb-6">Game Details</h2>
                     
-                    <div class="flex flex-col sm:flex-row items-start gap-6 mb-8 pb-8" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                        <!-- Game Icon -->
-                        <div class="w-28 h-28 rounded-2xl flex items-center justify-center flex-shrink-0 float-animation" style="background: linear-gradient(135deg, #667eea, #764ba2, #a855f7); box-shadow: 0 25px 50px rgba(102, 126, 234, 0.3);">
-                            {% if booking.game.image %}
-                            <img src="{{ booking.game.image.url }}" alt="{{ booking.game.name }}" class="w-full h-full object-cover rounded-2xl">
+                    <div class="mb-8 pb-8" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                        <h3 class="text-2xl sm:text-3xl font-black text-white mb-3" style="font-family: 'Orbitron', sans-serif;">{{ booking.game.name }}</h3>
+                        <p class="text-gray-300 mb-4 leading-relaxed hidden sm:block">{{ booking.game.description|default:"Premium gaming experience awaits you" }}</p>
+                        
+                        <div class="flex flex-wrap gap-2">
+                            {% if booking.booking_type == 'PRIVATE' %}
+                            <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style="background: #667eea; color: white;">
+                                <i class="bi bi-lock-fill"></i> Private Booking
+                            </span>
                             {% else %}
-                            <i class="bi bi-trophy-fill text-white text-5xl"></i>
+                            <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style="background: #10b981; color: white;">
+                                <i class="bi bi-people-fill"></i> Shared Booking
+                            </span>
+                            {% endif %}
+                            
+                            {% if is_hybrid %}
+                            <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style="background: #3b82f6; color: white;">
+                                <i class="bi bi-stars"></i> Hybrid Game
+                            </span>
                             {% endif %}
                         </div>
-                        
-                        <div class="flex-1">
-                            <h3 class="text-2xl sm:text-3xl font-black text-white mb-3" style="font-family: 'Orbitron', sans-serif;">{{ booking.game.name }}</h3>
-                            <p class="text-gray-300 mb-4 leading-relaxed">{{ booking.game.description|default:"Premium gaming experience awaits you" }}</p>
-                            
-                            <div class="flex flex-wrap gap-2">
-                                {% if booking.booking_type == 'PRIVATE' %}
-                                <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style="background: #667eea; color: white;">
-                                    <i class="bi bi-lock-fill"></i> Private Booking
-                                </span>
-                                {% else %}
-                                <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style="background: #10b981; color: white;">
-                                    <i class="bi bi-people-fill"></i> Shared Booking
-                                </span>
-                                {% endif %}
-                                
-                                {% if is_hybrid %}
-                                <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style="background: #3b82f6; color: white;">
-                                    <i class="bi bi-stars"></i> Hybrid Game
-                                </span>
-                                {% endif %}
-                            </div>
-                        </div>
                     </div>
                     
-                    <!-- Booking Info Grid - Enhanced -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-                        <div class="info-box rounded-2xl p-5" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.2); backdrop-filter: blur(10px);">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgba(102, 126, 234, 0.2);">
-                                    <i class="bi bi-calendar-event text-2xl" style="color: #818cf8;"></i>
-                                </div>
-                                <span class="text-sm font-semibold uppercase tracking-wide" style="color: #9ca3af;">Date & Time</span>
+                    <!-- Booking Info - Modern Compact Cards -->
+                    <div class="mb-6">
+                        <!-- Primary Info Row -->
+                        <div class="grid grid-cols-2 gap-2 mb-2">
+                            <!-- Date & Time Card -->
+                            <div class="rounded-lg p-3 relative overflow-hidden" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(102, 126, 234, 0.05)); border: 1px solid rgba(102, 126, 234, 0.3);">
+                                <div class="absolute top-0 right-0 w-16 h-16 rounded-full" style="background: radial-gradient(circle, rgba(102, 126, 234, 0.2), transparent); transform: translate(30%, -30%);"></div>
+                                <p class="text-xs font-semibold mb-1.5" style="color: #818cf8;">■ DATE & TIME</p>
+                                <p class="text-white font-bold text-sm mb-0.5">{{ booking.game_slot.date|date:"M d, Y" }}</p>
+                                <p class="text-xs" style="color: rgba(255, 255, 255, 0.7);">{{ booking.game_slot.start_time|time:"h:i A" }} - {{ booking.game_slot.end_time|time:"h:i A" }}</p>
                             </div>
-                            <p class="text-white font-bold text-xl mb-1">{{ booking.game_slot.date|date:"l, M d, Y" }}</p>
-                            <p class="text-base" style="color: #d1d5db;">{{ booking.game_slot.start_time|time:"h:i A" }} - {{ booking.game_slot.end_time|time:"h:i A" }}</p>
-                        </div>
-                        
-                        <div class="info-box rounded-2xl p-5" style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2); backdrop-filter: blur(10px);">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgba(168, 85, 247, 0.2);">
-                                    <i class="bi bi-clock-fill text-2xl" style="color: #c084fc;"></i>
-                                </div>
-                                <span class="text-sm font-semibold uppercase tracking-wide" style="color: #9ca3af;">Duration</span>
-                            </div>
-                            <p class="text-white font-bold text-xl mb-1">{{ booking.game.slot_duration_minutes }} Minutes</p>
-                            <p class="text-base" style="color: #d1d5db;">Extended gaming session</p>
-                        </div>
-                        
-                        <div class="info-box rounded-2xl p-5" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); backdrop-filter: blur(10px);">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgba(16, 185, 129, 0.2);">
-                                    <i class="bi bi-people-fill text-2xl" style="color: #34d399;"></i>
-                                </div>
-                                <span class="text-sm font-semibold uppercase tracking-wide" style="color: #9ca3af;">Capacity</span>
-                            </div>
-                            <p class="text-white font-bold text-xl mb-1"><span id="currentSpotsDisplay">{{ booking.spots_booked }}</span> Player{{ booking.spots_booked|pluralize }}</p>
-                            <div class="text-sm mt-2" style="color: #d1d5db;">
-                                <div class="capacity-indicator">
-                                    {% for i in "x"|ljust:booking.game.capacity %}
-                                    <div class="capacity-dot {% if forloop.counter0 < booking.spots_booked %}your-booking{% elif forloop.counter0 < booking.game_slot.availability.booked_spots %}booked{% else %}available{% endif %}"></div>
-                                    {% endfor %}
-                                </div>
+                            
+                            <!-- Duration Card -->
+                            <div class="rounded-lg p-3 relative overflow-hidden" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(168, 85, 247, 0.05)); border: 1px solid rgba(168, 85, 247, 0.3);">
+                                <div class="absolute top-0 right-0 w-16 h-16 rounded-full" style="background: radial-gradient(circle, rgba(168, 85, 247, 0.2), transparent); transform: translate(30%, -30%);"></div>
+                                <p class="text-xs font-semibold mb-1.5" style="color: #c084fc;">■ DURATION</p>
+                                <p class="text-white font-bold text-2xl">{{ booking.game.slot_duration_minutes }}<span class="text-sm ml-1" style="color: rgba(255, 255, 255, 0.7);">min</span></p>
                             </div>
                         </div>
                         
-                        <div class="info-box rounded-2xl p-5" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); backdrop-filter: blur(10px);">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgba(245, 158, 11, 0.2);">
-                                    <i class="bi bi-hash text-2xl" style="color: #fbbf24;"></i>
+                        <!-- Secondary Info Row -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <!-- Players Card -->
+                            <div class="rounded-lg p-3 relative overflow-hidden" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05)); border: 1px solid rgba(16, 185, 129, 0.3);">
+                                <div class="absolute top-0 right-0 w-16 h-16 rounded-full" style="background: radial-gradient(circle, rgba(16, 185, 129, 0.2), transparent); transform: translate(30%, -30%);"></div>
+                                <p class="text-xs font-semibold mb-1.5" style="color: #34d399;">■ PLAYERS</p>
+                                <p class="text-white font-bold text-2xl mb-1"><span id="currentSpotsDisplay">{{ booking.spots_booked }}</span></p>
+                                <div class="capacity-indicator" id="capacityDotsContainer" style="gap: 4px; padding: 0;">
+                                    <!-- Capacity dots will be rendered by JavaScript -->
                                 </div>
-                                <span class="text-sm font-semibold uppercase tracking-wide" style="color: #9ca3af;">Booking ID</span>
                             </div>
-                            <p class="text-white font-bold text-base mb-1 tracking-wide" style="font-family: 'Courier New', monospace; word-break: break-all; line-height: 1.6;">#{{ booking.id }}</p>
-                            <p class="text-sm" style="color: #9ca3af;">Reference number</p>
+                            
+                            <!-- Booking ID Card -->
+                            <div class="rounded-lg p-3 relative overflow-hidden" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05)); border: 1px solid rgba(245, 158, 11, 0.3);">
+                                <div class="absolute top-0 right-0 w-16 h-16 rounded-full" style="background: radial-gradient(circle, rgba(245, 158, 11, 0.2), transparent); transform: translate(30%, -30%);"></div>
+                                <p class="text-xs font-semibold mb-1.5" style="color: #fbbf24;">■ BOOKING ID</p>
+                                <p class="text-white font-bold text-xs tracking-wider" style="font-family: 'Courier New', monospace; word-break: break-all; line-height: 1.4;">#{{ booking.id|slice:":13" }}</p>
+                            </div>
                         </div>
                     </div>
-                    
-                    <!-- Modify Spots Section (for Shared Bookings) -->
-                    {% if is_shared and can_modify_spots %}
-                    <div class="pt-6" style="border-top: 1px solid rgba(255, 255, 255, 0.1);">
-                        <div class="rounded-2xl p-6" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.2); backdrop-filter: blur(10px);">
-                            <div class="flex items-center gap-3 mb-4">
-                                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgba(102, 126, 234, 0.2);">
-                                    <i class="bi bi-people-fill text-2xl" style="color: #818cf8;"></i>
-                                </div>
-                                <h3 class="text-xl font-black text-white">Adjust Number of Spots</h3>
-                            </div>
-                            
-                            <p class="text-gray-300 mb-4">Need to bring more friends? You can increase the number of spots for your booking!</p>
-                            
-                            <label class="block text-sm font-medium text-gray-300 mb-3">Select total number of spots:</label>
-                            <div class="grid grid-cols-4 gap-3 mb-4">
-                                {% for i in "x"|ljust:max_total_spots %}
-                                <button type="button" 
-                                        onclick="selectSpots({{ forloop.counter }})" 
-                                        class="spot-select-btn {% if forloop.counter == booking.spots_booked %}active{% endif %}"
-                                        data-spots="{{ forloop.counter }}">
-                                    {{ forloop.counter }}
-                                </button>
-                                {% endfor %}
-                            </div>
-                            
-                            <div id="spotUpdateMessage" class="hidden mb-4 p-3 rounded-lg text-sm">
-                                <!-- Success message will appear here -->
-                            </div>
-                            
-                            <button id="updateSpotsButton" 
-                                    onclick="updateBookingSpots()" 
-                                    class="w-full font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    style="background: linear-gradient(135deg, #667eea, #a855f7); color: white;"
-                                    disabled>
-                                Update Booking
-                            </button>
-                        </div>
-                    </div>
-                    {% endif %}
                 </div>
 
             </div>
@@ -566,7 +496,7 @@
                         </div>
                         {% endif %}
                         
-                        <div class="rounded-2xl p-6 border-2 relative overflow-hidden" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(168, 85, 247, 0.2)); border-color: rgba(99, 102, 241, 0.4); box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);">
+                        <div class="rounded-2xl p-6 border-2 relative overflow-hidden" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(168, 85, 247, 0.2)); border-color: rgba(99, 102, 241, 0.4);">
                             <div class="shimmer-effect absolute inset-0"></div>
                             <div class="relative z-10">
                                 <div class="flex justify-between items-center">
@@ -599,25 +529,13 @@
 
                 <!-- Status Card - Enhanced -->
                 <div class="animate-fade-in-up border-2 rounded-2xl" style="animation-delay: 0.2s; background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05)); border-color: rgba(245, 158, 11, 0.3); backdrop-filter: blur(20px); padding: 2rem;">
-                    <div class="flex items-start gap-4 mb-4">
-                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.3);">
-                            <i class="bi bi-clock-history text-2xl animate-pulse-slow" style="color: #fbbf24;"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-xl mb-1" style="color: #fbbf24;">Booking Reserved</h4>
-                            <p class="text-sm" style="color: rgba(251, 191, 36, 0.8);">Pending payment confirmation</p>
-                        </div>
-                    </div>
-                    
-                    <div class="rounded-xl p-5" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); backdrop-filter: blur(10px);">
-                        <p class="text-sm mb-3 font-bold flex items-center gap-2" style="color: #fbbf24;">
-                            <i class="bi bi-info-circle-fill"></i>
-                            Important Notice
-                        </p>
-                        <p class="text-sm leading-relaxed" style="color: rgba(251, 191, 36, 0.9);">
-                            Your booking is temporarily reserved. Please complete the payment within <strong>15 minutes</strong> to confirm your reservation. Unpaid bookings will be automatically cancelled.
-                        </p>
-                    </div>
+                    <p class="text-sm mb-3 font-bold flex items-center gap-2" style="color: #fbbf24;">
+                        <i class="bi bi-info-circle-fill"></i>
+                        Important Notice
+                    </p>
+                    <p class="text-sm leading-relaxed" style="color: rgba(251, 191, 36, 0.9);">
+                        Your booking is temporarily reserved. Please complete the payment within <strong>5 minutes</strong> to confirm your reservation. Unpaid bookings will be automatically cancelled.
+                    </p>
                 </div>
 
             </div>
@@ -633,6 +551,85 @@ let selectedNewSpots = parseInt('{{ booking.spots_booked }}');
 const bookingId = "{{ booking.id }}";
 const pricePerSpot = parseFloat('{{ booking.price_per_spot }}');
 const platformFee = parseFloat('{{ booking.platform_fee|default:0 }}');
+const gameCapacity = parseInt('{{ booking.game.capacity }}');
+const gameSlotId = '{{ booking.game_slot.id }}';
+
+// Render capacity dots with accurate state
+function renderCapacityDots(confirmedBookings, yourPendingSpots, totalCapacity) {
+    const container = document.getElementById('capacityDotsContainer');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    for (let i = 0; i < totalCapacity; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'capacity-dot';
+        
+        if (i < confirmedBookings) {
+            // Red dots for confirmed bookings by others
+            dot.classList.add('booked');
+        } else if (i < confirmedBookings + yourPendingSpots) {
+            // Blue/pulsing dots for your pending booking
+            dot.classList.add('your-booking');
+        } else {
+            // Green dots for available spots
+            dot.classList.add('available');
+        }
+        
+        container.appendChild(dot);
+    }
+}
+
+// Fetch real-time slot availability
+function fetchSlotAvailability() {
+    fetch(`/booking/api/slot-availability/${gameSlotId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const availability = data.availability;
+                const confirmedBookings = availability.booked_spots;
+                const yourPendingSpots = originalSpots;
+                
+                // Render capacity dots
+                renderCapacityDots(confirmedBookings, yourPendingSpots, gameCapacity);
+                
+                // Update max spots available for modification
+                updateMaxSpotsAvailable(availability.available_spots);
+            }
+        })
+        .catch(error => {
+            // Silently handle error
+        });
+}
+
+// Update max spots available
+function updateMaxSpotsAvailable(availableSpots) {
+    // Calculate truly available spots (excluding current booking)
+    const trulyAvailable = availableSpots;
+    const maxTotal = Math.min(originalSpots + trulyAvailable, 4);
+    
+    // Update spot selector buttons
+    const buttons = document.querySelectorAll('.spot-select-btn');
+    buttons.forEach((btn) => {
+        const btnSpots = parseInt(btn.dataset.spots);
+        if (btnSpots > maxTotal) {
+            btn.disabled = true;
+            btn.style.opacity = '0.3';
+            btn.style.cursor = 'not-allowed';
+        } else {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+        }
+    });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    fetchSlotAvailability();
+    // Refresh every 3 seconds
+    setInterval(fetchSlotAvailability, 3000);
+});
 
 // Select number of spots
 function selectSpots(spots) {
@@ -670,6 +667,9 @@ function selectSpots(spots) {
     
     // Update pricing preview
     updatePricingPreview(spots);
+    
+    // Update capacity dots preview (fetch latest data first)
+    fetchSlotAvailability();
 }
 
 // Update pricing preview
@@ -701,6 +701,19 @@ function updatePricingPreview(newSpots) {
 function updateBookingSpots() {
     const updateBtn = document.getElementById('updateSpotsButton');
     const messageDiv = document.getElementById('spotUpdateMessage');
+    
+    // Set flex properties FIRST to prevent layout shift
+    updateBtn.style.display = 'flex';
+    updateBtn.style.alignItems = 'center';
+    updateBtn.style.justifyContent = 'center';
+    
+    // Then preserve button dimensions
+    const width = updateBtn.offsetWidth;
+    const height = updateBtn.offsetHeight;
+    updateBtn.style.width = width + 'px';
+    updateBtn.style.height = height + 'px';
+    updateBtn.style.minWidth = width + 'px';
+    updateBtn.style.minHeight = height + 'px';
     
     // Show loading state
     updateBtn.innerHTML = '<div class="flex items-center justify-center gap-2"><div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div><span>Updating...</span></div>';
@@ -768,12 +781,29 @@ function proceedToPayment() {
     const button = document.getElementById('paymentButton');
     const originalHTML = button.innerHTML;
     
+    // Remove animation classes FIRST to prevent interference
+    button.classList.remove('hover-glow', 'btn-ripple', 'group');
+    
+    // Force remove any pseudo-element effects by resetting overflow
+    button.style.overflow = 'visible';
+    
+    // Set flex properties FIRST to prevent layout shift
+    button.style.display = 'flex';
+    button.style.alignItems = 'center';
+    button.style.justifyContent = 'center';
+    
+    // Then preserve button dimensions
+    const width = button.offsetWidth;
+    const height = button.offsetHeight;
+    button.style.width = width + 'px';
+    button.style.height = height + 'px';
+    button.style.minWidth = width + 'px';
+    button.style.minHeight = height + 'px';
+    
     // Animated loading state
     button.innerHTML = `
-        <div class="flex items-center justify-center gap-3">
-            <div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-            <span class="font-bold">Processing...</span>
-        </div>
+        <div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+        <span class="font-bold">Processing...</span>
     `;
     button.disabled = true;
     button.style.opacity = '0.8';
@@ -938,6 +968,20 @@ function cancelBooking() {
     if (confirm('⚠️ Are you sure you want to cancel this booking?\n\nThis action cannot be undone.')) {
         const cancelBtn = event.target;
         const originalHTML = cancelBtn.innerHTML;
+        
+        // Set flex properties FIRST to prevent layout shift
+        cancelBtn.style.display = 'flex';
+        cancelBtn.style.alignItems = 'center';
+        cancelBtn.style.justifyContent = 'center';
+        
+        // Then preserve button dimensions
+        const width = cancelBtn.offsetWidth;
+        const height = cancelBtn.offsetHeight;
+        cancelBtn.style.width = width + 'px';
+        cancelBtn.style.height = height + 'px';
+        cancelBtn.style.minWidth = width + 'px';
+        cancelBtn.style.minHeight = height + 'px';
+        
         cancelBtn.innerHTML = `
             <div class="flex items-center justify-center gap-2">
                 <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
@@ -957,7 +1001,7 @@ function cancelBooking() {
             if (data.success) {
                 showNotification('success', 'Booking cancelled successfully');
                 setTimeout(() => {
-                    window.location.href = '{% url "booking:game_selection" %}';
+                    window.location.href = '{% url "booking:game_detail" game_id=booking.game.id %}';
                 }, 1000);
             } else {
                 showNotification('error', data.error || 'Error cancelling booking');

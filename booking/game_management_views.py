@@ -19,8 +19,10 @@ logger = logging.getLogger(__name__)
 
 @cafe_owner_required
 def game_management_dashboard(request):
-    """Main game management dashboard for cafe owners"""
-    # Get all games with statistics
+    """Main game management dashboard for cafe owners - OPTIMIZED"""
+    from django.core.cache import cache
+    
+    # Get all games with statistics (single query with annotations)
     games = Game.objects.annotate(
         total_slots=Count('slots'),
         active_slots=Count('slots', filter=Q(slots__is_active=True)),
@@ -30,30 +32,36 @@ def game_management_dashboard(request):
     
     # Get today's statistics
     today = timezone.now().date()
-    today_slots = GameSlot.objects.filter(date=today, is_active=True)
-    today_bookings = Booking.objects.filter(
-        game_slot__date=today,
-        status__in=['CONFIRMED', 'IN_PROGRESS']
+    
+    # Use aggregate for counts (single query)
+    today_stats = GameSlot.objects.filter(date=today, is_active=True).aggregate(
+        slots_count=Count('id')
     )
     
-    # Calculate revenue for today
-    today_revenue = today_bookings.aggregate(
-        total=Sum('total_amount')
-    )['total'] or 0
+    booking_stats = Booking.objects.filter(
+        game_slot__date=today,
+        status__in=['CONFIRMED', 'IN_PROGRESS']
+    ).aggregate(
+        bookings_count=Count('id'),
+        revenue=Sum('total_amount')
+    )
     
-    # Get upcoming bookings
+    # Get upcoming bookings (optimized with select_related)
     upcoming_bookings = Booking.objects.filter(
         game_slot__date__gte=today,
         status__in=['CONFIRMED', 'PENDING']
-    ).select_related('customer__user', 'game', 'game_slot').order_by('game_slot__date', 'game_slot__start_time')[:10]
+    ).select_related('customer__user', 'game', 'game_slot').only(
+        'id', 'customer__user__first_name', 'customer__user__last_name',
+        'game__name', 'game_slot__date', 'game_slot__start_time', 'status'
+    ).order_by('game_slot__date', 'game_slot__start_time')[:10]
     
     context = {
         'games': games,
         'total_games': games.count(),
         'active_games': games.filter(is_active=True).count(),
-        'today_slots_count': today_slots.count(),
-        'today_bookings_count': today_bookings.count(),
-        'today_revenue': today_revenue,
+        'today_slots_count': today_stats['slots_count'] or 0,
+        'today_bookings_count': booking_stats['bookings_count'] or 0,
+        'today_revenue': booking_stats['revenue'] or 0,
         'upcoming_bookings': upcoming_bookings,
         'today': today,
     }
@@ -109,7 +117,9 @@ def game_create(request):
 
 @cafe_owner_required
 def game_detail(request, game_id):
-    """Detailed view of a game with slots and bookings"""
+    """Detailed view of a game with slots and bookings - OPTIMIZED"""
+    from django.db.models import Prefetch
+    
     game = get_object_or_404(Game, id=game_id)
     
     # Get date range for filtering (default to next 7 days)
@@ -126,13 +136,23 @@ def game_detail(request, game_id):
     else:
         date_to = datetime.strptime(date_to, '%Y-%m-%d').date()
     
-    # Get slots for the date range
+    # Optimized query with prefetch_related for bookings
     slots = game.slots.filter(
         date__range=[date_from, date_to],
         is_active=True
-    ).select_related('availability').prefetch_related('bookings').order_by('date', 'start_time')
+    ).select_related('availability').prefetch_related(
+        Prefetch(
+            'bookings',
+            queryset=Booking.objects.filter(
+                status__in=['CONFIRMED', 'IN_PROGRESS', 'PENDING']
+            ).select_related('customer__user').only(
+                'id', 'status', 'booking_type', 'spots_booked',
+                'customer__user__first_name', 'customer__user__last_name'
+            )
+        )
+    ).order_by('date', 'start_time')
     
-    # Group slots by date
+    # Group slots by date (in Python, more efficient than multiple queries)
     slots_by_date = {}
     for slot in slots:
         if slot.date not in slots_by_date:
@@ -141,18 +161,19 @@ def game_detail(request, game_id):
         # Get slot info with availability
         slot_info = {
             'slot': slot,
-            'bookings': slot.bookings.filter(status__in=['CONFIRMED', 'IN_PROGRESS', 'PENDING']),
+            'bookings': slot.bookings.all(),  # Already prefetched
             'availability': getattr(slot, 'availability', None)
         }
         slots_by_date[slot.date].append(slot_info)
     
-    # Get game statistics
+    # Get game statistics (single aggregate query)
+    stats = game.bookings.aggregate(
+        total_bookings=Count('id'),
+        confirmed_bookings=Count('id', filter=Q(status='CONFIRMED')),
+        revenue=Sum('total_amount', filter=Q(status='CONFIRMED'))
+    )
+    
     total_slots = game.slots.filter(is_active=True).count()
-    total_bookings = game.bookings.count()
-    confirmed_bookings = game.bookings.filter(status='CONFIRMED').count()
-    revenue = game.bookings.filter(status='CONFIRMED').aggregate(
-        total=Sum('total_amount')
-    )['total'] or 0
     
     context = {
         'game': game,
@@ -160,9 +181,9 @@ def game_detail(request, game_id):
         'date_from': date_from,
         'date_to': date_to,
         'total_slots': total_slots,
-        'total_bookings': total_bookings,
-        'confirmed_bookings': confirmed_bookings,
-        'revenue': revenue,
+        'total_bookings': stats['total_bookings'] or 0,
+        'confirmed_bookings': stats['confirmed_bookings'] or 0,
+        'revenue': stats['revenue'] or 0,
         'date_range': [date_from + timedelta(days=i) for i in range((date_to - date_from).days + 1)],
     }
     

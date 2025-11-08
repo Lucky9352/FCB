@@ -124,6 +124,11 @@ class GameSlot(models.Model):
     class Meta:
         unique_together = ['game', 'date', 'start_time']
         ordering = ['date', 'start_time']
+        indexes = [
+            models.Index(fields=['game', 'date', 'is_active'], name='gameslot_game_date_active_idx'),
+            models.Index(fields=['date', 'start_time'], name='gameslot_date_time_idx'),
+            models.Index(fields=['is_active', 'date'], name='gameslot_active_date_idx'),
+        ]
     
     def __str__(self):
         return f"{self.game.name} - {self.date} {self.start_time}-{self.end_time}"
@@ -154,6 +159,9 @@ class SlotAvailability(models.Model):
     class Meta:
         verbose_name = "Slot Availability"
         verbose_name_plural = "Slot Availabilities"
+        indexes = [
+            models.Index(fields=['game_slot'], name='slotavail_gameslot_idx'),
+        ]
     
     def __str__(self):
         return f"{self.game_slot} - {self.available_spots}/{self.total_capacity} available"
@@ -171,9 +179,22 @@ class SlotAvailability(models.Model):
         return pending_bookings
     
     def get_reserved_spots_count(self):
-        """Get count of spots currently reserved by pending payments"""
-        pending_bookings = self.get_pending_reservations()
-        return sum(booking.spots_booked for booking in pending_bookings)
+        """Get count of spots currently reserved by pending payments (uses prefetched data)"""
+        from django.utils import timezone
+        
+        # Use prefetched bookings if available (much faster)
+        try:
+            bookings = self.game_slot.bookings.all()
+            # Filter in Python to use prefetched data
+            reserved = sum(
+                b.spots_booked for b in bookings 
+                if b.status == 'PENDING' and b.reservation_expires_at > timezone.now()
+            )
+            return reserved
+        except AttributeError:
+            # Fallback to query if not prefetched
+            pending_bookings = self.get_pending_reservations()
+            return sum(booking.spots_booked for booking in pending_bookings)
     
     def get_truly_available_spots(self):
         """Get spots that are neither booked nor reserved"""
@@ -503,6 +524,13 @@ class Booking(models.Model):
         verbose_name = "Booking"
         verbose_name_plural = "Bookings"
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['game_slot', 'status'], name='booking_slot_status_idx'),
+            models.Index(fields=['status', 'reservation_expires_at'], name='booking_status_expires_idx'),
+            models.Index(fields=['customer', 'status'], name='booking_customer_status_idx'),
+            models.Index(fields=['game', 'status'], name='booking_game_status_idx'),
+            models.Index(fields=['customer', '-created_at'], name='booking_customer_created_idx'),
+        ]
     
     def __str__(self):
         if self.game:

@@ -156,7 +156,6 @@
 
 .hover-lift:hover {
   transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
 .hover-scale {
@@ -172,15 +171,10 @@
 }
 
 .hover-glow:hover {
-  box-shadow: 0 0 30px rgba(102, 126, 234, 0.6);
   transform: translateY(-2px);
 }
 
 .hover-neon-glow:hover {
-  box-shadow: 
-    0 0 20px rgba(0, 245, 255, 0.6),
-    0 0 40px rgba(0, 245, 255, 0.4),
-    0 0 60px rgba(0, 245, 255, 0.2);
   transform: scale(1.02);
 }
 
@@ -433,22 +427,13 @@
 
 .neon-border {
   border: 2px solid #00f5ff;
-  box-shadow: 
-    0 0 10px rgba(0, 245, 255, 0.6),
-    inset 0 0 10px rgba(0, 245, 255, 0.3);
   animation: neonBorderPulse 2s ease-in-out infinite;
 }
 
 @keyframes neonBorderPulse {
   0%, 100% {
-    box-shadow: 
-      0 0 10px rgba(0, 245, 255, 0.6),
-      inset 0 0 10px rgba(0, 245, 255, 0.3);
   }
   50% {
-    box-shadow: 
-      0 0 20px rgba(0, 245, 255, 0.9),
-      inset 0 0 20px rgba(0, 245, 255, 0.5);
   }
 }
 
@@ -577,9 +562,6 @@
 .glass-card:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    0 0 20px rgba(102, 126, 234, 0.3);
 }
 
 /* ============================================

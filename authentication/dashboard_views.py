@@ -15,7 +15,7 @@ import json
 
 @customer_required
 def customer_dashboard(request):
-    """Customer dashboard view with booking history and available stations"""
+    """Customer dashboard view with booking history and available stations - OPTIMIZED"""
     # Ensure user has customer profile
     if not hasattr(request.user, 'customer_profile'):
         # Create customer profile if it doesn't exist (for Google OAuth users)
@@ -23,29 +23,49 @@ def customer_dashboard(request):
     
     customer = request.user.customer_profile
     now = timezone.now()
+    today = now.date()
     
-    # Get customer's bookings
-    recent_bookings = customer.bookings.all().order_by('-created_at')[:5]
-    upcoming_bookings = customer.bookings.filter(
-        start_time__gt=now,
-        status__in=['CONFIRMED', 'PENDING']
-    ).order_by('start_time')[:3]
+    # Optimized query with select_related to avoid N+1 queries
+    all_customer_bookings = customer.bookings.select_related('game', 'game_slot')
     
-    # Get current booking (if any)
-    current_booking = customer.bookings.filter(
-        start_time__lte=now,
-        end_time__gte=now,
+    # Recent bookings (last 5) - use slicing to limit query
+    recent_bookings = all_customer_bookings.order_by('-created_at')[:5]
+    
+    # Upcoming bookings (future confirmed/pending/in_progress bookings)
+    upcoming_bookings = all_customer_bookings.filter(
+        game_slot__date__gte=today,
+        status__in=['CONFIRMED', 'PENDING', 'IN_PROGRESS']
+    ).order_by('game_slot__date', 'game_slot__start_time')[:3]
+    
+    # Get current active booking (if any)
+    current_booking = all_customer_bookings.filter(
+        game_slot__date=today,
         status='IN_PROGRESS'
     ).first()
     
-    # Get available games for quick booking
-    available_games = Game.objects.filter(
-        is_active=True
-    ).order_by('name')  # Show ALL games, not just 6
+    # Get available games (optimized query, NO CACHE for real-time updates)
+    available_games = Game.objects.filter(is_active=True).only(
+        'id', 'name', 'description', 'image', 'booking_type'
+    ).order_by('name')
     
-    # Get booking statistics
-    total_bookings = customer.bookings.count()
-    completed_bookings = customer.bookings.filter(status='COMPLETED').count()
+    # Use database aggregation for statistics (single query, NO CACHE)
+    stats = all_customer_bookings.aggregate(
+        total=Count('id'),
+        completed=Count('id', filter=Q(status='COMPLETED')),
+        pending=Count('id', filter=Q(status='PENDING')),
+        confirmed=Count('id', filter=Q(status='CONFIRMED')),
+        total_spent=Sum('total_amount', filter=Q(payment_status='PAID'))
+    )
+    
+    # Calculate total hours efficiently
+    completed_with_duration = customer.bookings.filter(
+        status='COMPLETED'
+    ).select_related('game').only('id', 'game__id', 'game__slot_duration_minutes')
+    
+    total_hours = sum(
+        booking.game.slot_duration_minutes / 60 
+        for booking in completed_with_duration
+    ) if completed_with_duration.exists() else 0
     
     context = {
         'customer': customer,
@@ -54,8 +74,12 @@ def customer_dashboard(request):
         'upcoming_bookings': upcoming_bookings,
         'current_booking': current_booking,
         'available_games': available_games,
-        'total_bookings': total_bookings,
-        'completed_bookings': completed_bookings,
+        'total_bookings': stats['total'] or 0,
+        'completed_bookings': stats['completed'] or 0,
+        'pending_bookings': stats['pending'] or 0,
+        'confirmed_bookings': stats['confirmed'] or 0,
+        'total_spent': stats['total_spent'] or Decimal('0.00'),
+        'total_hours': int(total_hours),
         'now': now,
     }
     return render(request, 'authentication/customer_dashboard.html', context)
@@ -73,48 +97,45 @@ def cafe_owner_dashboard(request):
 
 @cafe_owner_required
 def owner_overview(request):
-    """Owner overview dashboard with real-time stats and timeline"""
+    """Owner overview dashboard with real-time stats and timeline - OPTIMIZED FOR REAL-TIME"""
     cafe_owner = request.user.cafe_owner_profile
     now = timezone.now()
     today = now.date()
     yesterday = today - timedelta(days=1)
     
-    # Today's Stats - Use owner_payout instead of total_amount
-    todays_bookings = Booking.objects.filter(
+    # Real-time stats with single aggregate query (NO CACHE)
+    todays_stats = Booking.objects.filter(
         start_time__date=today
+    ).aggregate(
+        revenue=Sum('owner_payout', filter=Q(payment_status='PAID')),
+        total_bookings=Count('id'),
+        active_sessions=Count('id', filter=Q(
+            start_time__lte=now,
+            end_time__gte=now,
+            status='IN_PROGRESS'
+        )),
+        pending_payments=Count('id', filter=Q(payment_status='PENDING')),
+        customers_today=Count('customer', distinct=True),
+        cancelled_today=Count('id', filter=Q(status='CANCELLED'))
     )
     
-    # Owner's revenue = sum of owner_payout (after commission deduction)
-    todays_revenue = todays_bookings.filter(
-        payment_status='PAID'
-    ).aggregate(total=Sum('owner_payout'))['total'] or Decimal('0.00')
+    todays_revenue = todays_stats['revenue'] or Decimal('0.00')
+    total_bookings_today = todays_stats['total_bookings'] or 0
+    active_sessions = todays_stats['active_sessions'] or 0
+    pending_payments = todays_stats['pending_payments'] or 0
+    customers_today = todays_stats['customers_today'] or 0
+    cancelled_today = todays_stats['cancelled_today'] or 0
     
-    active_sessions = Booking.objects.filter(
+    # Available stations (real-time)
+    all_games_count = Game.objects.filter(is_active=True).count()
+    occupied_games_count = Booking.objects.filter(
         start_time__lte=now,
         end_time__gte=now,
         status='IN_PROGRESS'
-    ).count()
+    ).values('game_id').distinct().count()
+    available_stations = all_games_count - occupied_games_count
     
-    total_bookings_today = todays_bookings.count()
-    
-    # Available stations right now
-    all_games = Game.objects.filter(is_active=True)
-    occupied_games = Booking.objects.filter(
-        start_time__lte=now,
-        end_time__gte=now,
-        status='IN_PROGRESS'
-    ).values_list('game_id', flat=True)
-    available_stations = all_games.count() - len(set(occupied_games))
-    
-    # Pending payments
-    pending_payments = Booking.objects.filter(
-        payment_status='PENDING'
-    ).count()
-    
-    # Total customers today
-    customers_today = todays_bookings.values('customer').distinct().count()
-    
-    # Yesterday's revenue for comparison (owner_payout)
+    # Yesterday's revenue for comparison (single query)
     yesterdays_revenue = Booking.objects.filter(
         start_time__date=yesterday,
         payment_status='PAID'
@@ -126,37 +147,45 @@ def owner_overview(request):
     else:
         revenue_change = 100 if todays_revenue > 0 else 0
     
-    # Today's Timeline (hourly bookings)
+    # Today's Timeline (optimized - single query with grouping)
+    hourly_bookings = Booking.objects.filter(
+        start_time__date=today
+    ).select_related('game', 'customer__user').order_by('start_time')
+    
+    # Group bookings by hour in Python (more efficient than 24 separate queries)
     timeline_data = []
+    bookings_by_hour = {}
+    for booking in hourly_bookings:
+        hour = booking.start_time.hour
+        if hour not in bookings_by_hour:
+            bookings_by_hour[hour] = []
+        bookings_by_hour[hour].append({
+            'id': str(booking.id),
+            'game__name': booking.game.name,
+            'customer__user__first_name': booking.customer.user.first_name,
+            'customer__user__last_name': booking.customer.user.last_name,
+            'status': booking.status,
+            'start_time': booking.start_time,
+            'end_time': booking.end_time
+        })
+    
     for hour in range(24):
         hour_start = now.replace(hour=hour, minute=0, second=0, microsecond=0)
-        hour_end = hour_start + timedelta(hours=1)
-        
-        bookings_in_hour = Booking.objects.filter(
-            start_time__gte=hour_start,
-            start_time__lt=hour_end
-        ).select_related('game', 'customer')
-        
         timeline_data.append({
             'hour': hour,
             'time': hour_start.strftime('%I %p'),
-            'bookings': list(bookings_in_hour.values(
-                'id', 'game__name', 'customer__user__first_name', 
-                'customer__user__last_name', 'status', 'start_time', 'end_time'
-            ))
+            'bookings': bookings_by_hour.get(hour, [])
         })
     
-    # Upcoming bookings (next 3)
+    # Upcoming bookings (real-time with select_related)
     upcoming_bookings = Booking.objects.filter(
         start_time__gt=now,
         status__in=['CONFIRMED', 'PENDING']
-    ).select_related('game', 'customer').order_by('start_time')[:3]
+    ).select_related('game', 'customer__user').order_by('start_time')[:3]
     
-    # Recent alerts
+    # Recent alerts (real-time)
     alerts = []
     
-    # Cancelled bookings today
-    cancelled_today = todays_bookings.filter(status='CANCELLED').count()
     if cancelled_today > 0:
         alerts.append({
             'type': 'warning',
@@ -165,7 +194,7 @@ def owner_overview(request):
             'time': 'Today'
         })
     
-    # Failed payments
+    # Failed payments (single query)
     failed_payments = Booking.objects.filter(
         payment_status='FAILED',
         created_at__date=today
@@ -178,7 +207,7 @@ def owner_overview(request):
             'time': 'Today'
         })
     
-    # Games under maintenance
+    # Games under maintenance (single query)
     maintenance_games = Game.objects.filter(is_active=False).count()
     if maintenance_games > 0:
         alerts.append({
@@ -211,7 +240,7 @@ def owner_overview(request):
 
 @cafe_owner_required
 def owner_bookings(request):
-    """Bookings management section"""
+    """Bookings management section - OPTIMIZED FOR REAL-TIME"""
     cafe_owner = request.user.cafe_owner_profile
     now = timezone.now()
     
@@ -221,8 +250,17 @@ def owner_bookings(request):
     date_filter = request.GET.get('date', 'all')
     search_query = request.GET.get('search', '')
     
-    # Base queryset
-    bookings = Booking.objects.all().select_related('game', 'customer', 'customer__user')
+    # Auto-update booking statuses only for relevant bookings (performance optimization)
+    from booking.booking_service import auto_update_bookings_status
+    
+    bookings_to_check = Booking.objects.filter(
+        status__in=['PENDING', 'CONFIRMED', 'IN_PROGRESS']
+    ).select_related('game_slot').only('id', 'status', 'game_slot__start_time', 'game_slot__end_time')
+    
+    auto_update_bookings_status(bookings_to_check)
+    
+    # Optimized base queryset with select_related (NO CACHE for real-time)
+    bookings = Booking.objects.select_related('game', 'customer__user', 'game_slot')
     
     # Apply filters
     if status_filter != 'all':
@@ -250,19 +288,20 @@ def owner_bookings(request):
     # Order by start time (newest first)
     bookings = bookings.order_by('-start_time')
     
-    # Categorize bookings
-    confirmed_bookings = bookings.filter(status='CONFIRMED', start_time__gt=now).count()
-    in_progress_bookings = bookings.filter(status='IN_PROGRESS').count()
-    completed_bookings = bookings.filter(status='COMPLETED').count()
-    cancelled_bookings = bookings.filter(status='CANCELLED').count()
-    pending_payment_bookings = bookings.filter(payment_status='PENDING').count()
-    no_shows = bookings.filter(status='NO_SHOW').count()
+    # Use single aggregate query for counts (real-time stats)
+    stats = bookings.aggregate(
+        confirmed=Count('id', filter=Q(status='CONFIRMED', start_time__gt=now)),
+        in_progress=Count('id', filter=Q(status='IN_PROGRESS')),
+        completed=Count('id', filter=Q(status='COMPLETED')),
+        cancelled=Count('id', filter=Q(status='CANCELLED')),
+        pending_payment=Count('id', filter=Q(payment_status='PENDING')),
+        no_shows=Count('id', filter=Q(status='NO_SHOW'))
+    )
     
-    # Get all games for filter dropdown
-    all_games = Game.objects.filter(is_active=True).order_by('name')
+    # Get games list (real-time, optimized query)
+    all_games = Game.objects.filter(is_active=True).only('id', 'name').order_by('name')
     
-    # Calendar data for the month
-    calendar_data = []
+    # Calendar data for the month (optimized query)
     month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     next_month = (month_start + timedelta(days=32)).replace(day=1)
     
@@ -271,21 +310,23 @@ def owner_bookings(request):
         start_time__lt=next_month
     ).values('start_time__date').annotate(count=Count('id'))
     
-    for booking_day in monthly_bookings:
-        calendar_data.append({
+    calendar_data = [
+        {
             'date': booking_day['start_time__date'].isoformat(),
             'count': booking_day['count']
-        })
+        }
+        for booking_day in monthly_bookings
+    ]
     
     context = {
         'cafe_owner': cafe_owner,
         'bookings': bookings[:50],  # Limit to 50 for performance
-        'confirmed_bookings': confirmed_bookings,
-        'in_progress_bookings': in_progress_bookings,
-        'completed_bookings': completed_bookings,
-        'cancelled_bookings': cancelled_bookings,
-        'pending_payment_bookings': pending_payment_bookings,
-        'no_shows': no_shows,
+        'confirmed_bookings': stats['confirmed'] or 0,
+        'in_progress_bookings': stats['in_progress'] or 0,
+        'completed_bookings': stats['completed'] or 0,
+        'cancelled_bookings': stats['cancelled'] or 0,
+        'pending_payment_bookings': stats['pending_payment'] or 0,
+        'no_shows': stats['no_shows'] or 0,
         'all_games': all_games,
         'calendar_data': json.dumps(calendar_data),
         'status_filter': status_filter,
@@ -303,40 +344,44 @@ def owner_bookings(request):
 
 @cafe_owner_required
 def owner_games(request):
-    """Games and stations management section"""
+    """Games and stations management section - OPTIMIZED"""
     cafe_owner = request.user.cafe_owner_profile
     now = timezone.now()
     today = now.date()
     
-    # Get all games
+    # Get all games with optimized query
     games = Game.objects.all().order_by('name')
     
-    # Add today's stats to each game
+    # Get all today's bookings in one query
+    todays_bookings = Booking.objects.filter(
+        start_time__date=today
+    ).values('game_id', 'status', 'payment_status').annotate(
+        count=Count('id'),
+        revenue=Sum('total_amount', filter=Q(payment_status='PAID'))
+    )
+    
+    # Create lookup dictionaries for O(1) access
+    bookings_by_game = {b['game_id']: b for b in todays_bookings}
+    
+    # Get currently occupied games in one query
+    occupied_game_ids = set(Booking.objects.filter(
+        start_time__lte=now,
+        end_time__gte=now,
+        status='IN_PROGRESS'
+    ).values_list('game_id', flat=True))
+    
+    # Add stats to games efficiently (no additional queries)
     for game in games:
-        game.todays_bookings = Booking.objects.filter(
-            game=game,
-            start_time__date=today
-        ).count()
-        
-        game.todays_revenue = Booking.objects.filter(
-            game=game,
-            start_time__date=today,
-            payment_status='PAID'
-        ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
-        
-        # Check if currently occupied
-        game.is_occupied = Booking.objects.filter(
-            game=game,
-            start_time__lte=now,
-            end_time__gte=now,
-            status='IN_PROGRESS'
-        ).exists()
+        game_stats = bookings_by_game.get(game.id, {})
+        game.todays_bookings = game_stats.get('count', 0)
+        game.todays_revenue = game_stats.get('revenue') or Decimal('0.00')
+        game.is_occupied = game.id in occupied_game_ids
     
-    # Station status board
-    active_games = games.filter(is_active=True)
-    inactive_games = games.filter(is_active=False)
+    # Station status board (use already loaded games)
+    active_games_count = sum(1 for g in games if g.is_active)
+    inactive_games_count = len(games) - active_games_count
     
-    # Game analytics
+    # Game analytics (single query)
     most_popular_game = Booking.objects.filter(
         start_time__date=today
     ).values('game__name').annotate(
@@ -346,9 +391,9 @@ def owner_games(request):
     context = {
         'cafe_owner': cafe_owner,
         'games': games,
-        'active_games_count': active_games.count(),
-        'inactive_games_count': inactive_games.count(),
-        'total_games': games.count(),
+        'active_games_count': active_games_count,
+        'inactive_games_count': inactive_games_count,
+        'total_games': len(games),
         'most_popular_game': most_popular_game,
         'now': now,
     }
@@ -361,7 +406,7 @@ def owner_games(request):
 
 @cafe_owner_required
 def owner_customers(request):
-    """Customers CRM section"""
+    """Customers CRM section - OPTIMIZED FOR REAL-TIME"""
     cafe_owner = request.user.cafe_owner_profile
     now = timezone.now()
     
@@ -369,10 +414,10 @@ def owner_customers(request):
     filter_type = request.GET.get('filter', 'all')
     search_query = request.GET.get('search', '')
     
-    # Base queryset
-    customers = Customer.objects.all().select_related('user')
+    # Optimized base queryset with select_related
+    customers = Customer.objects.select_related('user')
     
-    # Add stats to each customer - Use owner_payout for revenue
+    # Add stats to each customer - Use owner_payout for revenue (single query with annotations)
     customers = customers.annotate(
         total_bookings=Count('bookings'),
         total_spent=Sum('bookings__owner_payout', filter=Q(bookings__payment_status='PAID')),
@@ -405,22 +450,23 @@ def owner_customers(request):
     # Order by total spent
     customers = customers.order_by('-total_spent')
     
-    # Customer segments count
-    total_customers = Customer.objects.count()
-    vip_customers = Customer.objects.annotate(
-        total_spent=Sum('bookings__owner_payout', filter=Q(bookings__payment_status='PAID'))
-    ).filter(total_spent__gte=1000).count()
-    
-    new_customers = Customer.objects.filter(
-        user__date_joined__gte=now - timedelta(days=7)
-    ).count()
+    # Real-time customer segment counts (NO CACHE for instant updates)
+    segment_counts = {
+        'total': Customer.objects.count(),
+        'vip': Customer.objects.annotate(
+            total_spent=Sum('bookings__owner_payout', filter=Q(bookings__payment_status='PAID'))
+        ).filter(total_spent__gte=1000).count(),
+        'new': Customer.objects.filter(
+            user__date_joined__gte=now - timedelta(days=7)
+        ).count()
+    }
     
     context = {
         'cafe_owner': cafe_owner,
         'customers': customers[:50],  # Limit for performance
-        'total_customers': total_customers,
-        'vip_customers': vip_customers,
-        'new_customers': new_customers,
+        'total_customers': segment_counts['total'],
+        'vip_customers': segment_counts['vip'],
+        'new_customers': segment_counts['new'],
         'filter_type': filter_type,
         'search_query': search_query,
     }

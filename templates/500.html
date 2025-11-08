@@ -103,6 +103,50 @@
           opacity: 0;
         }
       }
+
+      /* Mobile Animation Optimizations */
+      @media (max-width: 768px) {
+        @keyframes patternMove {
+          0% {
+            transform: translate(0, 0);
+          }
+          100% {
+            transform: translate(50px, 50px);
+          }
+        }
+
+        @keyframes errorPulse {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+          50% {
+            transform: scale(1.02);
+            opacity: 0.9;
+          }
+        }
+
+        @keyframes floatAnim {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-5px);
+          }
+        }
+
+        .bg-pattern {
+          animation: patternMove 30s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .error-code {
+          animation: errorPulse 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .error-icon {
+          animation: floatAnim 8s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+      }
     </style>
   </head>
   <body>

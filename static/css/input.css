@@ -54,7 +54,6 @@
 @utility card {
   background-color: var(--color-gaming-secondary);
   border-radius: 0.5rem;
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   padding: 1.5rem;
   border: 1px solid var(--color-gaming-accent);
 }
@@ -72,6 +71,5 @@
   
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 2px var(--color-gaming-highlight);
   }
 }

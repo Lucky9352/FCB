@@ -56,12 +56,14 @@ class AutoSlotGenerator:
     def _ensure_game_slots(cls, game):
         """
         Ensure a specific game has slots for the next N days
-        Uses caching to avoid checking too frequently
+        Uses caching ONLY to prevent slot generation overhead (once per hour)
+        NOTE: This cache does NOT affect real-time data display - it only controls
+        when new slots are generated in the background
         """
         cache_key = f"{cls.CACHE_KEY_PREFIX}{game.id}"
         last_check = cache.get(cache_key)
         
-        # Only check once per hour to avoid overhead
+        # Only check once per hour to avoid overhead (doesn't affect real-time updates)
         if last_check:
             return
         
@@ -95,14 +97,15 @@ class AutoSlotGenerator:
         """
         Check if we need to generate slots for today
         Call this in middleware on first request of the day
+        NOTE: This cache does NOT affect real-time data display
         """
         today_key = f"daily_slot_check_{date.today()}"
         
-        # Check if we've already run today
+        # Check if we've already run today (doesn't affect real-time updates)
         if cache.get(today_key):
             return False
         
-        # Mark as checked for today (lasts 24 hours)
+        # Mark as checked for today (lasts 24 hours - doesn't affect real-time updates)
         cache.set(today_key, True, 86400)
         
         # Generate slots in background

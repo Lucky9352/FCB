@@ -6,7 +6,6 @@
     backdrop-filter: blur(20px);
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     padding: 1.5rem;
     margin-bottom: 2rem;
 }
@@ -100,7 +99,6 @@
     color: white;
     border-color: #2563eb;
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .calendar-day.today {
@@ -147,17 +145,14 @@
 
 .availability-indicator.high {
     background: #10b981;
-    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
 }
 
 .availability-indicator.medium {
     background: #f59e0b;
-    box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
 }
 
 .availability-indicator.low {
     background: #ef4444;
-    box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
 }
 
 .availability-indicator.none {
@@ -171,7 +166,6 @@
     backdrop-filter: blur(20px);
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     padding: 1.5rem;
 }
 
@@ -236,13 +230,11 @@
     border-color: #3b82f6;
     background: #f8faff;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
 }
 
 .time-slot.selected {
     border-color: #3b82f6;
     background: #dbeafe;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 
 .time-slot.unavailable {
@@ -254,7 +246,6 @@
 
 .time-slot.unavailable:hover {
     transform: none;
-    box-shadow: none;
     border-color: #e5e7eb;
     background: #f9fafb;
 }
@@ -339,7 +330,6 @@
     height: 12px;
     border-radius: 50%;
     border: 2px solid white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .status-indicator.available {
@@ -358,19 +348,15 @@
 
 @keyframes pulse-green {
     0%, 100% { 
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 0 rgba(16, 185, 129, 0.7);
     }
     50% { 
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 6px rgba(16, 185, 129, 0);
     }
 }
 
 @keyframes pulse-yellow {
     0%, 100% { 
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 0 rgba(245, 158, 11, 0.7);
     }
     50% { 
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 6px rgba(245, 158, 11, 0);
     }
 }
 

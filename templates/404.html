@@ -24,7 +24,22 @@
         }
       }
       .glow {
-        box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+      }
+
+      /* Mobile Animation Optimizations */
+      @media (max-width: 768px) {
+        .float-animation {
+          animation: float 8s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
+        }
       }
     </style>
   </head>

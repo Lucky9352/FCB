@@ -145,29 +145,19 @@ def profile_redirect_view(request):
 
 
 def home_view(request):
-    """Home page view with all available games (public access)"""
+    """Home page view with all available games (public access) - OPTIMIZED"""
     from booking.models import Game
     
-    # Get all active games
-    games = Game.objects.filter(is_active=True).order_by('name')
+    # Get all active games (optimized query, real-time for instant updates)
+    games = Game.objects.filter(is_active=True).only(
+        'id', 'name', 'description', 'image', 'booking_type', 
+        'private_price', 'shared_price', 'capacity'
+    ).order_by('name')
     
     context = {
         'games': games,
     }
     return render(request, 'home.html', context)
-
-
-def debug_user_view(request):
-    """Debug view to check user authentication status"""
-    if request.user.is_authenticated:
-        return render(request, 'authentication/debug_user.html', {
-            'user': request.user,
-            'has_customer_profile': hasattr(request.user, 'customer_profile'),
-            'has_cafe_owner_profile': hasattr(request.user, 'cafe_owner_profile'),
-            'is_superuser': request.user.is_superuser,
-        })
-    else:
-        return redirect('authentication:customer_login')
 
 
 @login_required

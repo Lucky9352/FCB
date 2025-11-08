@@ -1,7 +1,8 @@
 from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
 from django.utils import timezone
-from .models import Booking, BookingHistory, GamingStation
+from django.core.cache import cache
+from .models import Booking, BookingHistory, GamingStation, Game
 from .supabase_client import supabase_realtime
 import logging
 
@@ -41,27 +42,59 @@ def create_booking_history(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Booking)
 def auto_update_booking_status(sender, instance, created, **kwargs):
     """Automatically update booking status based on time"""
+    # Skip if this is a status update to prevent recursion
+    if hasattr(instance, '_skip_auto_status_update'):
+        return
+    
     if not created:  # Only for existing bookings
         now = timezone.now()
+        
+        status_changed = False
+        new_status = instance.status
+        
+        # 1. Check for EXPIRED status (PENDING bookings with expired reservation)
+        if (instance.status == 'PENDING' and 
+            instance.reservation_expires_at and 
+            now >= instance.reservation_expires_at and
+            not instance.is_reservation_expired):
+            new_status = 'EXPIRED'
+            status_changed = True
         
         # Get start and end times (supports both new game_slot and old start_time)
         start_dt = instance.start_datetime
         end_dt = instance.end_datetime
         
-        if not start_dt or not end_dt:
-            return  # Skip if times are not available
+        if start_dt and end_dt:
+            # 2. Auto-start confirmed bookings
+            if (instance.status == 'CONFIRMED' and 
+                start_dt <= now < end_dt):
+                new_status = 'IN_PROGRESS'
+                status_changed = True
+            
+            # 3. Auto-complete in-progress bookings
+            elif (instance.status == 'IN_PROGRESS' and 
+                  now >= end_dt):
+                new_status = 'COMPLETED'
+                status_changed = True
+            
+            # 4. Mark as NO_SHOW if confirmed but time passed and not verified
+            elif (instance.status == 'CONFIRMED' and 
+                  now >= end_dt and 
+                  not instance.is_verified):
+                new_status = 'NO_SHOW'
+                status_changed = True
         
-        # Auto-start confirmed bookings
-        if (instance.status == 'CONFIRMED' and 
-            start_dt <= now < end_dt):
-            instance.status = 'IN_PROGRESS'
-            instance.save(update_fields=['status'])
-        
-        # Auto-complete in-progress bookings
-        elif (instance.status == 'IN_PROGRESS' and 
-              now >= end_dt):
-            instance.status = 'COMPLETED'
-            instance.save(update_fields=['status'])
+        # Update status if changed
+        if status_changed:
+            # Set flag to prevent recursion
+            instance._skip_auto_status_update = True
+            instance.status = new_status
+            if new_status == 'EXPIRED':
+                instance.is_reservation_expired = True
+                instance.save(update_fields=['status', 'is_reservation_expired'])
+            else:
+                instance.save(update_fields=['status'])
+            logger.info(f"Auto-updated booking {instance.id} status to {new_status}")
 
 
 @receiver(post_save, sender=Booking)
@@ -139,6 +172,9 @@ def broadcast_booking_deletion(sender, instance, **kwargs):
             
     except Exception as e:
         logger.error(f"Error broadcasting booking deletion: {e}")
+
+
+
 
 
 @receiver(post_save, sender=GamingStation)

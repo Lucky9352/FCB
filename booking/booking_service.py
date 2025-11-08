@@ -13,6 +13,96 @@ class BookingService:
     """Service class for managing hybrid bookings"""
     
     @staticmethod
+    def get_booking_options_fast(game_slot):
+        """
+        OPTIMIZED: Get booking options WITHOUT expiring reservations
+        (Expiration should be done once in the view, not per-slot)
+        """
+        try:
+            availability = game_slot.availability  # Use prefetched data
+        except (SlotAvailability.DoesNotExist, AttributeError):
+            availability = SlotAvailability.objects.create(
+                game_slot=game_slot,
+                total_capacity=game_slot.game.capacity
+            )
+        
+        game = game_slot.game
+        options = []
+        restrictions = BookingService.get_booking_type_restrictions_fast(game_slot, availability)
+        
+        # Private booking option
+        if game.booking_type in ['SINGLE', 'HYBRID']:
+            private_option = {
+                'type': 'PRIVATE',
+                'price': float(game.private_price),
+                'capacity': game.capacity,
+                'spots_included': game.capacity,
+                'description': f'Book entire {game.name} for your group',
+                'available': restrictions['can_book_private'],
+                'icon': '🔒',
+                'benefits': [
+                    'Exclusive access to the game',
+                    f'Play with up to {game.capacity} friends',
+                    'No waiting or sharing with strangers',
+                    'Full control over game settings'
+                ]
+            }
+            
+            if not restrictions['can_book_private']:
+                private_option['restriction_reason'] = restrictions.get('private_restriction_reason', 'Not available')
+                private_option['disabled_message'] = f"Private booking blocked: {private_option['restriction_reason']}"
+            
+            options.append(private_option)
+        
+        # Shared booking option (only for hybrid games)
+        if game.booking_type == 'HYBRID':
+            shared_option = {
+                'type': 'SHARED',
+                'price': float(game.shared_price),
+                'price_per_spot': float(game.shared_price),
+                'available_spots': restrictions['available_spots'],
+                'max_spots_per_booking': min(restrictions['available_spots'], 4),
+                'description': f'Book individual spot(s) - {restrictions["available_spots"]} remaining',
+                'available': restrictions['can_book_shared'],
+                'icon': '👥',
+                'benefits': [
+                    'More affordable option',
+                    'Meet and play with other gamers',
+                    'Book just the spots you need',
+                    'Great for solo players or small groups'
+                ]
+            }
+            
+            if not restrictions['can_book_shared']:
+                shared_option['restriction_reason'] = restrictions.get('shared_restriction_reason', 'Not available')
+                shared_option['disabled_message'] = f"Shared booking blocked: {shared_option['restriction_reason']}"
+            
+            options.append(shared_option)
+        
+        # Add slot information to all options
+        for option in options:
+            option.update({
+                'slot_info': {
+                    'date': game_slot.date.isoformat(),
+                    'start_time': game_slot.start_time.strftime('%H:%M'),
+                    'end_time': game_slot.end_time.strftime('%H:%M'),
+                    'duration_minutes': game.slot_duration_minutes,
+                    'game_name': game.name,
+                    'game_id': str(game.id),
+                    'slot_id': str(game_slot.id)
+                },
+                'capacity_info': {
+                    'total_capacity': restrictions['total_capacity'],
+                    'booked_spots': restrictions['booked_spots'],
+                    'available_spots': restrictions['available_spots'],
+                    'is_private_locked': restrictions['is_private_locked'],
+                    'is_shared_locked': restrictions['is_shared_locked']
+                }
+            })
+        
+        return options
+    
+    @staticmethod
     def get_booking_options(game_slot):
         """
         Get available booking options for a game slot with detailed information
@@ -324,6 +414,17 @@ class BookingService:
                 reason='Cancelled by customer'
             )
             
+            # Send cancellation email and create in-app notification
+            try:
+                from .notifications import NotificationService, InAppNotification
+                NotificationService.send_booking_cancellation_email(booking)
+                InAppNotification.notify_booking_cancelled(booking)
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Failed to send cancellation notification for booking {booking.id}: {e}")
+                # Don't fail the cancellation if notification fails
+            
             # Broadcast real-time update
             from .realtime_service import RealTimeService
             RealTimeService.broadcast_availability_update(booking.game_slot.id)
@@ -507,6 +608,75 @@ class BookingService:
             return True
     
     @staticmethod
+    def get_booking_type_restrictions_fast(game_slot, availability):
+        """
+        OPTIMIZED: Get restrictions WITHOUT expiring (expiration done in view)
+        """
+        from django.utils import timezone
+        
+        # Get pending reservations count
+        reserved_spots = availability.get_reserved_spots_count()
+        truly_available = availability.get_truly_available_spots()
+        
+        # Check if there are any pending private bookings (use prefetched data)
+        has_pending_private = any(
+            b.status == 'PENDING' and 
+            b.booking_type == 'PRIVATE' and 
+            b.reservation_expires_at > timezone.now()
+            for b in game_slot.bookings.all()
+        )
+        
+        # Check if there are any pending shared bookings (use prefetched data)
+        has_pending_shared = any(
+            b.status == 'PENDING' and 
+            b.booking_type == 'SHARED' and 
+            b.reservation_expires_at > timezone.now()
+            for b in game_slot.bookings.all()
+        )
+        
+        # Private booking is blocked if there are any pending private OR shared bookings
+        can_book_private = availability.can_book_private and not has_pending_private and not has_pending_shared
+        
+        # Shared booking is blocked if there are any pending private bookings
+        can_book_shared = availability.can_book_shared and not has_pending_private
+        
+        restrictions = {
+            'can_book_private': can_book_private,
+            'can_book_shared': can_book_shared,
+            'is_private_locked': availability.is_private_booked or has_pending_private or has_pending_shared,
+            'is_shared_locked': availability.booked_spots > 0 and not availability.is_private_booked,
+            'available_spots': truly_available,
+            'booked_spots': availability.booked_spots,
+            'reserved_spots': reserved_spots,
+            'truly_available_spots': truly_available,
+            'total_capacity': availability.total_capacity,
+            'has_pending_reservations': reserved_spots > 0,
+            'has_pending_private': has_pending_private,
+            'has_pending_shared': has_pending_shared
+        }
+        
+        # Add restriction reasons
+        if not restrictions['can_book_private']:
+            if has_pending_private:
+                restrictions['private_restriction_reason'] = "Someone is currently completing payment for private booking"
+            elif has_pending_shared:
+                restrictions['private_restriction_reason'] = "Someone is currently completing payment for shared booking"
+            elif restrictions['is_shared_locked']:
+                restrictions['private_restriction_reason'] = f"Slot has {availability.booked_spots} shared bookings"
+            else:
+                restrictions['private_restriction_reason'] = "Slot is fully booked"
+        
+        if not restrictions['can_book_shared']:
+            if has_pending_private:
+                restrictions['shared_restriction_reason'] = "Someone is currently completing payment for private booking"
+            elif restrictions['is_private_locked']:
+                restrictions['shared_restriction_reason'] = "Slot is privately booked"
+            else:
+                restrictions['shared_restriction_reason'] = "No spots available"
+        
+        return restrictions
+    
+    @staticmethod
     def get_booking_type_restrictions(game_slot):
         """
         Get current booking type restrictions for a slot
@@ -536,23 +706,45 @@ class BookingService:
                 reservation_expires_at__gt=timezone.now()
             ).exists()
             
+            # Check if there are any pending shared bookings
+            has_pending_shared = game_slot.bookings.filter(
+                status='PENDING',
+                booking_type='SHARED',
+                reservation_expires_at__gt=timezone.now()
+            ).exists()
+            
+            # Private booking is blocked if:
+            # 1. There are any confirmed shared bookings (availability.can_book_private checks this)
+            # 2. There are any pending private bookings
+            # 3. There are any pending shared bookings (NEW FIX)
+            can_book_private = availability.can_book_private and not has_pending_private and not has_pending_shared
+            
+            # Shared booking is blocked if:
+            # 1. There's a confirmed private booking
+            # 2. There are any pending private bookings
+            can_book_shared = availability.can_book_shared and not has_pending_private
+            
             restrictions = {
-                'can_book_private': availability.can_book_private and not has_pending_private,
-                'can_book_shared': availability.can_book_shared and not has_pending_private,
-                'is_private_locked': availability.is_private_booked or has_pending_private,
+                'can_book_private': can_book_private,
+                'can_book_shared': can_book_shared,
+                'is_private_locked': availability.is_private_booked or has_pending_private or has_pending_shared,
                 'is_shared_locked': availability.booked_spots > 0 and not availability.is_private_booked,
                 'available_spots': truly_available,  # FIXED: Use truly_available instead of availability.available_spots
                 'booked_spots': availability.booked_spots,
                 'reserved_spots': reserved_spots,
                 'truly_available_spots': truly_available,
                 'total_capacity': availability.total_capacity,
-                'has_pending_reservations': reserved_spots > 0
+                'has_pending_reservations': reserved_spots > 0,
+                'has_pending_private': has_pending_private,
+                'has_pending_shared': has_pending_shared
             }
             
             # Add restriction reasons
             if not restrictions['can_book_private']:
                 if has_pending_private:
                     restrictions['private_restriction_reason'] = "Someone is currently completing payment for private booking"
+                elif has_pending_shared:
+                    restrictions['private_restriction_reason'] = "Someone is currently completing payment for shared booking"
                 elif restrictions['is_shared_locked']:
                     restrictions['private_restriction_reason'] = f"Slot has {availability.booked_spots} shared bookings"
                 else:
@@ -595,3 +787,103 @@ class BookingService:
         
         for booking in expired_bookings:
             booking.check_and_expire_reservation()
+
+def auto_update_booking_status(booking):
+    """
+    Helper function to automatically update a single booking's status based on current time.
+    
+    Handles all status transitions:
+    - PENDING → EXPIRED (payment reservation expired)
+    - CONFIRMED → IN_PROGRESS (start time reached)
+    - IN_PROGRESS → COMPLETED (end time passed)
+    - CONFIRMED → NO_SHOW (end time passed without verification)
+    
+    Args:
+        booking: Booking instance to check and update
+        
+    Returns:
+        tuple: (status_changed: bool, old_status: str, new_status: str)
+    """
+    now = timezone.now()
+    old_status = booking.status
+    status_changed = False
+    
+    # 1. Check for EXPIRED status (PENDING bookings with expired reservation)
+    if (booking.status == 'PENDING' and 
+        booking.reservation_expires_at and 
+        now >= booking.reservation_expires_at and
+        not booking.is_reservation_expired):
+        booking.status = 'EXPIRED'
+        booking.is_reservation_expired = True
+        booking.save(update_fields=['status', 'is_reservation_expired'])
+        status_changed = True
+    
+    # Get start and end times
+    start_dt = booking.start_datetime
+    end_dt = booking.end_datetime
+    
+    if start_dt and end_dt:
+        # 2. Auto-start confirmed bookings (CONFIRMED → IN_PROGRESS)
+        if booking.status == 'CONFIRMED' and start_dt <= now < end_dt:
+            booking.status = 'IN_PROGRESS'
+            booking.save(update_fields=['status'])
+            status_changed = True
+        
+        # 3. Auto-complete in-progress bookings (IN_PROGRESS → COMPLETED)
+        elif booking.status == 'IN_PROGRESS' and now >= end_dt:
+            booking.status = 'COMPLETED'
+            booking.save(update_fields=['status'])
+            status_changed = True
+        
+        # 4. Mark as NO_SHOW if confirmed but time passed and not verified (CONFIRMED → NO_SHOW)
+        elif booking.status == 'CONFIRMED' and now >= end_dt and not booking.is_verified:
+            booking.status = 'NO_SHOW'
+            booking.save(update_fields=['status'])
+            status_changed = True
+    
+    return status_changed, old_status, booking.status
+
+
+def auto_update_bookings_status(bookings_queryset=None):
+    """
+    Helper function to automatically update multiple bookings' statuses.
+    
+    Args:
+        bookings_queryset: QuerySet of bookings to update. If None, updates all active bookings.
+        
+    Returns:
+        dict: Summary of status changes
+    """
+    if bookings_queryset is None:
+        # Default: check all bookings that might need status updates
+        bookings_queryset = Booking.objects.filter(
+            status__in=['PENDING', 'CONFIRMED', 'IN_PROGRESS']
+        ).select_related('game_slot')
+    
+    summary = {
+        'expired': 0,
+        'started': 0,
+        'completed': 0,
+        'no_show': 0,
+        'total_checked': 0,
+        'total_updated': 0
+    }
+    
+    for booking in bookings_queryset:
+        summary['total_checked'] += 1
+        status_changed, old_status, new_status = auto_update_booking_status(booking)
+        
+        if status_changed:
+            summary['total_updated'] += 1
+            
+            # Track specific transitions
+            if new_status == 'EXPIRED':
+                summary['expired'] += 1
+            elif new_status == 'IN_PROGRESS':
+                summary['started'] += 1
+            elif new_status == 'COMPLETED':
+                summary['completed'] += 1
+            elif new_status == 'NO_SHOW':
+                summary['no_show'] += 1
+    
+    return summary
