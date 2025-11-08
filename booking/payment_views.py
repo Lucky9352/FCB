@@ -243,8 +243,15 @@ def verify_razorpay_payment(request):
         else:
             logger.info(f"Telegram notification already sent for booking {booking_id}")
         
-        # TODO: Send confirmation email/SMS with QR code
-        # TODO: Update slot availability
+        # Send confirmation email and create in-app notification
+        try:
+            from booking.notifications import NotificationService, InAppNotification
+            NotificationService.send_booking_confirmation_email(booking)
+            InAppNotification.notify_booking_confirmed(booking)
+            logger.info(f"Confirmation email and notification sent for booking {booking_id}")
+        except Exception as e:
+            logger.error(f"Failed to send confirmation email/notification for booking {booking_id}: {e}")
+            # Don't fail the payment if notification fails
         
         return JsonResponse({
             'success': True,

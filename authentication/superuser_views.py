@@ -58,8 +58,7 @@ class SuperuserLoginView(LoginView):
 
 @tapnex_superuser_required
 def superuser_dashboard(request):
-    """Main superuser dashboard - replaces Django admin homepage"""
-    
+    """Main superuser dashboard - replaces Django admin homepage - OPTIMIZED FOR REAL-TIME"""
     # Get or create TapNex superuser profile
     tapnex_user, created = TapNexSuperuser.objects.get_or_create(
         user=request.user,
@@ -70,7 +69,7 @@ def superuser_dashboard(request):
         }
     )
     
-    # Quick stats overview
+    # Real-time stats (NO CACHE for instant updates)
     stats = {
         'total_users': User.objects.count(),
         'total_customers': Customer.objects.count(),
@@ -84,17 +83,23 @@ def superuser_dashboard(request):
         'pending_bookings': Booking.objects.filter(status='PENDING').count(),
     }
     
-    # Revenue metrics
+    # Revenue metrics (real-time)
     real_time_metrics = RevenueTracker.get_real_time_metrics()
     
-    # Recent activity
+    # Recent activity (optimized with select_related)
     recent_bookings = Booking.objects.select_related(
         'customer__user', 'game'
+    ).only(
+        'id', 'created_at', 'status', 'total_amount',
+        'customer__user__first_name', 'customer__user__last_name',
+        'game__name'
     ).order_by('-created_at')[:10]
     
-    recent_users = User.objects.order_by('-date_joined')[:10]
+    recent_users = User.objects.only(
+        'id', 'username', 'email', 'date_joined', 'is_active'
+    ).order_by('-date_joined')[:10]
     
-    # System alerts
+    # System alerts (real-time)
     alerts = []
     if stats['pending_bookings'] > 5:
         alerts.append({
@@ -109,7 +114,7 @@ def superuser_dashboard(request):
             'message': f"{inactive_games} games are currently inactive"
         })
     
-    # Get cafe owner if exists
+    # Get cafe owner if exists (real-time)
     try:
         cafe_owner = CafeOwner.objects.select_related('user').first()
     except CafeOwner.DoesNotExist:
@@ -246,7 +251,7 @@ def user_action(request, user_id):
 
 @tapnex_superuser_required
 def manage_bookings(request):
-    """Booking management - view, edit, cancel bookings"""
+    """Booking management - view, edit, cancel bookings - OPTIMIZED"""
     
     # Filters
     status_filter = request.GET.get('status', 'all')
@@ -255,9 +260,13 @@ def manage_bookings(request):
     date_from = request.GET.get('date_from')
     date_to = request.GET.get('date_to')
     
-    # Base queryset
+    # Optimized base queryset with select_related and only()
     bookings = Booking.objects.select_related(
         'customer__user', 'game', 'game_slot'
+    ).only(
+        'id', 'created_at', 'status', 'booking_type', 'total_amount', 'payment_status',
+        'customer__user__username', 'customer__user__email', 'customer__user__first_name',
+        'game__name', 'game_slot__date', 'game_slot__start_time'
     ).order_by('-created_at')
     
     # Apply filters
@@ -272,7 +281,7 @@ def manage_bookings(request):
             Q(customer__user__username__icontains=search_query) |
             Q(customer__user__email__icontains=search_query) |
             Q(game__name__icontains=search_query) |
-            Q(booking_id__icontains=search_query)
+            Q(id__icontains=search_query)
         )
     
     if date_from:
@@ -286,11 +295,12 @@ def manage_bookings(request):
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
     
-    # Summary stats
-    summary = {
-        'total': bookings.count(),
-        'total_revenue': bookings.aggregate(Sum('total_amount'))['total_amount__sum'] or 0,
-    }
+    # Summary stats (use aggregate on filtered queryset)
+    summary = bookings.aggregate(
+        total=Count('id'),
+        total_revenue=Sum('total_amount')
+    )
+    summary['total_revenue'] = summary['total_revenue'] or 0
     
     context = {
         'bookings': page_obj,

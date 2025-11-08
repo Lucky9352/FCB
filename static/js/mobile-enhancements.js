@@ -274,11 +274,6 @@
             setTimeout(function () {
                 const perfData = window.performance.timing;
                 const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
-
-                // Log performance for debugging (remove in production)
-                if (pageLoadTime > 3000) {
-                    console.warn('Page load time is slow:', pageLoadTime + 'ms');
-                }
             }, 0);
         });
     }
@@ -306,17 +301,6 @@
     document.addEventListener('DOMContentLoaded', function () {
         // Add loaded class to body
         document.body.classList.add('mobile-enhanced');
-
-        // Log mobile detection
-        console.log('Mobile enhancements loaded:', {
-            isMobile,
-            isIOS,
-            isAndroid,
-            viewport: {
-                width: window.innerWidth,
-                height: window.innerHeight
-            }
-        });
     });
 
 })();

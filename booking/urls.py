@@ -8,12 +8,6 @@ from . import api_realtime
 app_name = 'booking'
 
 urlpatterns = [
-    # OLD BOOKING SYSTEM (Backward Compatibility)
-    path('select/', views.booking_selection, name='selection'),
-    path('create/', views.booking_create, name='create'),
-    path('confirm/<uuid:booking_id>/', views.booking_confirm, name='confirm'),
-    path('success/<uuid:booking_id>/', views.booking_success, name='success'),
-    
     # NEW HYBRID BOOKING SYSTEM
     path('games/', views.game_selection, name='game_selection'),
     path('games/<uuid:game_id>/', views.game_detail, name='game_detail'),
@@ -50,10 +44,8 @@ urlpatterns = [
     
     # AJAX endpoints
     path('api/availability/', views.get_availability, name='get_availability'),
+    path('api/game-availability/<uuid:game_id>/', views.get_game_availability, name='get_game_availability'),
     path('api/slot-availability/<int:game_slot_id>/', views.get_slot_availability, name='get_slot_availability'),
-    
-    # Test page
-    path('test-api/', lambda request: render(request, 'booking/test_api.html'), name='test_api'),
     
     # Real-time API endpoints
     path('api/stations/status/', api_realtime.station_status_api, name='station_status_api'),

@@ -18,7 +18,6 @@ urlpatterns = [
     # Common authentication
     path('logout/', views.CustomLogoutView.as_view(), name='logout'),
     path('profile/', views.profile_redirect_view, name='profile_redirect'),
-    path('debug-user/', views.debug_user_view, name='debug_user'),
     path('update-phone/', views.update_phone_number, name='update_phone'),
     
     # Dashboards

@@ -235,7 +235,6 @@
       color: white;
       padding: 1rem 1.5rem;
       border-radius: 0.5rem;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
       z-index: 50;
       animation: slideInRight 0.5s ease-out;
     }
@@ -260,7 +259,6 @@
         padding: 1.5rem;
         border-radius: 1rem;
         display: inline-block;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     }
 
     .qr-code-container img {
@@ -273,6 +271,153 @@
     button, .btn, a.btn, a[class*="btn"] {
         position: relative;
         z-index: 10;
+    }
+
+    /* Mobile Optimizations */
+    @media (max-width: 768px) {
+        /* Slow down all animations on mobile */
+        .float-animation {
+            animation: float 8s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .animate-pulse-slow {
+            animation: pulse 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .gradient-orb {
+            animation: floatOrb 40s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .shimmer-effect {
+            animation: shimmer 4s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .confetti {
+            animation: confetti-fall 5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        /* Reduce animation intensity on mobile */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        .success-card {
+            padding: 1.5rem;
+        }
+
+        .success-card h1 {
+            font-size: 2rem !important;
+        }
+
+        .success-card p {
+            font-size: 1rem;
+        }
+
+        .detail-card {
+            padding: 1.25rem;
+        }
+
+        .detail-card h2 {
+            font-size: 1.25rem !important;
+        }
+
+        .qr-code-container {
+            padding: 1rem;
+            max-width: 100%;
+        }
+
+        .qr-code-container img {
+            max-width: 220px;
+            width: 100%;
+        }
+
+        .info-box {
+            padding: 0.875rem !important;
+        }
+
+        .info-box .icon-box {
+            width: 2.5rem !important;
+            height: 2.5rem !important;
+        }
+
+        .info-box .text-2xl {
+            font-size: 1.125rem !important;
+        }
+
+        .info-box span {
+            font-size: 0.75rem !important;
+        }
+
+        .booking-id {
+            font-size: 0.75rem !important;
+        }
+
+        .game-name {
+            font-size: 0.95rem !important;
+        }
+
+        .date-text {
+            font-size: 0.875rem !important;
+        }
+
+        .time-text {
+            font-size: 0.75rem !important;
+        }
+
+        .amount-text {
+            font-size: 1.5rem !important;
+        }
+
+        /* How to Enter section mobile optimization */
+        .step-item {
+            padding: 1rem !important;
+        }
+
+        .step-item h3 {
+            font-size: 0.95rem !important;
+        }
+
+        .step-item p {
+            font-size: 0.8rem !important;
+            line-height: 1.4;
+        }
+
+        .step-item .w-10 {
+            width: 2.25rem;
+            height: 2.25rem;
+            font-size: 0.875rem;
+        }
+
+        /* Button optimizations */
+        .px-8 {
+            padding-left: 1.5rem !important;
+            padding-right: 1.5rem !important;
+        }
+
+        .py-4 {
+            padding-top: 0.875rem !important;
+            padding-bottom: 0.875rem !important;
+        }
+
+        /* Contact section mobile */
+        .grid-cols-1.md\\:grid-cols-3 {
+            gap: 1rem;
+        }
+
+        .grid-cols-1.md\\:grid-cols-3 > div {
+            padding: 0.875rem !important;
+        }
+
+        .grid-cols-1.md\\:grid-cols-3 p {
+            font-size: 0.875rem;
+        }
     }
 
     @media print {
@@ -380,46 +525,46 @@
                     <h2 class="text-2xl font-black text-white">Booking Details</h2>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div class="info-box rounded-2xl p-5" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.2);">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="info-box rounded-2xl p-4" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.2);">
                         <div class="flex items-center gap-3 mb-3">
-                            <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgba(102, 126, 234, 0.2);">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center icon-box" style="background: rgba(102, 126, 234, 0.2);">
                                 <i class="bi bi-hash text-2xl" style="color: #818cf8;"></i>
                             </div>
                             <span class="text-sm font-semibold uppercase tracking-wide text-gray-400">Booking ID</span>
                         </div>
-                        <p class="text-white font-bold text-base tracking-wide" style="font-family: 'Courier New', monospace; word-break: break-all;">#{{ booking.id }}</p>
+                        <p class="text-white font-bold text-base tracking-wide booking-id" style="font-family: 'Courier New', monospace; word-break: break-all;">#{{ booking.id }}</p>
                     </div>
 
-                    <div class="info-box rounded-2xl p-5" style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2);">
+                    <div class="info-box rounded-2xl p-4" style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2);">
                         <div class="flex items-center gap-3 mb-3">
-                            <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgba(168, 85, 247, 0.2);">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center icon-box" style="background: rgba(168, 85, 247, 0.2);">
                                 <i class="bi bi-controller text-2xl" style="color: #c084fc;"></i>
                             </div>
                             <span class="text-sm font-semibold uppercase tracking-wide text-gray-400">Game</span>
                         </div>
-                        <p class="text-white font-bold text-lg">{{ booking.game.name }}</p>
+                        <p class="text-white font-bold text-lg game-name">{{ booking.game.name }}</p>
                     </div>
 
-                    <div class="info-box rounded-2xl p-5" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+                    <div class="info-box rounded-2xl p-4" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
                         <div class="flex items-center gap-3 mb-3">
-                            <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgba(16, 185, 129, 0.2);">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center icon-box" style="background: rgba(16, 185, 129, 0.2);">
                                 <i class="bi bi-calendar-event text-2xl" style="color: #34d399;"></i>
                             </div>
                             <span class="text-sm font-semibold uppercase tracking-wide text-gray-400">Date & Time</span>
                         </div>
-                        <p class="text-white font-bold text-base mb-1">{{ booking.game_slot.date|date:"M d, Y" }}</p>
-                        <p class="text-gray-300 text-sm">{{ booking.game_slot.start_time|time:"h:i A" }} - {{ booking.game_slot.end_time|time:"h:i A" }}</p>
+                        <p class="text-white font-bold text-base mb-1 date-text">{{ booking.game_slot.date|date:"M d, Y" }}</p>
+                        <p class="text-gray-300 text-sm time-text">{{ booking.game_slot.start_time|time:"h:i A" }} - {{ booking.game_slot.end_time|time:"h:i A" }}</p>
                     </div>
 
-                    <div class="info-box rounded-2xl p-5" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
+                    <div class="info-box rounded-2xl p-4" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
                         <div class="flex items-center gap-3 mb-3">
-                            <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgba(245, 158, 11, 0.2);">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center icon-box" style="background: rgba(245, 158, 11, 0.2);">
                                 <i class="bi bi-cash-coin text-2xl" style="color: #fbbf24;"></i>
                             </div>
                             <span class="text-sm font-semibold uppercase tracking-wide text-gray-400">Total Paid</span>
                         </div>
-                        <p class="text-white font-black text-2xl" style="color: #fbbf24;">₹{{ booking.total_amount|floatformat:2 }}</p>
+                        <p class="text-white font-black text-2xl amount-text" style="color: #fbbf24;">₹{{ booking.total_amount|floatformat:2 }}</p>
                     </div>
                 </div>
             </div>
@@ -434,41 +579,41 @@
                 </div>
 
                 <div class="space-y-4">
-                    <div class="flex items-start space-x-4 p-4 rounded-xl" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.2);">
+                    <div class="flex items-start space-x-4 p-4 rounded-xl step-item" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.2);">
                         <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
                             <span class="text-white font-bold">1</span>
                         </div>
-                        <div>
+                        <div class="flex-1">
                             <h3 class="text-white font-bold mb-1">Save Your QR Code</h3>
                             <p class="text-gray-300 text-sm">Download or screenshot the QR code above for easy access at the venue.</p>
                         </div>
                     </div>
 
-                    <div class="flex items-start space-x-4 p-4 rounded-xl" style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2);">
+                    <div class="flex items-start space-x-4 p-4 rounded-xl step-item" style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2);">
                         <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
                             <span class="text-white font-bold">2</span>
                         </div>
-                        <div>
+                        <div class="flex-1">
                             <h3 class="text-white font-bold mb-1">Arrive on Time</h3>
                             <p class="text-gray-300 text-sm">Please arrive 5-10 minutes before your session starts.</p>
                         </div>
                     </div>
 
-                    <div class="flex items-start space-x-4 p-4 rounded-xl" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+                    <div class="flex items-start space-x-4 p-4 rounded-xl step-item" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
                         <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
                             <span class="text-white font-bold">3</span>
                         </div>
-                        <div>
+                        <div class="flex-1">
                             <h3 class="text-white font-bold mb-1">Show QR at Reception</h3>
                             <p class="text-gray-300 text-sm">Our staff will scan your QR code to verify your booking and grant entry.</p>
                         </div>
                     </div>
 
-                    <div class="flex items-start space-x-4 p-4 rounded-xl" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
+                    <div class="flex items-start space-x-4 p-4 rounded-xl step-item" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
                         <div class="w-10 h-10 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
                             <span class="text-white font-bold">4</span>
                         </div>
-                        <div>
+                        <div class="flex-1">
                             <h3 class="text-white font-bold mb-1">Enjoy Your Session!</h3>
                             <p class="text-gray-300 text-sm">Once verified, you'll be directed to your gaming station. Have fun!</p>
                         </div>
@@ -480,7 +625,7 @@
 
       <!-- Action Buttons -->
       <div class="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up" style="animation-delay: 0.6s;">
-        <a href="{% url 'booking:my_bookings' %}" class="px-8 py-4 rounded-xl font-bold transition-all duration-200 transform hover:scale-105 text-center" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);">
+        <a href="{% url 'booking:my_bookings' %}" class="px-8 py-4 rounded-xl font-bold transition-all duration-200 transform hover:scale-105 text-center" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
           <div class="flex items-center justify-center space-x-2">
             <i class="bi bi-calendar-check text-xl"></i>
             <span>View My Bookings</span>

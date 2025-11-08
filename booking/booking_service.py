@@ -414,6 +414,17 @@ class BookingService:
                 reason='Cancelled by customer'
             )
             
+            # Send cancellation email and create in-app notification
+            try:
+                from .notifications import NotificationService, InAppNotification
+                NotificationService.send_booking_cancellation_email(booking)
+                InAppNotification.notify_booking_cancelled(booking)
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Failed to send cancellation notification for booking {booking.id}: {e}")
+                # Don't fail the cancellation if notification fails
+            
             # Broadcast real-time update
             from .realtime_service import RealTimeService
             RealTimeService.broadcast_availability_update(booking.game_slot.id)
@@ -776,3 +787,103 @@ class BookingService:
         
         for booking in expired_bookings:
             booking.check_and_expire_reservation()
+
+def auto_update_booking_status(booking):
+    """
+    Helper function to automatically update a single booking's status based on current time.
+    
+    Handles all status transitions:
+    - PENDING → EXPIRED (payment reservation expired)
+    - CONFIRMED → IN_PROGRESS (start time reached)
+    - IN_PROGRESS → COMPLETED (end time passed)
+    - CONFIRMED → NO_SHOW (end time passed without verification)
+    
+    Args:
+        booking: Booking instance to check and update
+        
+    Returns:
+        tuple: (status_changed: bool, old_status: str, new_status: str)
+    """
+    now = timezone.now()
+    old_status = booking.status
+    status_changed = False
+    
+    # 1. Check for EXPIRED status (PENDING bookings with expired reservation)
+    if (booking.status == 'PENDING' and 
+        booking.reservation_expires_at and 
+        now >= booking.reservation_expires_at and
+        not booking.is_reservation_expired):
+        booking.status = 'EXPIRED'
+        booking.is_reservation_expired = True
+        booking.save(update_fields=['status', 'is_reservation_expired'])
+        status_changed = True
+    
+    # Get start and end times
+    start_dt = booking.start_datetime
+    end_dt = booking.end_datetime
+    
+    if start_dt and end_dt:
+        # 2. Auto-start confirmed bookings (CONFIRMED → IN_PROGRESS)
+        if booking.status == 'CONFIRMED' and start_dt <= now < end_dt:
+            booking.status = 'IN_PROGRESS'
+            booking.save(update_fields=['status'])
+            status_changed = True
+        
+        # 3. Auto-complete in-progress bookings (IN_PROGRESS → COMPLETED)
+        elif booking.status == 'IN_PROGRESS' and now >= end_dt:
+            booking.status = 'COMPLETED'
+            booking.save(update_fields=['status'])
+            status_changed = True
+        
+        # 4. Mark as NO_SHOW if confirmed but time passed and not verified (CONFIRMED → NO_SHOW)
+        elif booking.status == 'CONFIRMED' and now >= end_dt and not booking.is_verified:
+            booking.status = 'NO_SHOW'
+            booking.save(update_fields=['status'])
+            status_changed = True
+    
+    return status_changed, old_status, booking.status
+
+
+def auto_update_bookings_status(bookings_queryset=None):
+    """
+    Helper function to automatically update multiple bookings' statuses.
+    
+    Args:
+        bookings_queryset: QuerySet of bookings to update. If None, updates all active bookings.
+        
+    Returns:
+        dict: Summary of status changes
+    """
+    if bookings_queryset is None:
+        # Default: check all bookings that might need status updates
+        bookings_queryset = Booking.objects.filter(
+            status__in=['PENDING', 'CONFIRMED', 'IN_PROGRESS']
+        ).select_related('game_slot')
+    
+    summary = {
+        'expired': 0,
+        'started': 0,
+        'completed': 0,
+        'no_show': 0,
+        'total_checked': 0,
+        'total_updated': 0
+    }
+    
+    for booking in bookings_queryset:
+        summary['total_checked'] += 1
+        status_changed, old_status, new_status = auto_update_booking_status(booking)
+        
+        if status_changed:
+            summary['total_updated'] += 1
+            
+            # Track specific transitions
+            if new_status == 'EXPIRED':
+                summary['expired'] += 1
+            elif new_status == 'IN_PROGRESS':
+                summary['started'] += 1
+            elif new_status == 'COMPLETED':
+                summary['completed'] += 1
+            elif new_status == 'NO_SHOW':
+                summary['no_show'] += 1
+    
+    return summary

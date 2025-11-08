@@ -47,7 +47,6 @@
     .shipping-section:hover {
       border-color: rgba(168, 237, 234, 0.4);
       transform: translateY(-2px);
-      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
     }
     
     .info-box {
@@ -84,7 +83,6 @@
     .info-box:hover {
       border-color: rgba(0, 212, 255, 0.6);
       transform: scale(1.02);
-      box-shadow: 0 15px 40px rgba(0, 212, 255, 0.2);
     }
     
     .text-light-gray {
@@ -109,7 +107,6 @@
       background: rgba(0, 212, 255, 0.15);
       border-color: rgba(0, 212, 255, 0.5);
       transform: translateY(-5px);
-      box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
     }
     
     .service-card i {
@@ -131,7 +128,6 @@
       color: white;
       font-weight: bold;
       font-size: 1.1rem;
-      box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3);
       transition: all 0.3s ease;
       margin-bottom: 1.5rem;
     }
@@ -149,12 +145,10 @@
       background: rgba(168, 237, 234, 0.08);
       border-color: rgba(168, 237, 234, 0.4);
       transform: translateX(5px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
     }
     
     .step-item:hover .step-number {
       transform: scale(1.05);
-      box-shadow: 0 6px 20px rgba(0, 212, 170, 0.5);
     }
     
     .step-content {
@@ -191,7 +185,6 @@
       background: rgba(168, 237, 234, 0.15);
       border-color: rgba(168, 237, 234, 0.5);
       transform: translateY(-5px);
-      box-shadow: 0 10px 30px rgba(168, 237, 234, 0.2);
     }
     
     .digital-card i {
@@ -213,7 +206,6 @@
     
     .location-card:hover {
       border-color: rgba(168, 237, 234, 0.6);
-      box-shadow: 0 15px 40px rgba(168, 237, 234, 0.25);
       transform: translateY(-3px);
     }
     
@@ -241,7 +233,6 @@
       align-items: center;
       justify-content: center;
       margin-bottom: 1.5rem;
-      box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3);
     }
     
     .section-icon i {
@@ -275,7 +266,35 @@
     
     .hero-icon-wrapper:hover {
       transform: scale(1.1);
-      box-shadow: 0 0 30px rgba(168, 237, 234, 0.4);
+    }
+
+    /* Mobile Animation Optimizations */
+    @media (max-width: 768px) {
+      @keyframes pulse-glow {
+        0%, 100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.8;
+        }
+      }
+
+      @keyframes float {
+        0%, 100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-5px);
+        }
+      }
+
+      .shipping-hero::before {
+        animation: pulse-glow 15s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+      }
+
+      .shipping-icon {
+        animation: float 8s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+      }
     }
   </style>
 {% endblock %}

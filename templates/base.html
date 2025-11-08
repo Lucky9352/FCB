@@ -163,7 +163,6 @@
         .btn-sign-in:hover {
             background: #4338ca !important;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
         }
         
         .btn-sign-in i {
@@ -187,7 +186,6 @@
         
         /* Mobile menu improvements */
         .mobile-menu {
-            box-shadow: -8px 0 32px rgba(0, 0, 0, 0.6);
         }
         
         @media (max-width: 640px) {
@@ -316,7 +314,7 @@
                             <a href="{% url 'authentication:tapnex_dashboard' %}" class="nav-link">
                                 Dashboard
                             </a>
-                        {% elif user.customer %}
+                        {% elif user.customer_profile %}
                             <a href="{% url 'authentication:customer_dashboard' %}" class="nav-link">
                                 Dashboard
                             </a>
@@ -442,7 +440,7 @@
                                 <i class="bi bi-speedometer2 text-lg text-primary-400"></i>
                                 <span>Dashboard</span>
                             </a>
-                        {% elif user.customer %}
+                        {% elif user.customer_profile %}
                             <a href="{% url 'authentication:customer_dashboard' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium">
                                 <i class="bi bi-grid-fill text-lg text-primary-400"></i>
                                 <span>Dashboard</span>

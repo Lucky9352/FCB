@@ -529,6 +529,7 @@ class Booking(models.Model):
             models.Index(fields=['status', 'reservation_expires_at'], name='booking_status_expires_idx'),
             models.Index(fields=['customer', 'status'], name='booking_customer_status_idx'),
             models.Index(fields=['game', 'status'], name='booking_game_status_idx'),
+            models.Index(fields=['customer', '-created_at'], name='booking_customer_created_idx'),
         ]
     
     def __str__(self):

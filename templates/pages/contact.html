@@ -47,7 +47,6 @@
     
     .contact-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
       border-color: rgba(168, 237, 234, 0.4);
     }
     
@@ -125,7 +124,6 @@
       transform: translateY(-5px);
       border-color: rgba(168, 237, 234, 0.6);
       background: linear-gradient(135deg, rgba(17, 24, 39, 0.9), rgba(26, 32, 46, 0.9));
-      box-shadow: 0 8px 25px rgba(168, 237, 234, 0.2);
     }
     
     .quick-link-card h5 {
@@ -172,7 +170,6 @@
 
     .faq-item:hover {
       border-color: rgba(168, 237, 234, 0.4);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
       transform: translateY(-2px);
     }
 
@@ -214,7 +211,6 @@
 
     .faq-item.active .faq-icon {
       transform: scale(1.1);
-      box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
     }
 
     .faq-icon i {
@@ -306,6 +302,20 @@
 
       .faq-question-text {
         font-size: 1rem;
+      }
+
+      /* Slow down animations on mobile */
+      @keyframes pulse-glow {
+        0%, 100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.8;
+        }
+      }
+
+      .contact-hero::before {
+        animation: pulse-glow 15s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
       }
 
       .faq-answer-content {

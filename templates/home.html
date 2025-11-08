@@ -138,23 +138,184 @@
     
     /* Adjust game card for mobile */
     .game-card {
-      min-height: 350px;
+      min-height: 320px !important;
     }
     
     .game-card-image {
       height: 100%;
-      min-height: 350px;
+      min-height: 320px !important;
       object-fit: cover;
     }
     
     /* Reduce padding on mobile */
     .feature-card {
-      padding: 1.5rem;
+      padding: 1.25rem !important;
     }
     
     .game-card-content {
-      padding: 1.25rem;
+      padding: 1rem !important;
       background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.4) 30%, rgba(0, 0, 0, 0.75) 100%);
+    }
+    
+    /* Hero Section Mobile */
+    .min-h-screen {
+      padding-top: 2rem !important;
+      padding-bottom: 2rem !important;
+    }
+    
+    .container.mx-auto {
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+    
+    /* Status Badge Mobile */
+    .status-badge {
+      padding: 0.5rem 1rem !important;
+      font-size: 0.75rem !important;
+    }
+    
+    .status-badge .pulse-dot {
+      width: 6px !important;
+      height: 6px !important;
+    }
+    
+    /* Hero Heading Mobile */
+    h1 .block:first-child {
+      font-size: 1.5rem !important;
+      margin-bottom: 0.5rem !important;
+    }
+    
+    h1 .gradient-text-neon {
+      font-size: 2.25rem !important;
+    }
+    
+    /* Hero Subheading Mobile */
+    .text-lg.sm\:text-xl {
+      font-size: 0.9375rem !important;
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+    
+    /* CTA Buttons Mobile */
+    .btn-xl {
+      padding: 0.75rem 1.25rem !important;
+      font-size: 0.875rem !important;
+    }
+    
+    .btn-xl i {
+      font-size: 0.875rem !important;
+    }
+    
+    /* Trust Badges Mobile */
+    .flex.flex-wrap.justify-center {
+      gap: 1rem !important;
+      font-size: 0.75rem !important;
+    }
+    
+    .flex.flex-wrap.justify-center i {
+      font-size: 0.875rem !important;
+    }
+    
+    /* Section Headers Mobile */
+    h2.text-4xl {
+      font-size: 1.75rem !important;
+    }
+    
+    h2.text-4xl + p {
+      font-size: 0.9375rem !important;
+    }
+    
+    /* Game Card Content Mobile */
+    .game-card-content h3 {
+      font-size: 1.5rem !important;
+      margin-bottom: 0.5rem !important;
+    }
+    
+    .game-card-content p {
+      font-size: 0.875rem !important;
+      margin-bottom: 1rem !important;
+    }
+    
+    .game-card-content .badge {
+      font-size: 0.625rem !important;
+      padding: 0.25rem 0.5rem !important;
+    }
+    
+    .game-card-content .btn {
+      padding: 0.625rem 1rem !important;
+      font-size: 0.8125rem !important;
+    }
+    
+    /* Feature Card Mobile */
+    .feature-card h3 {
+      font-size: 1.25rem !important;
+    }
+    
+    .feature-card p {
+      font-size: 0.875rem !important;
+    }
+    
+    .feature-card ul {
+      font-size: 0.8125rem !important;
+    }
+    
+    .feature-card i.text-5xl {
+      font-size: 2.5rem !important;
+    }
+    
+    /* CTA Card Mobile */
+    .cta-card {
+      padding: 2rem 1.5rem !important;
+    }
+    
+    .cta-card h2 {
+      font-size: 1.75rem !important;
+    }
+    
+    .cta-card p {
+      font-size: 0.9375rem !important;
+    }
+    
+    .cta-card i.text-6xl {
+      font-size: 3rem !important;
+    }
+    
+    /* Scroll Indicator Mobile */
+    .animate-bounce i {
+      font-size: 1.5rem !important;
+    }
+    
+    /* Pool Balls Decoration Mobile */
+    .game-card-image .w-16.h-16 {
+      width: 2.5rem !important;
+      height: 2.5rem !important;
+    }
+    
+    .game-card-image .w-16.h-16 .text-2xl {
+      font-size: 1.25rem !important;
+    }
+    
+    .game-card-image .gap-4 {
+      gap: 0.5rem !important;
+    }
+    
+    /* Table Tennis Paddles Mobile */
+    .game-card-image .w-20.h-24 {
+      width: 3rem !important;
+      height: 3.5rem !important;
+    }
+    
+    .game-card-image .w-12.h-12 {
+      width: 2rem !important;
+      height: 2rem !important;
+    }
+    
+    .game-card-image .gap-8 {
+      gap: 1rem !important;
+    }
+    
+    .game-card-image .gap-6 {
+      gap: 0.75rem !important;
     }
   }
   
@@ -218,7 +379,6 @@
   
   .feature-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 20px 50px rgba(102, 126, 234, 0.2);
   }
   
   .feature-card:hover::before {
@@ -257,7 +417,6 @@
   
   .game-card:hover {
     transform: translateY(-12px);
-    box-shadow: 0 25px 50px rgba(102, 126, 234, 0.3);
   }
   
   .game-card:hover::before {
@@ -321,11 +480,9 @@
   @keyframes pulse {
     0%, 100% {
       opacity: 1;
-      box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7);
     }
     50% {
       opacity: 0.8;
-      box-shadow: 0 0 0 10px rgba(52, 211, 153, 0);
     }
   }
   
@@ -396,22 +553,129 @@
   /* Responsive adjustments */
   @media (max-width: 640px) {
     .gradient-text-neon {
-      font-size: 3rem !important;
+      font-size: 2rem !important;
       line-height: 1.1;
     }
     
+    .game-card {
+      min-height: 280px !important;
+    }
+    
     .game-card-image {
-      height: 250px;
+      min-height: 280px !important;
     }
     
     .feature-card {
-      padding: 1.5rem;
+      padding: 1rem !important;
     }
     
     /* Smaller Forge logo on mobile */
     .float-animation img {
-      height: 7.5rem !important;
-      max-height: 7.5rem !important;
+      height: 6rem !important;
+      max-height: 6rem !important;
+    }
+    
+    /* Hero Section Extra Compact */
+    h1 .block:first-child {
+      font-size: 1.25rem !important;
+    }
+    
+    h1 .gradient-text-neon {
+      font-size: 2rem !important;
+    }
+    
+    /* Buttons Extra Compact */
+    .btn-xl {
+      padding: 0.625rem 1rem !important;
+      font-size: 0.8125rem !important;
+    }
+    
+    /* Section Spacing */
+    .py-24 {
+      padding-top: 3rem !important;
+      padding-bottom: 3rem !important;
+    }
+    
+    /* Game Grid Single Column */
+    .grid.md\:grid-cols-2 {
+      grid-template-columns: 1fr !important;
+      gap: 1.5rem !important;
+    }
+    
+    /* Feature Grid Single Column */
+    .grid.lg\:grid-cols-3 {
+      grid-template-columns: 1fr !important;
+      gap: 1rem !important;
+    }
+  }
+  
+  /* Extra small screens */
+  @media (max-width: 375px) {
+    .gradient-text-neon {
+      font-size: 1.75rem !important;
+    }
+    
+    h1 .block:first-child {
+      font-size: 1.125rem !important;
+    }
+    
+    .game-card {
+      min-height: 260px !important;
+    }
+    
+    .game-card-image {
+      min-height: 260px !important;
+    }
+    
+    .game-card-content {
+      padding: 0.875rem !important;
+    }
+    
+    .game-card-content h3 {
+      font-size: 1.25rem !important;
+    }
+    
+    .feature-card {
+      padding: 0.875rem !important;
+    }
+    
+    .feature-card i.text-5xl {
+      font-size: 2rem !important;
+    }
+    
+    .cta-card {
+      padding: 1.5rem 1rem !important;
+    }
+    
+    .btn-xl {
+      padding: 0.5rem 0.875rem !important;
+      font-size: 0.75rem !important;
+    }
+    
+    .status-badge {
+      padding: 0.375rem 0.75rem !important;
+      font-size: 0.6875rem !important;
+    }
+    
+    /* Pool Balls Extra Small */
+    .game-card-image .w-16.h-16 {
+      width: 2rem !important;
+      height: 2rem !important;
+    }
+    
+    .game-card-image .w-16.h-16 .text-2xl {
+      font-size: 1rem !important;
+    }
+    
+    /* Table Tennis Extra Small */
+    .game-card-image .w-20.h-24 {
+      width: 2.5rem !important;
+      height: 3rem !important;
+    }
+    
+    .game-card-image .w-12.h-12 {
+      width: 1.5rem !important;
+      height: 1.5rem !important;
     }
   }
   
@@ -423,6 +687,35 @@
   @media (max-width: 640px) {
     .float-animation img[alt*="Forge"] {
       max-height: 120px !important;
+    }
+  }
+
+  /* Mobile Animation Optimizations */
+  @media (max-width: 768px) {
+    .float-animation {
+      animation: float 8s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+    }
+
+    .gradient-orb {
+      animation: floatOrb 40s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+    }
+
+    .shimmer-effect {
+      animation: shimmer 4s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.9;
+      }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
     }
   }
 </style>

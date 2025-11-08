@@ -2,7 +2,6 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils import timezone
-from django.core.cache import cache
 from .models import Booking
 import logging
 
@@ -126,7 +125,7 @@ class InAppNotification:
     
     @staticmethod
     def create_notification(user, title, message, notification_type='info', booking=None):
-        """Create an in-app notification"""
+        """Create an in-app notification - REAL-TIME (NO CACHE)"""
         from .models import Notification
         
         notification = Notification.objects.create(
@@ -136,10 +135,6 @@ class InAppNotification:
             notification_type=notification_type,
             booking=booking
         )
-        
-        # Invalidate cache for this user so they see new notification immediately
-        cache_key = f'notifications_user_{user.id}'
-        cache.delete(cache_key)
         
         return notification
     

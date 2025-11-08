@@ -83,13 +83,11 @@
     .slot-card-clickable:hover {
         transform: translateY(-3px);
         border-color: rgba(102, 126, 234, 0.5);
-        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
         background: rgba(30, 41, 59, 0.75);
     }
     
     .slot-card-clickable:active {
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.12);
     }
     
     .slot-card-clickable::before {
@@ -119,38 +117,33 @@
     .slot-card-disabled:hover {
         transform: none;
         border-color: rgba(255, 255, 255, 0.1);
-        box-shadow: none;
     }
     
-    /* Time Filter Buttons */
+    /* Time Filter Buttons - Match Date Tab Style */
     .time-filter-btn {
         position: relative;
-        z-index: 10;
-        padding: 0.625rem 1.25rem;
-        border-radius: 0.75rem;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: white;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        cursor: pointer;
-        transition: all 0.3s ease;
         backdrop-filter: blur(10px);
-    }
-    
-    .time-filter-btn:hover {
-        background: rgba(102, 126, 234, 0.2);
-        border-color: rgba(102, 126, 234, 0.4);
-        transform: translateY(-2px);
+        z-index: 10;
+        cursor: pointer;
     }
     
     .time-filter-btn.active {
-        background: linear-gradient(135deg, #667eea, #a855f7);
-        border-color: #667eea;
+        background: linear-gradient(135deg, #667eea 0%, #a855f7 100%);
+        transform: scale(1.03);
+        color: white;
+    }
+    
+    .time-filter-btn:hover:not(.active) {
+        transform: translateY(-1px);
+        background: rgba(102, 126, 234, 0.1);
+        z-index: 20;
     }
     
     .time-filter-btn i {
-        margin-right: 0.375rem;
+        margin-right: 0.25rem;
+        font-size: 0.75rem;
     }
     
     /* Capacity Dots */
@@ -166,23 +159,19 @@
         height: 10px;
         border-radius: 50%;
         transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     
     .capacity-dot.booked {
         background-color: #ef4444;
-        box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
     }
     
     .capacity-dot.reserved {
         background-color: #f59e0b;
-        box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
         animation: pulse-reserved 2s ease-in-out infinite;
     }
     
     .capacity-dot.available {
         background-color: #10b981;
-        box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
     }
     
     @keyframes pulse-reserved {
@@ -196,18 +185,18 @@
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(10px);
-        z-index: 1;
+        z-index: 10;
     }
     
     .date-tab.active {
         background: linear-gradient(135deg, #667eea 0%, #a855f7 100%);
-        transform: scale(1.05);
+        transform: scale(1.03);
     }
     
     .date-tab:hover:not(.active) {
-        transform: translateY(-2px);
+        transform: translateY(-1px);
         background: rgba(102, 126, 234, 0.1);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        z-index: 20;
     }
     
     .scrollbar-hide {
@@ -307,7 +296,6 @@
     
     .book-btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
     }
     
     .book-btn:hover::after {
@@ -331,7 +319,6 @@
     .book-btn:disabled:hover,
     .btn-disabled:hover {
         transform: none !important;
-        box-shadow: none !important;
     }
     
     /* Spot Selector Button Styles */
@@ -353,7 +340,6 @@
         transform: scale(1.05);
         border-color: #667eea;
         background: rgba(102, 126, 234, 0.1);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
     }
     
     .spot-selector-btn.active {
@@ -361,14 +347,15 @@
         color: white;
         border-color: #667eea;
         transform: scale(1.05);
-        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
     }
     
     /* Modal Styles */
-    #unifiedBookingModal {
+    #unifiedBookingModal,
+    #loginPromptModal {
         z-index: 9999;
         animation: modalFadeIn 0.3s ease-out;
         backdrop-filter: blur(10px);
+        -webkit-overflow-scrolling: touch;
     }
     
     @keyframes modalFadeIn {
@@ -405,23 +392,348 @@
     
     /* Responsive Adjustments */
     @media (max-width: 640px) {
+        /* Slot Cards Mobile */
         .slot-card {
-            padding: 0.875rem;
+            padding: 0.75rem !important;
+            border-radius: 0.75rem !important;
         }
         
+        .slot-card h3,
+        .slot-card .text-lg {
+            font-size: 0.875rem !important;
+        }
+        
+        .slot-card .text-sm {
+            font-size: 0.75rem !important;
+        }
+        
+        .slot-card .text-xs {
+            font-size: 0.6875rem !important;
+        }
+        
+        /* Book Button Mobile */
         .book-btn {
-            padding: 0.5rem 0.875rem;
-            font-size: 0.8125rem;
+            padding: 0.5rem 0.75rem !important;
+            font-size: 0.75rem !important;
+            border-radius: 0.5rem !important;
         }
         
+        .book-btn i {
+            font-size: 0.75rem !important;
+        }
+        
+        /* Capacity Dots Mobile */
         .capacity-dot {
-            width: 8px;
-            height: 8px;
+            width: 7px !important;
+            height: 7px !important;
         }
         
+        .capacity-indicator {
+            gap: 4px !important;
+        }
+        
+        /* Time Filter Buttons */
         .time-filter-btn {
-            padding: 0.5rem 0.875rem;
-            font-size: 0.8125rem;
+            padding: 0.375rem 0.625rem !important;
+            font-size: 0.6875rem !important;
+            min-width: 65px !important;
+        }
+        
+        /* Slot Card Icons */
+        .slot-card i {
+            font-size: 0.875rem !important;
+        }
+        
+        /* Slot Card Badges */
+        .slot-card .rounded-full {
+            padding: 0.25rem 0.5rem !important;
+            font-size: 0.625rem !important;
+        }
+        
+        .time-filter-btn i {
+            margin-right: 0.25rem !important;
+            font-size: 0.625rem !important;
+        }
+        
+        .time-filter-btn .font-bold {
+            font-size: 0.6875rem !important;
+        }
+        
+        /* Time filter container */
+        .mb-6.flex.flex-wrap {
+            gap: 0.5rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        /* Modal Mobile Optimization */
+        #unifiedBookingModal > div,
+        #loginPromptModal > div {
+            max-width: 95vw !important;
+            margin: 0.5rem !important;
+            padding: 1.25rem !important;
+            max-height: 95vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Modal Header */
+        #unifiedBookingModal h3,
+        #loginPromptModal h3 {
+            font-size: 1.25rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        #unifiedBookingModal .text-center.mb-6,
+        #loginPromptModal .text-center.mb-6 {
+            margin-bottom: 1rem !important;
+        }
+        
+        #unifiedBookingModal .text-center p,
+        #loginPromptModal .text-center p {
+            font-size: 0.8125rem !important;
+        }
+        
+        /* Modal Icon */
+        #unifiedBookingModal .w-20,
+        #loginPromptModal .w-20 {
+            width: 3.5rem !important;
+            height: 3.5rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+        
+        #unifiedBookingModal .w-20 i,
+        #loginPromptModal .w-20 i {
+            font-size: 1.75rem !important;
+        }
+        
+        /* Full Table Toggle */
+        #fullTableToggle {
+            padding: 0.75rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        #fullTableToggle .w-12 {
+            width: 2.25rem !important;
+            height: 2.25rem !important;
+        }
+        
+        #fullTableToggle .text-white {
+            font-size: 0.8125rem !important;
+        }
+        
+        #fullTableToggle .text-xs {
+            font-size: 0.6875rem !important;
+        }
+        
+        #fullTablePrice {
+            font-size: 0.9375rem !important;
+        }
+        
+        #fullTableToggle .flex.items-center.gap-3 {
+            gap: 0.625rem !important;
+        }
+        
+        /* Spot Selection Section */
+        #spotSelectionSection {
+            margin-bottom: 1rem !important;
+        }
+        
+        #spotSelectionSection .text-white.font-semibold {
+            font-size: 0.8125rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+        
+        #spotSelectionSection i {
+            font-size: 0.875rem !important;
+        }
+        
+        /* Spot Selection Grid */
+        #spotSelectionGrid {
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 0.5rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        .spot-selector-btn {
+            padding: 0.625rem !important;
+            font-size: 0.8125rem !important;
+            border-radius: 0.625rem !important;
+            min-height: 2.5rem !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        
+        /* Total Price Display */
+        #totalPriceDisplay {
+            font-size: 1.5rem !important;
+        }
+        
+        #bookingTypeDisplay {
+            font-size: 0.6875rem !important;
+        }
+        
+        .rounded-xl.p-5.mb-6 {
+            padding: 0.875rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        .rounded-xl.p-5.mb-6 .flex.justify-between {
+            margin-bottom: 0.375rem !important;
+        }
+        
+        .rounded-xl.p-5.mb-6 .text-gray-200 {
+            font-size: 0.8125rem !important;
+        }
+        
+        /* Action Buttons */
+        #unifiedBookingModal .flex.space-x-3,
+        #loginPromptModal .flex.flex-col {
+            flex-direction: column !important;
+            gap: 0.625rem !important;
+        }
+        
+        #unifiedBookingModal .flex.space-x-3 {
+            margin-top: auto !important;
+        }
+        
+        #unifiedBookingModal button,
+        #loginPromptModal button,
+        #loginPromptModal a {
+            width: 100% !important;
+            padding: 0.75rem 0.875rem !important;
+            font-size: 0.8125rem !important;
+        }
+        
+        /* Login Prompt Modal Specific */
+        #loginPromptModal .p-4.rounded-xl {
+            padding: 0.75rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        #loginPromptModal .w-10 {
+            width: 2rem !important;
+            height: 2rem !important;
+        }
+        
+        #loginPromptModal .text-lg {
+            font-size: 0.9375rem !important;
+        }
+        
+        #loginPromptModal .text-xs {
+            font-size: 0.6875rem !important;
+        }
+        
+        #loginPromptModal .space-y-2 {
+            gap: 0.375rem !important;
+        }
+        
+        #loginPromptModal .text-center.pt-2 p {
+            font-size: 0.6875rem !important;
+            padding-top: 0.5rem !important;
+        }
+        
+        /* Smooth scrolling for modal content */
+        #unifiedBookingModal > div::-webkit-scrollbar,
+        #loginPromptModal > div::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        #unifiedBookingModal > div::-webkit-scrollbar-track,
+        #loginPromptModal > div::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+        
+        #unifiedBookingModal > div::-webkit-scrollbar-thumb,
+        #loginPromptModal > div::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.5);
+            border-radius: 3px;
+        }
+        
+        #unifiedBookingModal > div::-webkit-scrollbar-thumb:hover,
+        #loginPromptModal > div::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 126, 234, 0.7);
+        }
+        
+        /* Current Date Display Card */
+        .mb-6.slot-card {
+            padding: 0.875rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        #selectedDateDisplay {
+            font-size: 0.9375rem !important;
+        }
+        
+        #currentTimeDisplay {
+            font-size: 0.75rem !important;
+        }
+        
+        /* Combined Section Mobile */
+        .slot-card.mb-6.p-6 {
+            padding: 1rem !important;
+            margin-bottom: 1.5rem !important;
+        }
+        
+        .slot-card.mb-6.p-6 h2 {
+            font-size: 1.25rem !important;
+        }
+        
+        /* Date Tabs Mobile */
+        .date-tab {
+            min-width: 70px !important;
+            padding: 0.375rem 0.5rem !important;
+            border-radius: 0.5rem !important;
+        }
+        
+        .date-tab .font-bold {
+            font-size: 0.6875rem !important;
+            margin-bottom: 0.125rem !important;
+        }
+        
+        .date-tab .text-xs {
+            font-size: 0.5625rem !important;
+        }
+        
+        /* Date tabs container */
+        .flex.space-x-2.overflow-x-auto {
+            gap: 0.375rem !important;
+            padding-bottom: 0.5rem !important;
+        }
+        
+        .mb-4 {
+            margin-bottom: 0.875rem !important;
+        }
+        
+        /* Time Filter Buttons Mobile */
+        .time-filter-btn {
+            min-width: 65px !important;
+            padding: 0.375rem 0.5rem !important;
+            border-radius: 0.5rem !important;
+        }
+        
+        .time-filter-btn .font-bold {
+            font-size: 0.6875rem !important;
+        }
+        
+        .time-filter-btn i {
+            font-size: 0.6875rem !important;
+        }
+        
+        /* Improve touch targets on mobile */
+        .spot-selector-btn,
+        #fullTableToggle,
+        .time-filter-btn,
+        .date-tab {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        /* Prevent zoom on double tap */
+        button, a {
+            touch-action: manipulation;
         }
     }
     
@@ -429,6 +741,425 @@
         .orb-1, .orb-2 {
             width: 300px;
             height: 300px;
+        }
+
+        /* Slow down animations on mobile */
+        .gradient-orb {
+            animation: floatOrb 40s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .animate-pulse,
+        .pulse-reserved {
+            animation: pulse-reserved 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+        
+        /* Page Layout Mobile Optimization */
+        .min-h-screen {
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+        }
+        
+        .max-w-7xl {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+        
+        /* Back Button Mobile */
+        .mb-6 a {
+            font-size: 0.875rem !important;
+            padding: 0.5rem 0 !important;
+        }
+        
+        .mb-6 a svg {
+            width: 1rem !important;
+            height: 1rem !important;
+            margin-right: 0.375rem !important;
+        }
+        
+        /* Game Header Mobile */
+        .slot-card.mb-10 {
+            margin-bottom: 2rem !important;
+        }
+        
+        .slot-card.mb-10 .grid {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .slot-card.mb-10 .lg\:col-span-2 {
+            height: 250px !important;
+        }
+        
+        .slot-card.mb-10 .lg\:col-span-3 {
+            padding: 1.25rem !important;
+        }
+        
+        .slot-card.mb-10 h1 {
+            font-size: 1.75rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+        
+        .slot-card.mb-10 p {
+            font-size: 0.875rem !important;
+            margin-bottom: 1.5rem !important;
+        }
+        
+        /* Game Details Icons Mobile */
+        .slot-card.mb-10 .bi {
+            font-size: 0.875rem !important;
+        }
+        
+        /* Game Details Grid Mobile */
+        .slot-card.mb-10 .grid.grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.5rem !important;
+        }
+        
+        .slot-card.mb-10 .grid.grid-cols-2 > div {
+            padding: 0.75rem !important;
+        }
+        
+        .slot-card.mb-10 .grid.grid-cols-2 .text-sm {
+            font-size: 0.75rem !important;
+        }
+        
+        .slot-card.mb-10 .text-2xl {
+            font-size: 1.125rem !important;
+        }
+        
+        /* Pool Balls Decoration Mobile */
+        .slot-card.mb-10 .w-24.h-24 {
+            width: 3.5rem !important;
+            height: 3.5rem !important;
+        }
+        
+        .slot-card.mb-10 .w-24.h-24 .text-4xl {
+            font-size: 1.5rem !important;
+        }
+        
+        .slot-card.mb-10 .flex.gap-6 {
+            gap: 0.75rem !important;
+        }
+        
+        .slot-card.mb-10 .mb-6 {
+            margin-bottom: 0.75rem !important;
+        }
+        
+        /* Cue stick - hide on mobile */
+        .slot-card.mb-10 .absolute.bottom-16 {
+            display: none !important;
+        }
+        
+        /* Booking Type Badge Mobile */
+        .slot-card.mb-10 .absolute.top-4 span {
+            padding: 0.375rem 0.75rem !important;
+            font-size: 0.75rem !important;
+        }
+        
+        /* Section Headers Mobile */
+        h2.text-3xl {
+            font-size: 1.25rem !important;
+        }
+        
+        .flex.items-center.gap-3 i.text-3xl {
+            font-size: 1.25rem !important;
+        }
+        
+        /* Available Slots Section */
+        .flex.items-center.justify-between.mb-6 {
+            margin-bottom: 1rem !important;
+        }
+        
+        #liveIndicator {
+            font-size: 0.625rem !important;
+        }
+        
+        /* Selected Date Display Card */
+        .slot-card.mb-6 {
+            padding: 0.875rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        #selectedDateDisplay {
+            font-size: 0.875rem !important;
+        }
+        
+        #currentTimeDisplay {
+            font-size: 0.75rem !important;
+        }
+        
+        .slot-card.mb-6 .px-3 {
+            padding: 0.25rem 0.625rem !important;
+            font-size: 0.625rem !important;
+        }
+        
+        /* Date Selection Section Mobile */
+        .mb-10 {
+            margin-bottom: 1.5rem !important;
+        }
+        
+        .mb-10 .flex.items-center.gap-3 {
+            gap: 0.5rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        .mb-10 .bi-calendar-event {
+            font-size: 1.5rem !important;
+        }
+        
+        /* Date Tabs Mobile */
+        .date-tab {
+            min-width: 90px !important;
+            padding: 0.625rem 0.75rem !important;
+        }
+        
+        .date-tab .font-bold {
+            font-size: 0.8125rem !important;
+            margin-bottom: 0.25rem !important;
+        }
+        
+        .date-tab .text-sm {
+            font-size: 0.6875rem !important;
+        }
+        
+        /* Date tabs container */
+        .flex.space-x-4.overflow-x-auto {
+            gap: 0.5rem !important;
+            padding-bottom: 0.75rem !important;
+        }
+        
+        /* Slots Grid Mobile */
+        #slotsContainer > div {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.75rem !important;
+        }
+        
+        /* Loading States Mobile */
+        .loading-overlay {
+            min-height: 300px !important;
+        }
+        
+        .loading-spinner {
+            width: 40px !important;
+            height: 40px !important;
+            border-width: 4px !important;
+        }
+        
+        .loading-message p {
+            font-size: 0.875rem !important;
+        }
+        
+        .loading-message p.text-sm {
+            font-size: 0.75rem !important;
+        }
+        
+        /* Skeleton Loader Mobile */
+        .skeleton {
+            height: 100px !important;
+        }
+        
+        /* Empty State Mobile */
+        .text-center.py-12 {
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
+        }
+        
+        .text-center.py-12 i {
+            font-size: 3rem !important;
+        }
+        
+        .text-center.py-12 h3 {
+            font-size: 1.125rem !important;
+        }
+        
+        .text-center.py-12 p {
+            font-size: 0.875rem !important;
+        }
+    }
+    
+    /* Extra small screens optimization */
+    @media (max-width: 375px) {
+        /* Game Header Extra Compact */
+        .slot-card.mb-10 .lg\:col-span-3 {
+            padding: 1rem !important;
+        }
+        
+        .slot-card.mb-10 h1 {
+            font-size: 1.5rem !important;
+        }
+        
+        /* Pool Balls Even Smaller */
+        .slot-card.mb-10 .w-24.h-24 {
+            width: 2.75rem !important;
+            height: 2.75rem !important;
+        }
+        
+        .slot-card.mb-10 .w-24.h-24 .text-4xl {
+            font-size: 1.25rem !important;
+        }
+        
+        .slot-card.mb-10 .flex.gap-6 {
+            gap: 0.5rem !important;
+        }
+        
+        /* Game Details Grid - Keep 2 columns but tighter */
+        .slot-card.mb-10 .grid.grid-cols-2 {
+            gap: 0.375rem !important;
+        }
+        
+        .slot-card.mb-10 .grid.grid-cols-2 > div {
+            padding: 0.625rem !important;
+        }
+        
+        .slot-card.mb-10 .text-2xl {
+            font-size: 1rem !important;
+        }
+        
+        /* Modal Extra Compact */
+        #unifiedBookingModal > div,
+        #loginPromptModal > div {
+            padding: 1rem !important;
+            margin: 0.375rem !important;
+        }
+        
+        #unifiedBookingModal h3,
+        #loginPromptModal h3 {
+            font-size: 1.125rem !important;
+        }
+        
+        #unifiedBookingModal .w-20,
+        #loginPromptModal .w-20 {
+            width: 3rem !important;
+            height: 3rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        #unifiedBookingModal .w-20 i,
+        #loginPromptModal .w-20 i {
+            font-size: 1.5rem !important;
+        }
+        
+        #fullTableToggle {
+            padding: 0.625rem !important;
+        }
+        
+        #fullTableToggle .w-12 {
+            width: 2rem !important;
+            height: 2rem !important;
+        }
+        
+        #fullTableToggle .text-white {
+            font-size: 0.75rem !important;
+        }
+        
+        #fullTablePrice {
+            font-size: 0.875rem !important;
+        }
+        
+        #spotSelectionGrid {
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 0.375rem !important;
+        }
+        
+        .spot-selector-btn {
+            padding: 0.5rem !important;
+            font-size: 0.75rem !important;
+        }
+        
+        #totalPriceDisplay {
+            font-size: 1.375rem !important;
+        }
+        
+        #bookingTypeDisplay {
+            font-size: 0.625rem !important;
+        }
+        
+        #unifiedBookingModal button,
+        #loginPromptModal button,
+        #loginPromptModal a {
+            padding: 0.625rem 0.75rem !important;
+            font-size: 0.75rem !important;
+        }
+        
+        /* Date Tabs Extra Small */
+        .date-tab {
+            min-width: 70px !important;
+            padding: 0.5rem 0.5rem !important;
+        }
+        
+        .date-tab .font-bold {
+            font-size: 0.6875rem !important;
+        }
+        
+        .date-tab .text-xs {
+            font-size: 0.625rem !important;
+        }
+        
+        /* Time Filter Buttons Extra Small */
+        .time-filter-btn {
+            min-width: 60px !important;
+            padding: 0.375rem 0.375rem !important;
+        }
+        
+        .time-filter-btn .font-bold {
+            font-size: 0.625rem !important;
+        }
+        
+        .time-filter-btn i {
+            font-size: 0.5625rem !important;
+        }
+        
+        /* Combined Section Extra Small */
+        .slot-card.mb-6.p-6 {
+            padding: 0.875rem !important;
+        }
+        
+        .slot-card.mb-6.p-6 h2 {
+            font-size: 1.125rem !important;
+        }
+        
+        /* Slot Cards Extra Small */
+        .slot-card {
+            padding: 0.625rem !important;
+        }
+        
+        .slot-card h3,
+        .slot-card .text-lg {
+            font-size: 0.8125rem !important;
+        }
+        
+        .slot-card .text-sm {
+            font-size: 0.6875rem !important;
+        }
+        
+        .slot-card .text-xs {
+            font-size: 0.625rem !important;
+        }
+        
+        /* Book Button Extra Small */
+        .book-btn {
+            padding: 0.375rem 0.625rem !important;
+            font-size: 0.6875rem !important;
+        }
+        
+        /* Capacity Dots Extra Small */
+        .capacity-dot {
+            width: 6px !important;
+            height: 6px !important;
+        }
+        
+        .capacity-indicator {
+            gap: 3px !important;
+        }
+        
+        /* Back Button Extra Small */
+        .mb-6 a {
+            font-size: 0.8125rem !important;
+        }
+        
+        /* Loading States Extra Small */
+        .loading-spinner {
+            width: 35px !important;
+            height: 35px !important;
         }
     }
     
@@ -450,7 +1181,7 @@
         <div class="grid-pattern"></div>
     </div>
     
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10" style="overflow: visible !important;">
         
         <!-- Back Button -->
         <div class="mb-6">
@@ -573,7 +1304,7 @@
                         <div class="bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl p-5 border border-green-400/30 hover:border-green-400/50 transition-all">
                             <div class="text-green-200 text-sm mb-2 flex items-center gap-2">
                                 <i class="bi bi-wallet2"></i>
-                                Shared Price (per person)
+                                Shared Price
                             </div>
                             <div class="text-white text-2xl font-bold">₹{{ game.shared_price }}</div>
                         </div>
@@ -595,68 +1326,67 @@
             </div>
         </div>
 
-        <!-- Date Selection -->
-        <div class="mb-10">
-            <div class="flex items-center gap-3 mb-6">
-                <i class="bi bi-calendar-event text-white text-3xl"></i>
-                <h2 class="text-3xl font-black text-white leading-none">Select Date</h2>
-            </div>
-            <div class="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide py-3 -mx-1 px-1">
-                {% for date in date_range %}
-                <button type="button"
-                        onclick="selectDate('{{ date.isoformat }}')" 
-                        class="date-tab flex-shrink-0 px-8 py-4 rounded-xl text-center min-w-[140px] transition-all duration-300 {% if date == selected_date %}active text-white{% else %}text-gray-300{% endif %} border-2 border-white/10"
-                        data-date="{{ date.isoformat }}">
-                    <div class="font-bold text-lg mb-1">
-                        {% if date == today %}Today{% else %}{{ date|date:"M d" }}{% endif %}
-                    </div>
-                    <div class="text-sm opacity-80">{{ date|date:"D" }}</div>
-                </button>
-                {% endfor %}
+        <!-- Current Date/Time Display Card -->
+        <div class="mb-6 slot-card">
+            <div class="flex flex-col gap-1 items-center text-center">
+                <span class="text-white font-semibold text-lg" id="selectedDateDisplay">{{ selected_date|date:"l, F d, Y" }}</span>
+                <span class="text-gray-400 text-sm font-mono" id="currentTimeDisplay"></span>
             </div>
         </div>
 
-        <!-- Available Slots for Selected Date -->
-        <div>
-            <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
-                <div class="flex items-center gap-3">
-                    <i class="bi bi-clock-history text-white text-3xl flex items-center"></i>
-                    <h2 class="text-3xl font-black text-white">Available Time Slots</h2>
-                </div>
-                <span id="liveIndicator" class="flex items-center gap-2 text-xs font-medium text-green-400 opacity-0 transition-opacity duration-300">
-                    <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-                    Live Updates Active
-                </span>
+        <!-- Combined Date Selection & Time Slots Section -->
+        <div class="slot-card mb-6 p-6" style="overflow: visible !important; padding-bottom: 2.5rem !important;">
+            <!-- Section Header -->
+            <div class="mb-5">
+                <h2 class="text-2xl font-black text-white leading-none"><i class="bi bi-calendar-week"></i> Select Date & Time</h2>
             </div>
-            <div class="mb-6 slot-card flex items-center justify-between flex-wrap gap-3">
-                <div class="flex flex-col gap-1">
-                    <span class="text-white font-semibold text-lg" id="selectedDateDisplay">{{ selected_date|date:"l, F d, Y" }}</span>
-                    <span class="text-gray-400 text-sm font-mono" id="currentTimeDisplay"></span>
+            
+            <!-- Date Tabs -->
+            <div class="mb-4" style="overflow: visible !important; padding: 0.5rem;">
+                <div class="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1" style="overflow-y: visible !important; margin: -0.5rem; padding: 0.5rem;">
+                    {% for date in date_range %}
+                    <button type="button"
+                            onclick="selectDate('{{ date.isoformat }}')" 
+                            class="date-tab flex-shrink-0 px-4 py-2 rounded-lg text-center min-w-[95px] transition-all duration-300 {% if date == selected_date %}active text-white{% else %}text-gray-300{% endif %} border border-white/10"
+                            data-date="{{ date.isoformat }}">
+                        <div class="font-bold text-sm mb-0.5">
+                            {% if date == today %}Today{% else %}{{ date|date:"M d" }}{% endif %}
+                        </div>
+                        <div class="text-xs opacity-80">{{ date|date:"D" }}</div>
+                    </button>
+                    {% endfor %}
                 </div>
-                {% if selected_date == today %}
-                <span class="px-3 py-1.5 rounded-full text-xs font-semibold" style="background: #667eea; color: white;">
-                    <i class="bi bi-calendar-check"></i> Today
-                </span>
-                {% endif %}
             </div>
             
             <!-- Time Filter Buttons -->
-            <div class="mb-6 flex flex-wrap gap-3">
-                <button onclick="filterSlotsByTime('all')" class="time-filter-btn active" data-filter="all">
-                    <i class="bi bi-clock"></i> All Slots
-                </button>
-                <button onclick="filterSlotsByTime('morning')" class="time-filter-btn" data-filter="morning">
-                    <i class="bi bi-sunrise"></i> Morning
-                </button>
-                <button onclick="filterSlotsByTime('afternoon')" class="time-filter-btn" data-filter="afternoon">
-                    <i class="bi bi-sun"></i> Afternoon
-                </button>
-                <button onclick="filterSlotsByTime('evening')" class="time-filter-btn" data-filter="evening">
-                    <i class="bi bi-sunset"></i> Evening
-                </button>
-                <button onclick="filterSlotsByTime('night')" class="time-filter-btn" data-filter="night">
-                    <i class="bi bi-moon-stars"></i> Night
-                </button>
+            <div class="mb-4" style="overflow: visible !important; padding: 0.5rem;">
+                <div class="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1" id="timeFilterContainer" style="overflow-y: visible !important; margin: -0.5rem; padding: 0.5rem;">
+                    <button onclick="filterSlotsByTime('all')" class="time-filter-btn active flex-shrink-0 px-4 py-2 rounded-lg text-center min-w-[75px] transition-all duration-300 border border-white/10" data-filter="all">
+                        <div class="font-bold text-sm">
+                            <i class="bi bi-clock"></i> All
+                        </div>
+                    </button>
+                    <button onclick="filterSlotsByTime('morning')" class="time-filter-btn flex-shrink-0 px-4 py-2 rounded-lg text-center min-w-[75px] transition-all duration-300 text-gray-300 border border-white/10" data-filter="morning">
+                        <div class="font-bold text-sm">
+                            <i class="bi bi-sunrise"></i> Morning
+                        </div>
+                    </button>
+                    <button onclick="filterSlotsByTime('afternoon')" class="time-filter-btn flex-shrink-0 px-4 py-2 rounded-lg text-center min-w-[75px] transition-all duration-300 text-gray-300 border border-white/10" data-filter="afternoon">
+                        <div class="font-bold text-sm">
+                            <i class="bi bi-sun"></i> Afternoon
+                        </div>
+                    </button>
+                    <button onclick="filterSlotsByTime('evening')" class="time-filter-btn flex-shrink-0 px-4 py-2 rounded-lg text-center min-w-[75px] transition-all duration-300 text-gray-300 border border-white/10" data-filter="evening">
+                        <div class="font-bold text-sm">
+                            <i class="bi bi-sunset"></i> Evening
+                        </div>
+                    </button>
+                    <button onclick="filterSlotsByTime('night')" class="time-filter-btn flex-shrink-0 px-4 py-2 rounded-lg text-center min-w-[75px] transition-all duration-300 text-gray-300 border border-white/10" data-filter="night">
+                        <div class="font-bold text-sm">
+                            <i class="bi bi-moon-stars"></i> Night
+                        </div>
+                    </button>
+                </div>
             </div>
             
             <!-- Slots Container - Loaded via AJAX -->
@@ -676,10 +1406,10 @@
 </div>
 
 <!-- Unified Booking Modal -->
-<div id="unifiedBookingModal" class="fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center p-4" style="z-index: 9999;" onclick="closeUnifiedModal(event)">
-    <div class="rounded-2xl max-w-md w-full p-8 border border-white/20 relative" style="background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(20px);" onclick="event.stopPropagation()">
+<div id="unifiedBookingModal" class="fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center p-4" style="z-index: 9999; overflow-y: auto;" onclick="closeUnifiedModal(event)">
+    <div class="rounded-2xl max-w-md w-full p-8 border border-white/20 relative my-auto" style="background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(20px);" onclick="event.stopPropagation()">
         <div class="text-center mb-6">
-            <div class="w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7); box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7);">
                 <i class="bi bi-controller text-white text-4xl"></i>
             </div>
             <h3 class="text-3xl font-black text-white mb-2">Book Your Spot</h3>
@@ -747,10 +1477,10 @@
 </div>
 
 <!-- Login Prompt Modal (for non-authenticated users) -->
-<div id="loginPromptModal" class="fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center p-4" style="z-index: 9999;" onclick="closeLoginPrompt(event)">
-    <div class="rounded-2xl max-w-md w-full p-8 border border-white/20 relative" style="background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(20px);" onclick="event.stopPropagation()">
+<div id="loginPromptModal" class="fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center p-4" style="z-index: 9999; overflow-y: auto;" onclick="closeLoginPrompt(event)">
+    <div class="rounded-2xl max-w-md w-full p-8 border border-white/20 relative my-auto" style="background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(20px);" onclick="event.stopPropagation()">
         <div class="text-center mb-6">
-            <div class="w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7); box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7);">
                 <i class="bi bi-lock-fill text-white text-4xl"></i>
             </div>
             <h3 class="text-3xl font-black text-white mb-2">Login Required</h3>
@@ -779,9 +1509,9 @@
         <div class="flex flex-col space-y-3">
             <a href="{% url 'authentication:customer_login' %}?next={{ request.path }}" 
                class="w-full px-6 py-3.5 rounded-xl font-bold transition-all text-center text-white relative z-10"
-               style="background: linear-gradient(135deg, #667eea, #a855f7); box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);"
-               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 15px 30px rgba(102, 126, 234, 0.4)'"
-               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(102, 126, 234, 0.3)'">
+               style="background: linear-gradient(135deg, #667eea, #a855f7);"
+               onmouseover="this.style.transform='translateY(-2px)'"
+               onmouseout="this.style.transform='translateY(0)'">
                 <i class="bi bi-box-arrow-in-right mr-2"></i> Login to Book
             </a>
             <button onclick="closeLoginPrompt()" 
@@ -868,9 +1598,6 @@ function loadSlotsForDate(dateStr) {
     
     // Show skeleton loader with loading text
     container.innerHTML = `
-        <div class="mb-4 text-center">
-            <p class="text-gray-400 text-sm animate-pulse">Loading slots...</p>
-        </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
             ${Array(8).fill(0).map(() => `
                 <div class="slot-card skeleton" style="height: 120px;">
@@ -887,26 +1614,16 @@ function loadSlotsForDate(dateStr) {
     // Fetch slots from API
     fetch(`/api/games/${gameId}/slots/?date=${dateStr}`)
         .then(response => {
-            const networkTime = ((Date.now() - startTime) / 1000).toFixed(2);
-            console.log(`🌐 Network response: ${networkTime}s`);
-            
             if (!response.ok) {
                 throw new Error('Failed to load slots');
             }
             return response.json();
         })
         .then(data => {
-            const parseTime = ((Date.now() - startTime) / 1000).toFixed(2);
-            console.log(`📦 JSON parsed: ${parseTime}s`);
-            
             currentSlotsData = data.slots; // Store for comparison
             renderSlots(data.slots);
-            
-            const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
-            console.log(`✅ Total load time: ${totalTime}s (${data.slots.length} slots)`);
         })
         .catch(error => {
-            console.error('❌ Failed to load slots:', error);
             showError('Unable to load slots. Please try again.');
         });
 }
@@ -1043,14 +1760,6 @@ function renderCapacityDots(availability) {
     const bookedSpots = availability.booked_spots || 0;
     const reservedSpots = availability.reserved_spots || 0;
     const totalCapacity = availability.total_capacity || 0;
-    
-    console.log('🔴 renderCapacityDots called:', {
-        booked: bookedSpots,
-        reserved: reservedSpots,
-        total: totalCapacity,
-        truly_available: availability.truly_available_spots,
-        available_spots: availability.available_spots
-    });
     
     for (let i = 0; i < totalCapacity; i++) {
         let dotClass = 'available';
@@ -1311,7 +2020,7 @@ function updateUnifiedPriceDisplay() {
         
         // Check if auto-converted (selected all spots individually)
         if (selectedSpots === totalCapacity) {
-            bookingTypeDisplay.innerHTML = `Full table (${totalCapacity} spots) • <span class="text-green-300">✓ Private price applied</span>`;
+            bookingTypeDisplay.innerHTML = `Full table (${totalCapacity} spots)`;
         } else {
             bookingTypeDisplay.textContent = `Full table (${totalCapacity} spots) • Private booking price`;
         }
@@ -1737,7 +2446,7 @@ function pollSlots() {
             }
         })
         .catch(error => {
-            console.error('Polling error:', error);
+            // Silently handle polling error
         })
         .finally(() => {
             isFetching = false;
@@ -2026,8 +2735,12 @@ function filterSlotsByTime(category) {
     document.querySelectorAll('.time-filter-btn').forEach(btn => {
         if (btn.dataset.filter === category) {
             btn.classList.add('active');
+            btn.classList.remove('text-gray-300');
+            btn.classList.add('text-white');
         } else {
             btn.classList.remove('active');
+            btn.classList.add('text-gray-300');
+            btn.classList.remove('text-white');
         }
     });
     
@@ -2093,25 +2806,43 @@ document.addEventListener('keydown', function(e) {
 // Update current time display in IST
 function updateCurrentTime() {
     const timeDisplay = document.getElementById('currentTimeDisplay');
-    if (timeDisplay) {
+    const dateDisplay = document.getElementById('selectedDateDisplay');
+    
+    if (timeDisplay || dateDisplay) {
         // Get current time in IST (Asia/Kolkata timezone)
         const now = new Date();
         const istTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
         
-        let hours = istTime.getHours();
-        const minutes = istTime.getMinutes();
-        const seconds = istTime.getSeconds();
-        const ampm = hours >= 12 ? 'PM' : 'AM';
+        // Update time display
+        if (timeDisplay) {
+            let hours = istTime.getHours();
+            const minutes = istTime.getMinutes();
+            const seconds = istTime.getSeconds();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            
+            // Convert to 12-hour format
+            hours = hours % 12;
+            hours = hours ? hours : 12; // 0 should be 12
+            
+            // Pad with zeros
+            const minutesStr = minutes.toString().padStart(2, '0');
+            const secondsStr = seconds.toString().padStart(2, '0');
+            
+            timeDisplay.textContent = `${hours}:${minutesStr}:${secondsStr} ${ampm} IST`;
+        }
         
-        // Convert to 12-hour format
-        hours = hours % 12;
-        hours = hours ? hours : 12; // 0 should be 12
-        
-        // Pad with zeros
-        const minutesStr = minutes.toString().padStart(2, '0');
-        const secondsStr = seconds.toString().padStart(2, '0');
-        
-        timeDisplay.textContent = `${hours}:${minutesStr}:${secondsStr} ${ampm} IST`;
+        // Update date display
+        if (dateDisplay) {
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                timeZone: 'Asia/Kolkata'
+            };
+            const dateStr = istTime.toLocaleDateString('en-US', options);
+            dateDisplay.textContent = dateStr;
+        }
     }
 }
 

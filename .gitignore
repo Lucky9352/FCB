@@ -89,7 +89,5 @@ secrets.json
 # Exclude all markdown files except important docs
 *.md
 !README.md
-!TESTING_GUIDE.md
-!CLEANUP_SUMMARY.md
-!IGNORE_FILES_VERIFICATION.md
 !SCRIPTS_GUIDE.md
+!TESTING_GUIDE.md

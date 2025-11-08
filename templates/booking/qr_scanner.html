@@ -13,20 +13,16 @@
     }
     #scanner-container.scanning { 
         border-color: #06b6d4;
-        box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
     }
     #scanner-container.processing { 
         border-color: #f59e0b;
-        box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
     }
     #scanner-container.success {
         border-color: #10b981;
-        box-shadow: 0 0 40px rgba(16, 185, 129, 0.7);
         animation: success-pulse 0.6s ease-out;
     }
     #scanner-container.error {
         border-color: #ef4444;
-        box-shadow: 0 0 40px rgba(239, 68, 68, 0.7);
         animation: error-shake 0.5s ease-out;
     }
 
@@ -175,7 +171,6 @@
         width: 90%;
         max-height: 90vh;
         overflow-y: auto;
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
         animation: slideUp 0.3s ease-out;
     }
 
@@ -252,6 +247,24 @@
         color: #f59e0b;
         border: 1px solid rgba(245, 158, 11, 0.4);
     }
+
+    /* Mobile Animation Optimizations */
+    @media (max-width: 768px) {
+      .gradient-orb {
+        animation: floatOrb 40s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+      }
+
+      @keyframes success-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.01); }
+      }
+
+      @keyframes error-shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+      }
+    }
 </style>
 {% endblock %}
 
@@ -270,7 +283,7 @@
         <div class="card-glow animate-fade-in-up mb-8" style="background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.5rem; padding: 2rem;">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div class="flex items-center gap-4">
-                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);">
+                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7);">
                         <i class="bi bi-qr-code-scan text-white text-3xl"></i>
                     </div>
                     <div>
@@ -342,7 +355,7 @@
 
                     <!-- Control Buttons -->
                     <div class="flex justify-center gap-3">
-                        <button id="toggleScanBtn" class="px-8 py-4 rounded-xl font-bold transition-all" style="background: linear-gradient(135deg, #06b6d4, #0891b2); color: white; box-shadow: 0 10px 30px rgba(6, 182, 212, 0.3); z-index: 10;">
+                        <button id="toggleScanBtn" class="px-8 py-4 rounded-xl font-bold transition-all" style="background: linear-gradient(135deg, #06b6d4, #0891b2); color: white; z-index: 10;">
                             <i class="bi bi-play-fill mr-2"></i>Start Scanning
                         </button>
                         <button id="flashlightBtn" class="px-8 py-4 rounded-xl font-bold transition-all hidden" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); z-index: 10;">
@@ -367,7 +380,7 @@
                                placeholder="Enter booking ID"
                                class="w-full px-4 py-4 rounded-xl font-mono text-lg text-center"
                                style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); color: white;">
-                        <button type="submit" class="w-full px-8 py-4 rounded-xl font-bold transition-all" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3); z-index: 10;">
+                        <button type="submit" class="w-full px-8 py-4 rounded-xl font-bold transition-all" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; z-index: 10;">
                             <i class="bi bi-check-circle mr-2"></i>Verify Booking
                         </button>
                     </form>
@@ -509,7 +522,7 @@
         </div>
 
         <div class="modal-footer">
-            <button id="closeModalBtn" class="px-8 py-4 rounded-xl font-bold transition-all" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);">
+            <button id="closeModalBtn" class="px-8 py-4 rounded-xl font-bold transition-all" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
                 <i class="bi bi-x-circle mr-2"></i>Close
             </button>
         </div>
@@ -571,7 +584,7 @@
         try {
             const audio = new Audio(successAudioSrc);
             audio.volume = 0.7;
-            audio.play().catch(e => console.log("Audio play blocked:", e));
+            audio.play().catch(e => {});
         } catch(e) {}
         setTimeout(() => {
             if (isScanning) setScannerVisualState('scanning');
@@ -585,7 +598,7 @@
         try {
             const audio = new Audio(errorAudioSrc);
             audio.volume = 0.7;
-            audio.play().catch(e => console.log("Audio play blocked:", e));
+            audio.play().catch(e => {});
         } catch(e) {}
         setTimeout(() => {
             if (isScanning) setScannerVisualState('scanning');
@@ -605,7 +618,6 @@
         // Prevent duplicate scans of the same QR code within cooldown period
         const currentTime = Date.now();
         if (lastScannedToken === token && (currentTime - lastScanTime) < SCAN_COOLDOWN) {
-            console.log('Duplicate scan detected, ignoring...');
             return;
         }
         
@@ -639,9 +651,6 @@
                 showBookingModal(result.booking, false);
             } else {
                 showErrorFeedback();
-                console.log('Error result:', result); // Debug log
-                console.log('Already verified:', result.already_verified); // Debug log
-                console.log('Booking data:', result.booking); // Debug log
                 
                 // Special handling for already verified bookings
                 if (result.already_verified && result.booking) {
@@ -655,7 +664,6 @@
         } catch (error) {
             showErrorFeedback();
             showAlert('error', 'Failed to verify QR code');
-            console.error('Verification error:', error);
         } finally {
             // Reset processing state after cooldown
             setTimeout(() => {
@@ -688,12 +696,10 @@
             // Check for flash support after scanner starts
             try {
                 hasFlash = await qrScanner.hasFlash();
-                console.log('Flash available:', hasFlash);
                 if (hasFlash) {
                     flashBtn.classList.remove('hidden');
                 }
             } catch (e) {
-                console.log('Flash check failed:', e);
                 hasFlash = false;
             }
             
@@ -903,10 +909,6 @@
                 // Show detailed modal
                 showBookingModal(result.booking, false);
             } else {
-                console.log('Manual error result:', result); // Debug log
-                console.log('Already verified:', result.already_verified); // Debug log
-                console.log('Booking data:', result.booking); // Debug log
-                
                 // Special handling for already verified bookings
                 if (result.already_verified && result.booking) {
                     showAlert('warning', `Already Verified: ${result.message}`);
@@ -919,7 +921,6 @@
                 }
             }
         } catch (error) {
-            console.error('Manual verification error:', error);
             showAlert('error', 'Failed to verify booking. Please check the input.');
             vibrate([200, 100, 200, 100, 200]); // Error vibration
         }
@@ -956,7 +957,6 @@
             
             vibrate(50); // Short vibration for toggle
         } catch (error) {
-            console.error('Flash toggle error:', error);
             showAlert('error', 'Failed to toggle flash');
             vibrate(200);
         }

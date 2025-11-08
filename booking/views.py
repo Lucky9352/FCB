@@ -3,9 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
-from django.db.models import Q
+from django.db.models import Q, F
 from django.core.exceptions import ValidationError
-from django.core.cache import cache
 from datetime import datetime, timedelta
 from authentication.decorators import customer_required
 from .models import GamingStation, Booking, Notification, Game
@@ -18,142 +17,54 @@ logger = logging.getLogger(__name__)
 
 
 @customer_required
-def booking_selection(request):
-    """Booking selection interface with calendar/grid view"""
-    # Get all active gaming stations
-    stations = GamingStation.objects.filter(
-        is_active=True,
-        is_maintenance=False
-    ).order_by('station_type', 'name')
+def get_game_availability(request, game_id):
+    """AJAX endpoint to get available slots for a specific game - OPTIMIZED"""
+    from .booking_service import BookingService
     
-    # Get selected date (default to today)
-    selected_date = request.GET.get('date', timezone.now().date().isoformat())
+    date_str = request.GET.get('date')
+    
     try:
-        selected_date = datetime.fromisoformat(selected_date).date()
-    except ValueError:
+        selected_date = datetime.fromisoformat(date_str).date()
+    except (ValueError, TypeError):
         selected_date = timezone.now().date()
     
-    # Generate time slots for the selected date (9 AM to 11 PM)
-    time_slots = []
-    start_hour = 9
-    end_hour = 23
+    try:
+        game = Game.objects.get(id=game_id, is_active=True)
+    except Game.DoesNotExist:
+        return JsonResponse({'error': 'Game not found'}, status=404)
     
-    for hour in range(start_hour, end_hour):
-        time_slots.append({
-            'time': f"{hour:02d}:00",
-            'display': f"{hour % 12 or 12}:00 {'AM' if hour < 12 else 'PM'}",
-            'datetime': timezone.make_aware(
-                datetime.combine(selected_date, datetime.min.time().replace(hour=hour)),
-                timezone=timezone.get_current_timezone()
-            )
-        })
-    
-    # Get existing bookings for the selected date
-    existing_bookings = Booking.objects.filter(
-        start_time__date=selected_date,
-        status__in=['CONFIRMED', 'IN_PROGRESS', 'PENDING']
-    ).select_related('gaming_station')
-    
-    # Create availability matrix
-    availability = {}
-    for station in stations:
-        availability[station.id] = {}
-        for slot in time_slots:
-            # Check if this time slot is available for this station
-            slot_end = slot['datetime'] + timedelta(hours=1)
-            is_available = not existing_bookings.filter(
-                gaming_station=station,
-                start_time__lt=slot_end,
-                end_time__gt=slot['datetime']
-            ).exists()
-            
-            availability[station.id][slot['time']] = {
-                'available': is_available,
-                'datetime': slot['datetime'],
-                'end_datetime': slot_end
-            }
-    
-    context = {
-        'stations': stations,
-        'time_slots': time_slots,
-        'selected_date': selected_date,
-        'availability': availability,
-        'today': timezone.now().date(),
-    }
-    
-    return render(request, 'booking/selection.html', context)
-
-
-@customer_required
-def booking_create(request):
-    """Create a new booking"""
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            station_id = data.get('station_id')
-            start_time = data.get('start_time')
-            duration = int(data.get('duration', 1))  # Default 1 hour
-            
-            # Validate inputs
-            if not all([station_id, start_time]):
-                return JsonResponse({'error': 'Missing required fields'}, status=400)
-            
-            # Get station
-            station = get_object_or_404(GamingStation, id=station_id, is_active=True)
-            
-            # Parse start time
-            start_datetime = timezone.make_aware(datetime.fromisoformat(start_time))
-            end_datetime = start_datetime + timedelta(hours=duration)
-            
-            # Validate booking time is in the future
-            if start_datetime <= timezone.now():
-                return JsonResponse({'error': 'Booking time must be in the future'}, status=400)
-            
-            # Check availability
-            if not station.is_available_at_time(start_datetime, end_datetime):
-                return JsonResponse({'error': 'Time slot is not available'}, status=400)
-            
-            # Get customer
-            customer = request.user.customer_profile
-            
-            # Create booking
-            booking = Booking.objects.create(
-                customer=customer,
-                gaming_station=station,
-                start_time=start_datetime,
-                end_time=end_datetime,
-                hourly_rate=station.hourly_rate,
-                status='PENDING'
-            )
-            
-            return JsonResponse({
-                'success': True,
-                'booking_id': str(booking.id),
-                'total_amount': str(booking.total_amount),
-                'redirect_url': f'/booking/confirm/{booking.id}/'
-            })
-            
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
-    
-    return JsonResponse({'error': 'Method not allowed'}, status=405)
-
-
-@customer_required
-def booking_confirm(request, booking_id):
-    """Booking confirmation page"""
-    booking = get_object_or_404(
-        Booking, 
-        id=booking_id, 
-        customer=request.user.customer_profile,
-        status='PENDING'
+    # Get available slots for this game
+    available_slots = BookingService.get_available_slots(
+        game,
+        date_from=selected_date,
+        date_to=selected_date
     )
     
-    context = {
-        'booking': booking,
-    }
+    # Format response
+    slots_data = []
+    for slot_info in available_slots:
+        slot = slot_info['slot']
+        availability = slot_info['availability']
+        options = slot_info['options']
+        
+        slots_data.append({
+            'id': str(slot.id),
+            'start_time': slot.start_time.strftime('%I:%M %p'),
+            'end_time': slot.end_time.strftime('%I:%M %p'),
+            'date': slot.date.isoformat(),
+            'can_book_private': availability.can_book_private,
+            'can_book_shared': availability.can_book_shared,
+            'available_spots': availability.available_spots,
+            'options': options
+        })
     
-    return render(request, 'booking/confirm.html', context)
+    return JsonResponse({
+        'success': True,
+        'game_id': str(game.id),
+        'game_name': game.name,
+        'slots': slots_data,
+        'has_availability': len(slots_data) > 0
+    })
 
 
 @customer_required
@@ -215,51 +126,28 @@ def my_bookings(request):
     # Get bookings with filters
     status_filter = request.GET.get('status', 'all')
     
-    bookings = customer.bookings.all().order_by('-created_at')
+    # Auto-update booking statuses before displaying
+    from .booking_service import auto_update_bookings_status
+    
+    bookings_to_check = customer.bookings.filter(
+        status__in=['PENDING', 'CONFIRMED', 'IN_PROGRESS']
+    ).select_related('game_slot')
+    
+    auto_update_bookings_status(bookings_to_check)
+    
+    # Optimize query with select_related to avoid N+1 queries
+    bookings = customer.bookings.select_related(
+        'game', 
+        'game_slot'
+    ).order_by('-created_at')
     
     if status_filter != 'all':
         bookings = bookings.filter(status=status_filter.upper())
     
-    # Categorize bookings
-    now = timezone.now()
-    
-    # Separate old and new bookings for filtering
-    upcoming = []
-    past = []
-    current = None
-    
-    for booking in bookings:
-        start_dt = booking.start_datetime
-        end_dt = booking.end_datetime
-        
-        if not start_dt or not end_dt:
-            continue  # Skip bookings without valid times
-        
-        # Check for current booking
-        if start_dt <= now <= end_dt and booking.status == 'IN_PROGRESS':
-            if not current:  # Take the first one
-                current = booking
-        # Check for upcoming (any status, as long as it's in the future)
-        elif start_dt > now:
-            upcoming.append(booking)
-        # Past bookings (end time has passed)
-        elif end_dt < now:
-            past.append(booking)
-    
-    # Sort lists
-    upcoming.sort(key=lambda b: b.start_datetime)
-    past.sort(key=lambda b: b.start_datetime, reverse=True)
-    
-    # Get all bookings for "All" tab
-    all_bookings = list(bookings)
-    
+    # Pass queryset directly to template (filtering is done in JavaScript)
     context = {
-        'bookings': all_bookings,  # For "All Bookings" tab
-        'upcoming_bookings': upcoming,
-        'current_booking': current,
-        'past_bookings': past,
+        'bookings': bookings,  # Pass queryset, not list
         'status_filter': status_filter,
-        'now': now,  # For template comparisons
     }
     
     return render(request, 'booking/my_bookings.html', context)
@@ -273,6 +161,10 @@ def booking_details(request, booking_id):
         id=booking_id, 
         customer=request.user.customer_profile
     )
+    
+    # Auto-update booking status before displaying
+    from .booking_service import auto_update_booking_status
+    auto_update_booking_status(booking)
     
     # Redirect to confirmation page if still pending
     if booking.status == 'PENDING':
@@ -355,50 +247,12 @@ def simulate_payment(request, booking_id):
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 
-@customer_required
-def cancel_booking(request, booking_id):
-    """Cancel a booking"""
-    if request.method == 'POST':
-        booking = get_object_or_404(
-            Booking, 
-            id=booking_id, 
-            customer=request.user.customer_profile,
-            status__in=['PENDING', 'CONFIRMED']
-        )
-        
-        try:
-            # Update booking status
-            booking.status = 'CANCELLED'
-            booking.save()
-            
-            # Send cancellation email
-            NotificationService.send_booking_cancellation_email(booking)
-            
-            # Create in-app notification
-            InAppNotification.notify_booking_cancelled(booking)
-            
-            # Add success message
-            messages.success(request, 'Booking cancelled successfully.')
-            
-            return JsonResponse({'success': True})
-            
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
-    
-    return JsonResponse({'error': 'Method not allowed'}, status=405)
+# Removed duplicate cancel_booking function - using the one at line 709 which uses BookingService
 
 
 @customer_required
 def get_notifications(request):
-    """Get user's notifications with caching for performance"""
-    user_id = request.user.id
-    cache_key = f'notifications_user_{user_id}'
-    
-    # Try to get from cache first (10 second cache)
-    cached_data = cache.get(cache_key)
-    if cached_data:
-        return JsonResponse(cached_data)
-    
+    """Get user's notifications - REAL-TIME (NO CACHE)"""
     # Optimized query - get unread notifications with single database hit
     notifications = request.user.notifications.filter(
         is_read=False
@@ -423,15 +277,12 @@ def get_notifications(request):
         'unread_count': len(notifications_list)
     }
     
-    # Cache for 10 seconds to reduce database load
-    cache.set(cache_key, response_data, 10)
-    
     return JsonResponse(response_data)
 
 
 @customer_required
 def mark_notification_read(request, notification_id):
-    """Mark a notification as read"""
+    """Mark a notification as read - REAL-TIME (NO CACHE)"""
     if request.method == 'POST':
         try:
             notification = get_object_or_404(
@@ -440,10 +291,6 @@ def mark_notification_read(request, notification_id):
                 user=request.user
             )
             notification.mark_as_read()
-            
-            # Invalidate cache when notification is marked as read
-            cache_key = f'notifications_user_{request.user.id}'
-            cache.delete(cache_key)
             
             return JsonResponse({'success': True})
         except Exception as e:
@@ -455,17 +302,14 @@ def mark_notification_read(request, notification_id):
 
 @customer_required
 def game_selection(request):
-    """Game selection interface with hybrid booking options - PUBLIC ACCESS"""
-    from .models import Game
-    from .booking_service import BookingService
+    """Game selection interface with hybrid booking options - OPTIMIZED"""
+    from .models import Game, GameSlot, SlotAvailability
     from .auto_slot_generator import auto_generate_slots_all_games
     from datetime import date, timedelta
+    from django.db.models import Exists, OuterRef, Q, F
     
     # Ensure slots are available (runs in background, doesn't block)
     auto_generate_slots_all_games(async_mode=True)
-    
-    # Get all active games
-    games = Game.objects.filter(is_active=True).order_by('name')
     
     # Get selected date (default to today)
     selected_date = request.GET.get('date', timezone.now().date().isoformat())
@@ -474,26 +318,43 @@ def game_selection(request):
     except ValueError:
         selected_date = timezone.now().date()
     
-    # Get available slots for each game
+    # OPTIMIZED: Use a single query with subquery to check availability
+    # This checks if any slot exists with availability, without loading all slot data
+    # can_book_private = booked_spots == 0
+    # can_book_shared = not is_private_booked AND available_spots > 0
+    available_slots_subquery = GameSlot.objects.filter(
+        game=OuterRef('pk'),
+        date=selected_date,
+        is_active=True,
+        availability__isnull=False
+    ).filter(
+        Q(availability__booked_spots=0) |  # Can book private
+        Q(availability__is_private_booked=False, availability__booked_spots__lt=F('availability__total_capacity'))  # Can book shared
+    )
+    
+    # Get all active games with availability annotation
+    games = Game.objects.filter(is_active=True).annotate(
+        has_availability=Exists(available_slots_subquery)
+    ).only(
+        'id', 'name', 'description', 'image', 'booking_type', 
+        'capacity', 'private_price', 'shared_price', 'slot_duration_minutes'
+    ).order_by('name')
+    
+    # Convert to list with game_data structure for template compatibility
     games_with_availability = []
     for game in games:
-        available_slots = BookingService.get_available_slots(
-            game, 
-            date_from=selected_date,
-            date_to=selected_date
-        )
-        
         games_with_availability.append({
             'game': game,
-            'available_slots': available_slots,
-            'has_availability': len(available_slots) > 0
+            'has_availability': game.has_availability
         })
+    
+    today = timezone.now().date()
     
     context = {
         'games_with_availability': games_with_availability,
         'selected_date': selected_date,
-        'today': timezone.now().date(),
-        'date_range': [selected_date + timedelta(days=i) for i in range(7)]  # Next 7 days
+        'today': today,
+        'date_range': [today + timedelta(days=i) for i in range(7)]  # Next 7 days from today
     }
     
     return render(request, 'booking/game_selection.html', context)

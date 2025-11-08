@@ -284,6 +284,17 @@ def active_bookings_view(request):
     View all currently active/verified bookings for the day
     """
     today = timezone.now().date()
+    now = timezone.now()
+    
+    # Auto-update booking statuses before displaying
+    from .booking_service import auto_update_bookings_status
+    
+    bookings_to_check = Booking.objects.filter(
+        Q(game_slot__date=today) | Q(start_time__date=today),
+        status__in=['PENDING', 'CONFIRMED', 'IN_PROGRESS']
+    ).select_related('game_slot')
+    
+    auto_update_bookings_status(bookings_to_check)
     
     # Get all bookings for today that are confirmed or in progress
     active_bookings = Booking.objects.filter(

@@ -288,7 +288,6 @@ a:hover {
 
 .btn:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
 }
 
 /* Button Sizes */
@@ -316,13 +315,11 @@ a:hover {
 .btn-primary {
   background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-secondary-600) 100%);
   color: white;
-  box-shadow: var(--shadow-lg);
 }
 
 .btn-primary:hover {
   background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-secondary-500) 100%);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-xl), var(--shadow-glow-primary);
 }
 
 .btn-primary:active {
@@ -415,7 +412,6 @@ a:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.2);
   transform: translateY(-4px);
-  box-shadow: var(--shadow-2xl);
 }
 
 .card-header {
@@ -455,11 +451,6 @@ a:hover {
 .card-flat {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: none;
-  box-shadow: none;
-}
-
-.card-elevated {
-  box-shadow: var(--shadow-xl);
 }
 
 .card-bordered {
@@ -513,7 +504,6 @@ a:hover {
 .form-textarea:focus {
   background: rgba(255, 255, 255, 0.08);
   border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
 }
 
 .form-input:disabled,
@@ -857,10 +847,8 @@ a:hover {
 
 @keyframes glow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
   }
   50% {
-    box-shadow: 0 0 40px rgba(102, 126, 234, 0.8);
   }
 }
 
