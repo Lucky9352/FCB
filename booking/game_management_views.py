@@ -19,10 +19,16 @@ logger = logging.getLogger(__name__)
 
 @cafe_owner_required
 def game_management_dashboard(request):
-    """Main game management dashboard for cafe owners - OPTIMIZED"""
-    from django.core.cache import cache
+    """Main game management dashboard for cafe owners - REAL-TIME NO CACHE"""
     
-    # Get all games with statistics (single query with annotations)
+    # Auto-update booking statuses for real-time accuracy
+    from booking.booking_service import auto_update_bookings_status
+    bookings_to_check = Booking.objects.filter(
+        status__in=['PENDING', 'CONFIRMED', 'IN_PROGRESS']
+    ).select_related('game_slot')
+    auto_update_bookings_status(bookings_to_check)
+    
+    # Get all games with statistics (single query with annotations) - NO CACHE
     games = Game.objects.annotate(
         total_slots=Count('slots'),
         active_slots=Count('slots', filter=Q(slots__is_active=True)),
@@ -30,10 +36,10 @@ def game_management_dashboard(request):
         confirmed_bookings=Count('bookings', filter=Q(bookings__status='CONFIRMED'))
     ).order_by('name')
     
-    # Get today's statistics
+    # Get today's statistics - REAL-TIME
     today = timezone.now().date()
     
-    # Use aggregate for counts (single query)
+    # Use aggregate for counts (single query) - NO CACHE
     today_stats = GameSlot.objects.filter(date=today, is_active=True).aggregate(
         slots_count=Count('id')
     )
@@ -46,7 +52,7 @@ def game_management_dashboard(request):
         revenue=Sum('total_amount')
     )
     
-    # Get upcoming bookings (optimized with select_related)
+    # Get upcoming bookings (optimized with select_related) - REAL-TIME
     upcoming_bookings = Booking.objects.filter(
         game_slot__date__gte=today,
         status__in=['CONFIRMED', 'PENDING']
@@ -66,7 +72,12 @@ def game_management_dashboard(request):
         'today': today,
     }
     
-    return render(request, 'booking/game_management/dashboard.html', context)
+    response = render(request, 'booking/game_management/dashboard.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @cafe_owner_required
@@ -112,7 +123,12 @@ def game_create(request):
         'submit_text': 'Create Game',
     }
     
-    return render(request, 'booking/game_management/game_form.html', context)
+    response = render(request, 'booking/game_management/game_form.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @cafe_owner_required
@@ -187,7 +203,12 @@ def game_detail(request, game_id):
         'date_range': [date_from + timedelta(days=i) for i in range((date_to - date_from).days + 1)],
     }
     
-    return render(request, 'booking/game_management/game_detail.html', context)
+    response = render(request, 'booking/game_management/game_detail.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @cafe_owner_required
@@ -230,7 +251,12 @@ def game_update(request, game_id):
         'submit_text': 'Update Game',
     }
     
-    return render(request, 'booking/game_management/game_form.html', context)
+    response = render(request, 'booking/game_management/game_form.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @cafe_owner_required
@@ -347,7 +373,12 @@ def custom_slot_create(request):
         'today': datetime.now().date().isoformat(),
     }
     
-    return render(request, 'authentication/owner_custom_slots.html', context)
+    response = render(request, 'authentication/owner_custom_slots.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @cafe_owner_required
@@ -440,7 +471,12 @@ def schedule_management(request):
         'games': games,
     }
     
-    return render(request, 'booking/game_management/schedule_management.html', context)
+    response = render(request, 'booking/game_management/schedule_management.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @cafe_owner_required
@@ -609,7 +645,12 @@ def game_analytics(request, game_id):
         'date_range_days': (end_date - start_date).days + 1,
     }
     
-    return render(request, 'booking/game_management/game_analytics.html', context)
+    response = render(request, 'booking/game_management/game_analytics.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @cafe_owner_required
@@ -653,7 +694,12 @@ def individual_schedule_management(request, game_id):
         'submit_text': 'Update Schedule',
     }
     
-    return render(request, 'booking/game_management/individual_schedule.html', context)
+    response = render(request, 'booking/game_management/individual_schedule.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @cafe_owner_required
@@ -1172,7 +1218,12 @@ def advanced_schedule_management(request, game_id):
         }
     }
     
-    return render(request, 'booking/game_management/advanced_schedule.html', context)
+    response = render(request, 'booking/game_management/advanced_schedule.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @cafe_owner_required

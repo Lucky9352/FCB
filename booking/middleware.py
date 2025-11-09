@@ -31,3 +31,40 @@ class AutoSlotMaintenanceMiddleware:
         response = self.get_response(request)
         
         return response
+
+
+class NoCacheMiddleware:
+    """
+    Middleware to disable all caching on owner and admin pages for real-time updates.
+    Ensures that all data is always fresh and up-to-date.
+    """
+    
+    def __init__(self, get_response):
+        self.get_response = get_response
+    
+    def __call__(self, request):
+        # Process the request
+        response = self.get_response(request)
+        
+        # Apply no-cache headers to owner, admin, and management pages
+        owner_paths = [
+            '/owner/',
+            '/accounts/owner/',
+            '/accounts/cafe-owner/',
+            '/accounts/tapnex/',
+            '/game-management/',
+            '/booking/game-management/',
+        ]
+        
+        # Check if current path matches any owner/admin paths
+        if any(request.path.startswith(path) for path in owner_paths):
+            # Disable all caching for real-time updates
+            response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+            response['Pragma'] = 'no-cache'
+            response['Expires'] = '0'
+            # Additional headers to prevent caching
+            response['X-Accel-Expires'] = '0'
+            
+            logger.debug(f"Applied no-cache headers to: {request.path}")
+        
+        return response

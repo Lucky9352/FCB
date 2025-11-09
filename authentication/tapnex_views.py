@@ -71,7 +71,12 @@ def tapnex_dashboard(request):
         'user': request.user,
     }
     
-    return render(request, 'authentication/tapnex_dashboard.html', context)
+    response = render(request, 'authentication/tapnex_dashboard.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @tapnex_superuser_required
@@ -108,7 +113,12 @@ def commission_settings(request):
         'recent_bookings_count': recent_bookings.count(),
     }
     
-    return render(request, 'authentication/commission_settings.html', context)
+    response = render(request, 'authentication/commission_settings.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @tapnex_superuser_required
@@ -163,7 +173,12 @@ def revenue_reports(request):
         'game_chart_data': json.dumps(game_chart_data),
     }
     
-    return render(request, 'authentication/revenue_reports.html', context)
+    response = render(request, 'authentication/revenue_reports.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @tapnex_superuser_required
@@ -192,7 +207,12 @@ def create_cafe_owner(request):
         'form': form,
     }
     
-    return render(request, 'authentication/create_cafe_owner.html', context)
+    response = render(request, 'authentication/create_cafe_owner.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @tapnex_superuser_required
@@ -245,7 +265,12 @@ def cafe_owner_management(request):
         'commission_breakdown': commission_breakdown,
     }
     
-    return render(request, 'authentication/cafe_owner_management.html', context)
+    response = render(request, 'authentication/cafe_owner_management.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @tapnex_superuser_required
@@ -370,7 +395,12 @@ def system_analytics(request):
         })
     }
     
-    return render(request, 'authentication/system_analytics.html', context)
+    response = render(request, 'authentication/system_analytics.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @tapnex_superuser_required

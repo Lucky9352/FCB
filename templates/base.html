@@ -169,18 +169,17 @@
             display: none;
         }
         
-        /* Desktop navigation visibility */
+        /* Desktop navigation visibility - CRITICAL FIX */
+        .nav-items {
+            display: none; /* Hidden by default (mobile) */
+        }
+        
         @media (min-width: 1024px) {
             .nav-items {
                 display: flex !important;
                 visibility: visible !important;
                 align-items: center;
-            }
-        }
-        
-        @media (max-width: 1023px) {
-            .nav-items {
-                display: none !important;
+                opacity: 1 !important;
             }
         }
         
@@ -471,7 +470,7 @@
                 {% else %}
                     <!-- Primary Navigation Only -->
                     <nav class="space-y-1.5">
-                        <a href="{% url 'home' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium">
+                        <a href="{% url 'home' %}?view=home" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium">
                             <i class="bi bi-house-door text-lg text-primary-400"></i>
                             <span>Home</span>
                         </a>
@@ -580,7 +579,7 @@
                     <h3 class="text-white font-semibold uppercase tracking-wider mb-3" style="font-size: 0.875rem;">Quick Links</h3>
                     <nav>
                         <ul class="space-y-1">
-                            <li><a href="{% url 'home' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Home</a></li>
+                            <li><a href="{% url 'home' %}?view=home" class="text-gray-400 hover:text-white transition-colors text-sm">Home</a></li>
                             <li><a href="{% url 'about' %}" class="text-gray-400 hover:text-white transition-colors text-sm">About Us</a></li>
                             <li><a href="{% url 'contact' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Contact</a></li>
                             {% if not user.is_authenticated %}

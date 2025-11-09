@@ -1,78 +1,182 @@
-{% extends 'base.html' %}
+{% extends 'authentication/owner_base.html' %}
 {% load static %}
 
 {% block title %}Advanced Schedule Management - {{ game.name }}{% endblock %}
+{% block page_title %}Advanced Schedule Management{% endblock %}
+{% block page_subtitle %}{{ game.name }} - Analytics & Optimization{% endblock %}
 
 {% block extra_css %}
 <style>
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.2;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+    
+    .orb-1 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%);
+        top: -100px;
+        right: -100px;
+    }
+    
+    .orb-2 {
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+        bottom: -80px;
+        left: -80px;
+        animation-delay: 7s;
+    }
+    
+    @keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(20px, -20px) scale(1.05); }
+        66% { transform: translate(-20px, 20px) scale(0.95); }
+    }
+    
+    .grid-pattern {
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+    
     .stats-card {
-        @apply bg-white rounded-lg shadow-md p-6 border border-gray-200;
+        background: rgba(30, 41, 59, 0.5);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        padding: 1.5rem;
     }
     
     .stat-value {
-        @apply text-3xl font-bold text-blue-600;
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: #60a5fa;
     }
     
     .stat-label {
-        @apply text-sm text-gray-600 mt-1;
+        font-size: 0.875rem;
+        color: #9ca3af;
+        margin-top: 0.25rem;
     }
     
     .chart-container {
-        @apply bg-white rounded-lg shadow-md p-6 border border-gray-200;
+        background: rgba(30, 41, 59, 0.5);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        padding: 1.5rem;
     }
     
     .suggestion-card {
-        @apply bg-white rounded-lg shadow-md p-6 border-l-4 mb-4;
+        background: rgba(30, 41, 59, 0.5);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        border-left-width: 4px;
+        margin-bottom: 1rem;
     }
     
     .suggestion-high {
-        @apply border-red-400 bg-red-50;
+        border-left-color: #f87171;
+        background: rgba(239, 68, 68, 0.1);
     }
     
     .suggestion-medium {
-        @apply border-yellow-400 bg-yellow-50;
+        border-left-color: #fbbf24;
+        background: rgba(245, 158, 11, 0.1);
     }
     
     .suggestion-low {
-        @apply border-green-400 bg-green-50;
+        border-left-color: #34d399;
+        background: rgba(16, 185, 129, 0.1);
     }
     
     .optimization-section {
-        @apply bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-6 border border-purple-200;
+        background: linear-gradient(to right, rgba(168, 85, 247, 0.1), rgba(99, 102, 241, 0.1));
+        border-radius: 1rem;
+        padding: 1.5rem;
+        border: 1px solid rgba(168, 85, 247, 0.2);
     }
     
     .schedule-config {
-        @apply bg-white rounded-lg shadow-md p-6 border border-gray-200;
+        background: rgba(30, 41, 59, 0.5);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        padding: 1.5rem;
     }
     
     .bar-chart {
-        @apply flex items-end space-x-2 h-32;
+        display: flex;
+        align-items: flex-end;
+        gap: 0.5rem;
+        height: 8rem;
     }
     
     .bar {
-        @apply bg-blue-500 rounded-t flex-1 min-w-0 transition-all duration-300 hover:bg-blue-600;
+        background: #3b82f6;
+        border-radius: 0.5rem 0.5rem 0 0;
+        flex: 1;
+        min-width: 0;
+        transition: all 0.3s;
+    }
+    
+    .bar:hover {
+        background: #2563eb;
     }
     
     .bar-label {
-        @apply text-xs text-gray-600 mt-2 text-center;
+        font-size: 0.75rem;
+        color: #9ca3af;
+        margin-top: 0.5rem;
+        text-align: center;
     }
     
     .loading-spinner {
-        @apply animate-spin h-6 w-6 text-purple-600;
+        animation: spin 1s linear infinite;
+        height: 1.5rem;
+        width: 1.5rem;
+        color: #a855f7;
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-8">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Advanced Schedule Management</h1>
-                    <p class="mt-2 text-gray-600">{{ game.name }} - Analytics & Optimization</p>
-                </div>
+<div class="relative">
+    <!-- Background Elements -->
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="grid-pattern"></div>
+    </div>
+    
+    <div class="relative z-10">
+        <!-- Header Actions -->
+        <div class="mb-6">
+            <div class="flex flex-wrap gap-3">
                 <div class="flex space-x-4">
                     <a href="{% url 'booking:game_management:individual_schedule_management' game_id=game.id %}" 
                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
@@ -252,7 +356,10 @@
         </div>
     </div>
 </div>
+</div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const suggestionsContainer = document.getElementById('suggestionsContainer');

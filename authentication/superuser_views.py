@@ -130,7 +130,12 @@ def superuser_dashboard(request):
         'cafe_owner': cafe_owner,
     }
     
-    return render(request, 'authentication/superuser_dashboard.html', context)
+    response = render(request, 'authentication/superuser_dashboard.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @tapnex_superuser_required
@@ -172,7 +177,12 @@ def manage_users(request):
         'total_users': users.count(),
     }
     
-    return render(request, 'authentication/manage_users.html', context)
+    response = render(request, 'authentication/manage_users.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @tapnex_superuser_required
@@ -195,7 +205,12 @@ def user_detail(request, user_id):
         'is_cafe_owner': hasattr(user, 'cafe_owner_profile'),
     }
     
-    return render(request, 'authentication/user_detail.html', context)
+    response = render(request, 'authentication/user_detail.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @tapnex_superuser_required
@@ -310,7 +325,12 @@ def manage_bookings(request):
         'summary': summary,
     }
     
-    return render(request, 'authentication/manage_bookings.html', context)
+    response = render(request, 'authentication/manage_bookings.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @tapnex_superuser_required
@@ -326,7 +346,12 @@ def booking_detail(request, booking_id):
         'booking': booking,
     }
     
-    return render(request, 'authentication/booking_detail.html', context)
+    response = render(request, 'authentication/booking_detail.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @tapnex_superuser_required
@@ -396,7 +421,12 @@ def manage_games(request):
         'total_games': games.count(),
     }
     
-    return render(request, 'authentication/manage_games.html', context)
+    response = render(request, 'authentication/manage_games.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @tapnex_superuser_required
@@ -428,7 +458,12 @@ def game_detail(request, game_id):
         'game_slots': game_slots,
     }
     
-    return render(request, 'authentication/game_detail.html', context)
+    response = render(request, 'authentication/game_detail.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @tapnex_superuser_required
@@ -529,7 +564,12 @@ def system_settings(request):
         'system_stats': system_stats,
     }
     
-    return render(request, 'authentication/system_settings.html', context)
+    response = render(request, 'authentication/system_settings.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @tapnex_superuser_required
@@ -550,7 +590,12 @@ def database_browser(request):
         'models_list': models_list,
     }
     
-    return render(request, 'authentication/database_browser.html', context)
+    response = render(request, 'authentication/database_browser.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @tapnex_superuser_required

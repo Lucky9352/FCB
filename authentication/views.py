@@ -148,8 +148,11 @@ def home_view(request):
     """Home page view with all available games (public access) - OPTIMIZED"""
     from booking.models import Game
     
-    # Redirect authenticated users to their dashboard
-    if request.user.is_authenticated:
+    # Check if user explicitly wants to view home page (e.g., from footer link)
+    view_home = request.GET.get('view', None) == 'home'
+    
+    # Redirect authenticated users to their dashboard (unless explicitly viewing home)
+    if request.user.is_authenticated and not view_home:
         if request.user.is_superuser or hasattr(request.user, 'tapnex_superuser_profile'):
             return redirect('authentication:tapnex_dashboard')
         elif hasattr(request.user, 'cafe_owner_profile'):

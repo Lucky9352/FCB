@@ -71,6 +71,7 @@ MIDDLEWARE = [
     'authentication.middleware.AdminAccessMiddleware',
     'authentication.middleware.RoleBasedRedirectMiddleware',
     'booking.middleware.AutoSlotMaintenanceMiddleware',  # Auto-generate slots in background
+    'booking.middleware.NoCacheMiddleware',  # Disable caching on owner/admin pages for real-time updates
 ]
 
 ROOT_URLCONF = 'gaming_cafe.urls'

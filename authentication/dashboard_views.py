@@ -25,6 +25,13 @@ def customer_dashboard(request):
     now = timezone.now()
     today = now.date()
     
+    # Auto-update booking statuses for real-time accuracy
+    from booking.booking_service import auto_update_bookings_status
+    customer_bookings_to_check = customer.bookings.filter(
+        status__in=['PENDING', 'CONFIRMED', 'IN_PROGRESS']
+    ).select_related('game_slot')
+    auto_update_bookings_status(customer_bookings_to_check)
+    
     # Optimized query with select_related to avoid N+1 queries
     all_customer_bookings = customer.bookings.select_related('game', 'game_slot')
     
@@ -83,7 +90,12 @@ def customer_dashboard(request):
         'total_hours': int(total_hours),
         'now': now,
     }
-    return render(request, 'authentication/customer_dashboard.html', context)
+    response = render(request, 'authentication/customer_dashboard.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @cafe_owner_required
@@ -104,9 +116,16 @@ def owner_overview(request):
     today = now.date()
     yesterday = today - timedelta(days=1)
     
+    # Auto-update booking statuses for real-time accuracy
+    from booking.booking_service import auto_update_bookings_status
+    bookings_to_check = Booking.objects.filter(
+        status__in=['PENDING', 'CONFIRMED', 'IN_PROGRESS']
+    ).select_related('game_slot')
+    auto_update_bookings_status(bookings_to_check)
+    
     # Real-time stats with single aggregate query (NO CACHE)
     todays_stats = Booking.objects.filter(
-        start_time__date=today
+        game_slot__date=today
     ).aggregate(
         revenue=Sum('owner_payout', filter=Q(payment_status='PAID')),
         total_bookings=Count('id'),
@@ -130,15 +149,14 @@ def owner_overview(request):
     # Available stations (real-time)
     all_games_count = Game.objects.filter(is_active=True).count()
     occupied_games_count = Booking.objects.filter(
-        start_time__lte=now,
-        end_time__gte=now,
+        game_slot__date=today,
         status='IN_PROGRESS'
     ).values('game_id').distinct().count()
     available_stations = all_games_count - occupied_games_count
     
     # Yesterday's revenue for comparison (single query)
     yesterdays_revenue = Booking.objects.filter(
-        start_time__date=yesterday,
+        game_slot__date=yesterday,
         payment_status='PAID'
     ).aggregate(total=Sum('owner_payout'))['total'] or Decimal('0.00')
     
@@ -150,25 +168,26 @@ def owner_overview(request):
     
     # Today's Timeline (optimized - single query with grouping)
     hourly_bookings = Booking.objects.filter(
-        start_time__date=today
-    ).select_related('game', 'customer__user').order_by('start_time')
+        game_slot__date=today
+    ).select_related('game', 'customer__user', 'game_slot').order_by('game_slot__start_time')
     
     # Group bookings by hour in Python (more efficient than 24 separate queries)
     timeline_data = []
     bookings_by_hour = {}
     for booking in hourly_bookings:
-        hour = booking.start_time.hour
-        if hour not in bookings_by_hour:
-            bookings_by_hour[hour] = []
-        bookings_by_hour[hour].append({
-            'id': str(booking.id),
-            'game__name': booking.game.name,
-            'customer__user__first_name': booking.customer.user.first_name,
-            'customer__user__last_name': booking.customer.user.last_name,
-            'status': booking.status,
-            'start_time': booking.start_time,
-            'end_time': booking.end_time
-        })
+        if booking.game_slot:
+            hour = booking.game_slot.start_time.hour
+            if hour not in bookings_by_hour:
+                bookings_by_hour[hour] = []
+            bookings_by_hour[hour].append({
+                'id': str(booking.id),
+                'game__name': booking.game.name,
+                'customer__user__first_name': booking.customer.user.first_name,
+                'customer__user__last_name': booking.customer.user.last_name,
+                'status': booking.status,
+                'start_time': booking.game_slot.start_datetime,
+                'end_time': booking.game_slot.end_datetime
+            })
     
     for hour in range(24):
         hour_start = now.replace(hour=hour, minute=0, second=0, microsecond=0)
@@ -180,9 +199,9 @@ def owner_overview(request):
     
     # Upcoming bookings (real-time with select_related)
     upcoming_bookings = Booking.objects.filter(
-        start_time__gt=now,
+        game_slot__date__gte=today,
         status__in=['CONFIRMED', 'PENDING']
-    ).select_related('game', 'customer__user').order_by('start_time')[:3]
+    ).select_related('game', 'customer__user', 'game_slot').order_by('game_slot__date', 'game_slot__start_time')[:3]
     
     # Recent alerts (real-time)
     alerts = []
@@ -232,7 +251,12 @@ def owner_overview(request):
         'alerts': alerts,
         'now': now,
     }
-    return render(request, 'authentication/owner_overview.html', context)
+    response = render(request, 'authentication/owner_overview.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 # ============================================
@@ -256,7 +280,7 @@ def owner_bookings(request):
     
     bookings_to_check = Booking.objects.filter(
         status__in=['PENDING', 'CONFIRMED', 'IN_PROGRESS']
-    ).select_related('game_slot').only('id', 'status', 'game_slot__start_time', 'game_slot__end_time')
+    ).select_related('game_slot')
     
     auto_update_bookings_status(bookings_to_check)
     
@@ -336,7 +360,12 @@ def owner_bookings(request):
         'search_query': search_query,
         'now': now,
     }
-    return render(request, 'authentication/owner_bookings.html', context)
+    response = render(request, 'authentication/owner_bookings.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 # ============================================
@@ -398,7 +427,12 @@ def owner_games(request):
         'most_popular_game': most_popular_game,
         'now': now,
     }
-    return render(request, 'authentication/owner_games.html', context)
+    response = render(request, 'authentication/owner_games.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 # ============================================
@@ -471,7 +505,12 @@ def owner_customers(request):
         'filter_type': filter_type,
         'search_query': search_query,
     }
-    return render(request, 'authentication/owner_customers.html', context)
+    response = render(request, 'authentication/owner_customers.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 # ============================================
@@ -584,7 +623,12 @@ def owner_revenue(request):
         'start_date': start_date,
         'end_date': end_date,
     }
-    return render(request, 'authentication/owner_revenue.html', context)
+    response = render(request, 'authentication/owner_revenue.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 # ============================================
@@ -690,4 +734,9 @@ def owner_reports(request):
         'start_date': start_date,
         'end_date': today,
     }
-    return render(request, 'authentication/owner_reports.html', context)
+    response = render(request, 'authentication/owner_reports.html', context)
+    # Disable all caching for real-time updates
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response

@@ -38,6 +38,9 @@ urlpatterns = [
     path('customer/dashboard/', RedirectView.as_view(pattern_name='authentication:customer_dashboard', permanent=True)),
     path('owner/dashboard/', RedirectView.as_view(pattern_name='authentication:cafe_owner_dashboard', permanent=True)),
     
+    # Redirect signup to login since Google OAuth handles both
+    path('accounts/signup/', RedirectView.as_view(pattern_name='authentication:customer_login', permanent=False)),
+    
     path('accounts/', include('authentication.urls')),
     path('accounts/', include('allauth.urls')),
     path('booking/', include('booking.urls')),

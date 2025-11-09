@@ -1,20 +1,89 @@
-{% extends 'authentication/owner_dashboard_base.html' %}
+{% extends 'authentication/owner_base.html' %}
 {% load static %}
 
 {% block title %}Add Custom Slots{% endblock %}
 {% block page_title %}Add Custom Time Slots{% endblock %}
 {% block page_subtitle %}Create special slots outside regular schedule{% endblock %}
 
+{% block extra_css %}
+<style>
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.2;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+    
+    .orb-1 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%);
+        top: -100px;
+        right: -100px;
+    }
+    
+    .orb-2 {
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+        bottom: -80px;
+        left: -80px;
+        animation-delay: 7s;
+    }
+    
+    @keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(20px, -20px) scale(1.05); }
+        66% { transform: translate(-20px, 20px) scale(0.95); }
+    }
+    
+    .grid-pattern {
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+    
+    @media (max-width: 768px) {
+        .orb-1, .orb-2 {
+            width: 250px;
+            height: 250px;
+            filter: blur(60px);
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="max-w-4xl mx-auto">
+<div class="relative">
+    <!-- Background Elements -->
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="grid-pattern"></div>
+    </div>
+    
+    <div class="max-w-4xl mx-auto relative z-10">
     <!-- Instructions Card -->
-    <div class="bg-blue-50 border-l-4 border-blue-500 p-6 mb-8 rounded-lg">
-        <div class="flex items-start">
-            <i class="fas fa-info-circle text-blue-500 text-2xl mr-4 mt-1"></i>
+    <div class="owner-card mb-6 animate-fade-in-up" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1)); border-color: rgba(59, 130, 246, 0.3);">
+        <div class="flex items-start gap-4">
+            <i class="bi bi-info-circle text-blue-400 text-2xl mt-1"></i>
             <div>
-                <h3 class="text-lg font-semibold text-blue-900 mb-2">What are Custom Slots?</h3>
-                <p class="text-blue-800 mb-2">Custom slots allow you to add special time slots outside your game's regular schedule.</p>
-                <p class="text-blue-700 text-sm">
+                <h3 class="text-lg font-bold text-white mb-2">What are Custom Slots?</h3>
+                <p class="text-gray-300 mb-2">Custom slots allow you to add special time slots outside your game's regular schedule.</p>
+                <p class="text-gray-400 text-sm">
                     <strong>Examples:</strong> Extended hours for holidays, special events, one-time tournaments, or emergency availability.
                 </p>
             </div>
@@ -22,17 +91,17 @@
     </div>
 
     <!-- Custom Slot Form -->
-    <div class="bg-white rounded-xl shadow-md p-8">
+    <div class="owner-card animate-fade-in-up" style="animation-delay: 0.1s;">
         <form method="post" id="customSlotForm">
             {% csrf_token %}
             
             <!-- Game Selection -->
-            <div class="mb-8">
-                <label class="block text-lg font-semibold text-gray-800 mb-3">
-                    <i class="fas fa-gamepad text-indigo-600 mr-2"></i>Select Game
+            <div class="mb-6">
+                <label class="block text-lg font-bold text-white mb-3">
+                    <i class="bi bi-controller text-indigo-400 mr-2"></i>Select Game
                 </label>
                 <select name="game" id="gameSelect" required
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-lg">
+                        class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-indigo-500">
                     <option value="">Choose a game...</option>
                     {% for game in games %}
                     <option value="{{ game.id }}" 
@@ -43,94 +112,99 @@
                     </option>
                     {% endfor %}
                 </select>
-                <p class="text-sm text-gray-600 mt-2">
-                    <i class="fas fa-lightbulb mr-1"></i>
+                <p class="text-sm text-gray-400 mt-2">
+                    <i class="bi bi-lightbulb mr-1"></i>
                     Only active games are shown
                 </p>
             </div>
 
             <!-- Date Selection -->
-            <div class="mb-8">
-                <label class="block text-lg font-semibold text-gray-800 mb-3">
-                    <i class="fas fa-calendar-alt text-indigo-600 mr-2"></i>Select Date(s)
+            <div class="mb-6">
+                <label class="block text-lg font-bold text-white mb-3">
+                    <i class="bi bi-calendar text-indigo-400 mr-2"></i>Select Date(s)
                 </label>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Start Date</label>
                         <input type="date" name="start_date" id="startDate" required min="{{ today }}"
-                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                               class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">End Date (Optional)</label>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">End Date (Optional)</label>
                         <input type="date" name="end_date" id="endDate" min="{{ today }}"
-                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                               class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-indigo-500">
                         <p class="text-xs text-gray-500 mt-1">Leave empty for single day</p>
                     </div>
                 </div>
             </div>
 
             <!-- Time Selection -->
-            <div class="mb-8">
-                <label class="block text-lg font-semibold text-gray-800 mb-3">
-                    <i class="fas fa-clock text-indigo-600 mr-2"></i>Time Range
+            <div class="mb-6">
+                <label class="block text-lg font-bold text-white mb-3">
+                    <i class="bi bi-clock text-indigo-400 mr-2"></i>Time Range
                 </label>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Start Time</label>
                         <input type="time" name="start_time" id="startTime" required
-                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                               class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">End Time</label>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">End Time</label>
                         <input type="time" name="end_time" id="endTime" required
-                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                               class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-indigo-500">
                     </div>
                 </div>
             </div>
 
             <!-- Slot Duration -->
-            <div class="mb-8">
-                <label class="block text-lg font-semibold text-gray-800 mb-3">
-                    <i class="fas fa-hourglass-half text-indigo-600 mr-2"></i>Slot Duration
+            <div class="mb-6">
+                <label class="block text-lg font-bold text-white mb-3">
+                    <i class="bi bi-hourglass text-indigo-400 mr-2"></i>Slot Duration
                 </label>
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center gap-4">
                     <input type="number" name="slot_duration" id="slotDuration" value="60" min="15" max="480" step="15" required
-                           class="w-32 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-center text-lg font-semibold">
-                    <span class="text-gray-700 font-medium">minutes per slot</span>
+                           class="w-32 px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white text-center text-lg font-bold focus:ring-2 focus:ring-indigo-500">
+                    <span class="text-gray-300 font-medium">minutes per slot</span>
                 </div>
-                <p class="text-sm text-gray-600 mt-2">
-                    <i class="fas fa-info-circle mr-1"></i>
+                <p class="text-sm text-gray-400 mt-2">
+                    <i class="bi bi-info-circle mr-1"></i>
                     Common durations: 30, 60, 90, or 120 minutes
                 </p>
             </div>
 
             <!-- Preview Section -->
-            <div id="previewSection" class="hidden mb-8 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border-2 border-indigo-200">
-                <h3 class="text-lg font-semibold text-indigo-900 mb-3">
-                    <i class="fas fa-eye mr-2"></i>Preview
+            <div id="previewSection" class="hidden mb-6 p-6 rounded-lg" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); border: 2px solid rgba(102, 126, 234, 0.3);">
+                <h3 class="text-lg font-bold text-white mb-3">
+                    <i class="bi bi-eye mr-2"></i>Preview
                 </h3>
-                <div id="previewContent" class="text-gray-700"></div>
+                <div id="previewContent" class="text-gray-300"></div>
             </div>
 
             <!-- Submit Buttons -->
-            <div class="flex justify-between items-center pt-6 border-t-2 border-gray-200">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-3 pt-6 border-t border-white/10">
                 <a href="{% url 'authentication:owner_overview' %}" 
-                   class="px-6 py-3 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors duration-200">
-                    <i class="fas fa-arrow-left mr-2"></i>Cancel
+                   class="btn btn-secondary w-full sm:w-auto">
+                    <i class="bi bi-arrow-left mr-2"></i>Cancel
                 </a>
-                <button type="button" onclick="previewSlots()" 
-                        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 mr-3">
-                    <i class="fas fa-eye mr-2"></i>Preview Slots
-                </button>
-                <button type="submit" id="submitBtn"
-                        class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-medium transition-all duration-200 shadow-lg">
-                    <i class="fas fa-plus-circle mr-2"></i>Create Custom Slots
-                </button>
+                <div class="flex gap-3 w-full sm:w-auto">
+                    <button type="button" onclick="previewSlots()" 
+                            class="btn btn-secondary flex-1 sm:flex-none">
+                        <i class="bi bi-eye mr-2"></i>Preview
+                    </button>
+                    <button type="submit" id="submitBtn"
+                            class="btn btn-primary flex-1 sm:flex-none">
+                        <i class="bi bi-plus-circle mr-2"></i>Create Slots
+                    </button>
+                </div>
             </div>
         </form>
     </div>
 </div>
+</div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
 // Set minimum date to today
 document.getElementById('startDate').min = '{{ today }}';
@@ -177,28 +251,28 @@ function previewSlots() {
     const previewContent = document.getElementById('previewContent');
     
     let slotsHtml = '<div class="space-y-3">';
-    slotsHtml += `<div class="flex items-center space-x-2">`;
-    slotsHtml += `<i class="fas fa-calendar-check text-indigo-600"></i>`;
-    slotsHtml += `<span class="font-semibold">Game:</span> <span>${game.options[game.selectedIndex].text}</span>`;
+    slotsHtml += `<div class="flex items-center gap-2">`;
+    slotsHtml += `<i class="bi bi-calendar-check text-indigo-400"></i>`;
+    slotsHtml += `<span class="font-semibold text-white">Game:</span> <span class="text-gray-300">${game.options[game.selectedIndex].text}</span>`;
     slotsHtml += `</div>`;
-    slotsHtml += `<div class="flex items-center space-x-2">`;
-    slotsHtml += `<i class="fas fa-calendar-days text-indigo-600"></i>`;
-    slotsHtml += `<span class="font-semibold">Dates:</span> <span>${startDate}${endDate !== startDate ? ' to ' + endDate : ''} (${days} day${days > 1 ? 's' : ''})</span>`;
+    slotsHtml += `<div class="flex items-center gap-2">`;
+    slotsHtml += `<i class="bi bi-calendar-range text-indigo-400"></i>`;
+    slotsHtml += `<span class="font-semibold text-white">Dates:</span> <span class="text-gray-300">${startDate}${endDate !== startDate ? ' to ' + endDate : ''} (${days} day${days > 1 ? 's' : ''})</span>`;
     slotsHtml += `</div>`;
-    slotsHtml += `<div class="flex items-center space-x-2">`;
-    slotsHtml += `<i class="fas fa-clock text-indigo-600"></i>`;
-    slotsHtml += `<span class="font-semibold">Time:</span> <span>${startTime} - ${endTime}</span>`;
+    slotsHtml += `<div class="flex items-center gap-2">`;
+    slotsHtml += `<i class="bi bi-clock text-indigo-400"></i>`;
+    slotsHtml += `<span class="font-semibold text-white">Time:</span> <span class="text-gray-300">${startTime} - ${endTime}</span>`;
     slotsHtml += `</div>`;
-    slotsHtml += `<div class="flex items-center space-x-2">`;
-    slotsHtml += `<i class="fas fa-hourglass text-indigo-600"></i>`;
-    slotsHtml += `<span class="font-semibold">Duration:</span> <span>${duration} minutes per slot</span>`;
+    slotsHtml += `<div class="flex items-center gap-2">`;
+    slotsHtml += `<i class="bi bi-hourglass text-indigo-400"></i>`;
+    slotsHtml += `<span class="font-semibold text-white">Duration:</span> <span class="text-gray-300">${duration} minutes per slot</span>`;
     slotsHtml += `</div>`;
-    slotsHtml += `<div class="flex items-center space-x-2 pt-2 border-t border-indigo-200">`;
-    slotsHtml += `<i class="fas fa-list-check text-green-600 text-xl"></i>`;
-    slotsHtml += `<span class="font-bold text-lg text-green-700">Total Slots to Create: ${totalSlots}</span>`;
+    slotsHtml += `<div class="flex items-center gap-2 pt-2 border-t border-white/10">`;
+    slotsHtml += `<i class="bi bi-check-circle text-green-400 text-xl"></i>`;
+    slotsHtml += `<span class="font-bold text-lg text-green-400">Total Slots to Create: ${totalSlots}</span>`;
     slotsHtml += `</div>`;
-    slotsHtml += `<div class="text-sm text-gray-600 mt-2">`;
-    slotsHtml += `<i class="fas fa-info-circle mr-1"></i>${slotsPerDay} slots per day × ${days} day${days > 1 ? 's' : ''}`;
+    slotsHtml += `<div class="text-sm text-gray-400 mt-2">`;
+    slotsHtml += `<i class="bi bi-info-circle mr-1"></i>${slotsPerDay} slots per day × ${days} day${days > 1 ? 's' : ''}`;
     slotsHtml += `</div>`;
     slotsHtml += '</div>';
     
@@ -228,7 +302,7 @@ document.getElementById('customSlotForm').addEventListener('submit', function(e)
     }
     
     // Show loading
-    document.getElementById('submitBtn').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating Slots...';
+    document.getElementById('submitBtn').innerHTML = '<i class="bi bi-hourglass-split animate-spin mr-2"></i>Creating Slots...';
     document.getElementById('submitBtn').disabled = true;
 });
 </script>
