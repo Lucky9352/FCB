@@ -48,33 +48,32 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     
     def get_login_redirect_url(self, request):
         """Redirect users to appropriate dashboard after Google login"""
+        # Check for 'next' parameter first
+        next_url = request.GET.get('next') or request.POST.get('next')
+        
         if request.user.is_authenticated:
             # Ensure customer profile exists for Google OAuth users
-            if not hasattr(request.user, 'customer_profile') and not hasattr(request.user, 'cafe_owner_profile'):
+            if not hasattr(request.user, 'customer_profile') and not hasattr(request.user, 'cafe_owner_profile') and not request.user.is_superuser:
                 Customer.objects.get_or_create(user=request.user)
             
-            if hasattr(request.user, 'customer_profile'):
-                return '/accounts/customer/dashboard/'
+            # Check user role and redirect accordingly
+            if request.user.is_superuser:
+                return '/accounts/tapnex/dashboard/'
             elif hasattr(request.user, 'cafe_owner_profile'):
                 return '/accounts/owner/dashboard/'
-            elif request.user.is_superuser:
-                return '/accounts/tapnex/dashboard/'
+            elif hasattr(request.user, 'customer_profile'):
+                # If there's a next URL, use it, otherwise go to dashboard
+                return next_url if next_url else '/accounts/customer/dashboard/'
             else:
-                # Fallback - create customer profile
+                # Fallback - create customer profile and redirect to dashboard
                 Customer.objects.get_or_create(user=request.user)
-                return '/accounts/customer/dashboard/'
-        return '/accounts/login/'
+                return next_url if next_url else '/accounts/customer/dashboard/'
+        
+        return '/accounts/customer/dashboard/'
     
     def authentication_error(self, request, provider_id, error=None, exception=None, extra_context=None):
-        """Handle authentication errors with user-friendly messages"""
-        if provider_id == 'google':
-            if 'access_denied' in str(error):
-                messages.error(request, 'Google authentication was cancelled. Please try again.')
-            elif 'invalid_request' in str(error):
-                messages.error(request, 'Invalid authentication request. Please try again.')
-            else:
-                messages.error(request, 'Authentication failed. Please try again or contact support.')
-        
+        """Handle authentication errors - redirect without showing messages"""
+        # Don't show any error messages - the custom error page will handle it
         return redirect(reverse('authentication:customer_login'))
 
 
@@ -83,14 +82,24 @@ class CustomAccountAdapter(DefaultAccountAdapter):
     
     def get_login_redirect_url(self, request):
         """Redirect users based on their role after manual login"""
+        # Check for 'next' parameter first
+        next_url = request.GET.get('next') or request.POST.get('next')
+        
         if request.user.is_authenticated:
+            # Check user role and redirect accordingly
             if request.user.is_superuser:
-                return '/admin/'
+                return '/accounts/tapnex/dashboard/'
             elif hasattr(request.user, 'cafe_owner_profile'):
-                return '/owner/dashboard/'
+                return '/accounts/owner/dashboard/'
             elif hasattr(request.user, 'customer_profile'):
-                return '/customer/dashboard/'
-        return '/'
+                # If there's a next URL, use it, otherwise go to dashboard
+                return next_url if next_url else '/accounts/customer/dashboard/'
+            else:
+                # Fallback - create customer profile and redirect to dashboard
+                Customer.objects.get_or_create(user=request.user)
+                return next_url if next_url else '/accounts/customer/dashboard/'
+        
+        return '/accounts/customer/dashboard/'
     
     def add_message(self, request, level, message_tag, message, extra_tags=''):
         """Customize message display - ensure message is a string"""

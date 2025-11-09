@@ -148,6 +148,19 @@ def home_view(request):
     """Home page view with all available games (public access) - OPTIMIZED"""
     from booking.models import Game
     
+    # Redirect authenticated users to their dashboard
+    if request.user.is_authenticated:
+        if request.user.is_superuser or hasattr(request.user, 'tapnex_superuser_profile'):
+            return redirect('authentication:tapnex_dashboard')
+        elif hasattr(request.user, 'cafe_owner_profile'):
+            return redirect('authentication:cafe_owner_dashboard')
+        elif hasattr(request.user, 'customer_profile'):
+            return redirect('authentication:customer_dashboard')
+        else:
+            # Create customer profile for OAuth users and redirect
+            Customer.objects.get_or_create(user=request.user)
+            return redirect('authentication:customer_dashboard')
+    
     # Get all active games (optimized query, real-time for instant updates)
     games = Game.objects.filter(is_active=True).only(
         'id', 'name', 'description', 'image', 'booking_type', 

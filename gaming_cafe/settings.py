@@ -212,7 +212,7 @@ ACCOUNT_ADAPTER = 'authentication.adapters.CustomAccountAdapter'
 SOCIALACCOUNT_ADAPTER = 'authentication.adapters.CustomSocialAccountAdapter'
 
 # Session Configuration
-SESSION_TIMEOUT = 1800  # 30 minutes in seconds
+SESSION_TIMEOUT = 1209600  # 2 weeks (14 days) - Same as cookie age for consistency
 SESSION_COOKIE_AGE = 1209600  # 2 weeks (14 days) - Remember user for 2 weeks
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Keep user logged in even after closing browser

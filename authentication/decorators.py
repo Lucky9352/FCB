@@ -11,9 +11,10 @@ def customer_required(view_func):
     """
     Decorator that requires the user to be a customer.
     Redirects to appropriate login if not authenticated or not a customer.
+    Preserves the 'next' parameter for redirect after login.
     """
     @wraps(view_func)
-    @login_required
+    @login_required(login_url='/accounts/login/')
     def _wrapped_view(request, *args, **kwargs):
         if not hasattr(request.user, 'customer_profile'):
             # If user is authenticated but not a customer, show access denied
@@ -24,9 +25,15 @@ def customer_required(view_func):
                 elif request.user.is_superuser:
                     return redirect('authentication:tapnex_dashboard')
                 else:
-                    return redirect('authentication:customer_login')
+                    # Redirect to customer login with next parameter
+                    from django.http import QueryDict
+                    next_url = request.get_full_path()
+                    return redirect(f'/accounts/login/?next={next_url}')
             else:
-                return redirect('authentication:customer_login')
+                # User not authenticated - redirect to login with next parameter
+                from django.http import QueryDict
+                next_url = request.get_full_path()
+                return redirect(f'/accounts/login/?next={next_url}')
         
         return view_func(request, *args, **kwargs)
     return _wrapped_view
@@ -106,12 +113,15 @@ def admin_access_required(view_func):
 class RoleBasedAccessMixin:
     """
     Mixin for class-based views to handle role-based access control.
+    Preserves the 'next' parameter for redirect after login.
     """
     required_role = None  # 'customer', 'cafe_owner', or 'superuser'
     
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect('authentication:customer_login')
+            # Redirect to login with next parameter
+            next_url = request.get_full_path()
+            return redirect(f'/accounts/login/?next={next_url}')
         
         if self.required_role == 'customer':
             if not hasattr(request.user, 'customer_profile'):
@@ -139,7 +149,9 @@ class RoleBasedAccessMixin:
         elif hasattr(request.user, 'customer_profile'):
             return redirect('authentication:customer_dashboard')
         else:
-            return redirect('authentication:customer_login')
+            # Redirect to login with next parameter
+            next_url = request.get_full_path()
+            return redirect(f'/accounts/login/?next={next_url}')
 
 
 def tapnex_superuser_required(view_func):

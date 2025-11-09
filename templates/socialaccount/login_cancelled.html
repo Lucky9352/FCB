@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Logged Out - TapNex{% endblock %}
+{% block title %}Login Cancelled - TapNex{% endblock %}
 
 {% block content %}
 <style>
@@ -24,15 +24,6 @@
         }
     }
     
-    @keyframes float {
-        0%, 100% {
-            transform: translateY(0px);
-        }
-        50% {
-            transform: translateY(-10px);
-        }
-    }
-    
     .animate-fade-in {
         animation: fadeIn 0.5s ease-out;
     }
@@ -41,38 +32,32 @@
         animation: scaleIn 0.5s ease-out 0.2s both;
     }
     
-    .animate-float {
-        animation: float 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
-    }
-    
     /* Mobile optimizations */
     @media (max-width: 640px) {
-        .logout-container {
+        .cancel-container {
             padding: 1rem;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
+            padding-top: 5rem !important;
         }
         
-        .logout-card {
+        .cancel-card {
             padding: 1.5rem;
         }
         
-        .logout-icon {
+        .cancel-icon {
             width: 4rem;
             height: 4rem;
         }
         
-        .logout-title {
+        .cancel-title {
             font-size: 1.5rem;
             line-height: 2rem;
         }
         
-        .logout-text {
+        .cancel-text {
             font-size: 0.875rem;
         }
         
-        .logout-btn {
+        .cancel-btn {
             padding: 0.875rem 1rem;
             font-size: 0.9375rem;
             touch-action: manipulation;
@@ -81,13 +66,13 @@
     }
     
     /* Enhanced button hover effects */
-    .logout-btn {
+    .cancel-btn {
         transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
     }
     
-    .logout-btn::before {
+    .cancel-btn::before {
         content: '';
         position: absolute;
         top: 50%;
@@ -100,52 +85,52 @@
         transition: width 0.6s, height 0.6s;
     }
     
-    .logout-btn:active::before {
+    .cancel-btn:active::before {
         width: 300px;
         height: 300px;
     }
     
     /* Gradient background */
-    .logout-bg {
+    .cancel-bg {
         background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%);
     }
 </style>
 
-<div class="logout-bg min-h-screen flex items-center justify-center logout-container py-12">
+<div class="cancel-bg min-h-screen flex items-center justify-center cancel-container py-12 pt-24">
     <div class="max-w-md w-full animate-fade-in">
-        <div class="card text-center logout-card">
-            <!-- Success Icon with floating animation -->
-            <div class="w-20 h-20 logout-icon bg-gradient-to-br from-green-500/30 to-green-600/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-scale-in animate-float">
-                <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        <div class="card text-center cancel-card">
+            <!-- Info Icon -->
+            <div class="w-20 h-20 cancel-icon bg-gradient-to-br from-blue-500/30 to-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-scale-in">
+                <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
             </div>
 
-            <h1 class="text-3xl logout-title font-gaming font-bold text-white mb-4">
-                Successfully Logged Out
+            <h1 class="text-3xl cancel-title font-gaming font-bold text-white mb-4">
+                Login Cancelled
             </h1>
             
-            <p class="text-gray-400 logout-text mb-8 leading-relaxed">
-                Thanks for spending some quality time with TapNex today. We hope to see you again soon!
+            <p class="text-gray-400 cancel-text mb-8 leading-relaxed">
+                You decided to cancel the login process. No worries, you can try again anytime!
             </p>
 
-            <!-- Quick Stats or Fun Message -->
-            <div class="bg-gaming-accent/10 rounded-lg p-4 mb-6">
-                <p class="text-sm text-gray-400">
-                    <i class="bi bi-shield-check text-green-500 mr-2"></i>
-                    Your session has been securely ended
+            <!-- Info Message -->
+            <div class="bg-blue-500/10 rounded-lg p-4 mb-6 border border-blue-500/20">
+                <p class="text-sm text-blue-300">
+                    <i class="bi bi-info-circle mr-2"></i>
+                    No account was created or modified
                 </p>
             </div>
 
             <div class="space-y-3">
-                <a href="{% url 'home' %}" class="btn-primary w-full block text-center logout-btn">
-                    <i class="bi bi-house-door mr-2"></i>
-                    Return to Home
+                <a href="{% url 'authentication:customer_login' %}" class="btn-primary w-full flex items-center justify-center text-center cancel-btn">
+                    <i class="bi bi-box-arrow-in-right mr-2"></i>
+                    Try Logging In Again
                 </a>
                 
-                <a href="{% url 'authentication:customer_login' %}" class="btn-secondary w-full block text-center logout-btn">
-                    <i class="bi bi-box-arrow-in-right mr-2"></i>
-                    Log In Again
+                <a href="{% url 'home' %}" class="btn-secondary w-full flex items-center justify-center text-center cancel-btn">
+                    <i class="bi bi-house-door mr-2"></i>
+                    Return to Home
                 </a>
             </div>
 
@@ -176,4 +161,12 @@
         </div>
     </div>
 </div>
+
+<!-- Auto-redirect after 5 seconds -->
+<script>
+    // Optional: Auto-redirect to login page after 5 seconds
+    setTimeout(function() {
+        window.location.href = "{% url 'authentication:customer_login' %}";
+    }, 5000);
+</script>
 {% endblock %}
