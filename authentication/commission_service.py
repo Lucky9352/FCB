@@ -47,16 +47,17 @@ class CommissionCalculator:
         if not end_date:
             end_date = date.today()
         
-        # Get TapNex superuser settings
+        # Get TapNex superuser settings - REQUIRED, no defaults
         try:
             tapnex_user = TapNexSuperuser.objects.first()
-            commission_rate = tapnex_user.commission_rate if tapnex_user else Decimal('10.00')
-            platform_fee = tapnex_user.platform_fee if tapnex_user else Decimal('0.00')
-            platform_fee_type = tapnex_user.platform_fee_type if tapnex_user else 'PERCENT'
+            if not tapnex_user or tapnex_user.commission_rate is None or tapnex_user.platform_fee is None:
+                raise ValueError("Commission rate and platform fee must be configured in superuser settings")
+            
+            commission_rate = tapnex_user.commission_rate
+            platform_fee = tapnex_user.platform_fee
+            platform_fee_type = tapnex_user.platform_fee_type
         except TapNexSuperuser.DoesNotExist:
-            commission_rate = Decimal('10.00')
-            platform_fee = Decimal('0.00')
-            platform_fee_type = 'PERCENT'
+            raise ValueError("TapNex superuser not found. Commission rates must be configured.")
         
         # Get confirmed bookings in date range
         bookings = Booking.objects.filter(
@@ -246,14 +247,16 @@ class RevenueTracker:
             status='PENDING'
         ).count()
         
-        # Get commission settings
+        # Get commission settings - REQUIRED, no defaults
         try:
             tapnex_user = TapNexSuperuser.objects.first()
-            commission_rate = tapnex_user.commission_rate if tapnex_user else Decimal('10.00')
-            platform_fee = tapnex_user.platform_fee if tapnex_user else Decimal('0.00')
+            if not tapnex_user or tapnex_user.commission_rate is None or tapnex_user.platform_fee is None:
+                raise ValueError("Commission rate and platform fee must be configured in superuser settings")
+            
+            commission_rate = tapnex_user.commission_rate
+            platform_fee = tapnex_user.platform_fee
         except TapNexSuperuser.DoesNotExist:
-            commission_rate = Decimal('10.00')
-            platform_fee = Decimal('0.00')
+            raise ValueError("TapNex superuser not found. Commission rates must be configured.")
         
         # Calculate today's commission
         today_commission = CommissionCalculator.calculate_commission(

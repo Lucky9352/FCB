@@ -25,13 +25,12 @@ from booking.models import Booking, Game
 def tapnex_dashboard(request):
     """TapNex superuser main dashboard with commission overview and analytics"""
     
-    # Get or create TapNex superuser profile
+    # Get or create TapNex superuser profile (NO defaults for commission/platform fee)
     tapnex_user, created = TapNexSuperuser.objects.get_or_create(
         user=request.user,
         defaults={
             'contact_email': request.user.email,
-            'commission_rate': Decimal('10.00'),
-            'platform_fee': Decimal('0.00')
+            # commission_rate and platform_fee must be set manually - no defaults
         }
     )
     

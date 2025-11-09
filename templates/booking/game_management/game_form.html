@@ -3,7 +3,15 @@
 
 {% block title %}{{ title }}{% endblock %}
 {% block page_title %}{{ title }}{% endblock %}
-{% block page_subtitle %}Configure your game with schedule, pricing, and booking options{% endblock %}
+{% block page_subtitle %}{% if game %}Update game settings and configuration{% else %}Configure your game with schedule, pricing, and booking options{% endif %}{% endblock %}
+
+{% block header_actions %}
+{% if game %}
+<a href="{% url 'booking:game_management:game_detail' game.id %}" class="flex w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-600 hover:bg-gray-700 items-center justify-center text-white transition-all flex-shrink-0">
+    <i class="bi bi-arrow-left text-sm"></i>
+</a>
+{% endif %}
+{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -57,12 +65,38 @@
     }
     
     .form-section {
-        background: rgba(30, 41, 59, 0.5);
+        background: rgba(30, 41, 59, 0.6);
         backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 1.5rem;
-        padding: 1.5rem;
+        padding: 2rem;
         margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .form-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #667eea, #a855f7);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .form-section:hover::before {
+        opacity: 1;
+    }
+    
+    .form-section:hover {
+        border-color: rgba(102, 126, 234, 0.3);
+        background: rgba(30, 41, 59, 0.7);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
     
     .form-group {
@@ -71,28 +105,52 @@
     
     .form-label {
         display: block;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: rgba(255, 255, 255, 0.9);
-        margin-bottom: 0.5rem;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.95);
+        margin-bottom: 0.625rem;
+        letter-spacing: 0.01em;
+    }
+    
+    .form-label i {
+        margin-right: 0.375rem;
+        opacity: 0.8;
     }
     
     .form-input, .form-select, .form-textarea {
         width: 100%;
-        padding: 0.75rem 1rem;
+        padding: 0.875rem 1.125rem;
         background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 0.75rem;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.875rem;
         color: white;
-        font-size: 0.875rem;
-        transition: all 0.2s;
+        font-size: 0.9375rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 500;
+    }
+    
+    .form-input:hover, .form-select:hover, .form-textarea:hover {
+        border-color: rgba(102, 126, 234, 0.3);
+        background: rgba(255, 255, 255, 0.07);
     }
     
     .form-input:focus, .form-select:focus, .form-textarea:focus {
         outline: none;
-        border-color: rgba(102, 126, 234, 0.5);
-        background: rgba(255, 255, 255, 0.08);
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        border-color: rgba(102, 126, 234, 0.6);
+        background: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15), 0 4px 12px rgba(102, 126, 234, 0.2);
+        transform: translateY(-1px);
+    }
+    
+    .form-input::placeholder, .form-textarea::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Dark theme for select options */
+    select option {
+        background-color: #1e293b;
+        color: #ffffff;
+        padding: 8px;
     }
     
     .form-help {
@@ -116,17 +174,25 @@
     .checkbox-item {
         display: flex;
         align-items: center;
-        padding: 0.75rem;
+        padding: 1rem;
         background: rgba(255, 255, 255, 0.05);
         border: 2px solid rgba(255, 255, 255, 0.1);
-        border-radius: 0.75rem;
-        transition: all 0.2s;
+        border-radius: 0.875rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer;
+        position: relative;
     }
     
     .checkbox-item:hover {
-        background: rgba(102, 126, 234, 0.1);
-        border-color: rgba(102, 126, 234, 0.3);
+        background: rgba(102, 126, 234, 0.15);
+        border-color: rgba(102, 126, 234, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+    
+    .checkbox-item:has(input:checked) {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(168, 85, 247, 0.2));
+        border-color: rgba(102, 126, 234, 0.5);
     }
     
     .checkbox-input {
@@ -184,6 +250,79 @@
         margin-bottom: 0.5rem;
     }
     
+    /* Section Headers */
+    .form-section h2 {
+        position: relative;
+        padding-bottom: 0.75rem;
+        margin-bottom: 1.5rem !important;
+    }
+    
+    .form-section h2::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, #667eea, #a855f7);
+        border-radius: 2px;
+    }
+    
+    /* Stat Cards */
+    .stat-card-mini {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card-mini::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, currentColor, transparent);
+        opacity: 0.5;
+    }
+    
+    .stat-card-mini:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Button Enhancements */
+    .btn {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 600;
+        letter-spacing: 0.01em;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .btn:active {
+        transform: translateY(0);
+    }
+    
+    /* Info Box Enhancement */
+    .info-box {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .info-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, #667eea, #a855f7);
+    }
+    
     @media (max-width: 768px) {
         .orb-1, .orb-2 {
             width: 250px;
@@ -193,6 +332,14 @@
         
         .checkbox-group {
             grid-template-columns: 1fr;
+        }
+        
+        .form-section {
+            padding: 1.5rem;
+        }
+        
+        .form-section h2 {
+            font-size: 1.125rem;
         }
     }
 </style>
@@ -209,7 +356,62 @@
     
     <div class="relative z-10">
 
-        <form method="post" id="gameForm">
+        <!-- Form Messages -->
+        {% if messages %}
+        <div class="mb-6 space-y-3">
+            {% for message in messages %}
+            <div class="p-4 rounded-lg animate-fade-in-up {% if message.tags == 'success' %}bg-green-500/20 border border-green-500/30 text-green-300{% elif message.tags == 'error' %}bg-red-500/20 border border-red-500/30 text-red-300{% else %}bg-blue-500/20 border border-blue-500/30 text-blue-300{% endif %}">
+                <i class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}x-circle{% else %}info-circle{% endif %} mr-2"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Progress Indicator -->
+        <div class="mb-8 p-6 rounded-2xl" style="background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1);">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-white">Form Progress</h3>
+                <span id="progressText" class="text-sm font-semibold text-indigo-400">0% Complete</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+                <div id="progressBarFill" class="h-full rounded-full transition-all duration-500 ease-out" style="width: 0%; background: linear-gradient(90deg, #667eea, #a855f7);"></div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4">
+                <div class="flex items-center gap-2 text-xs">
+                    <div id="step1" class="w-5 h-5 rounded-full border-2 border-gray-500 flex items-center justify-center">
+                        <i class="bi bi-check text-xs hidden"></i>
+                    </div>
+                    <span class="text-gray-400">Basic Info</span>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <div id="step2" class="w-5 h-5 rounded-full border-2 border-gray-500 flex items-center justify-center">
+                        <i class="bi bi-check text-xs hidden"></i>
+                    </div>
+                    <span class="text-gray-400">Booking</span>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <div id="step3" class="w-5 h-5 rounded-full border-2 border-gray-500 flex items-center justify-center">
+                        <i class="bi bi-check text-xs hidden"></i>
+                    </div>
+                    <span class="text-gray-400">Schedule</span>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <div id="step4" class="w-5 h-5 rounded-full border-2 border-gray-500 flex items-center justify-center">
+                        <i class="bi bi-check text-xs hidden"></i>
+                    </div>
+                    <span class="text-gray-400">Pricing</span>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <div id="step5" class="w-5 h-5 rounded-full border-2 border-gray-500 flex items-center justify-center">
+                        <i class="bi bi-check text-xs hidden"></i>
+                    </div>
+                    <span class="text-gray-400">Image</span>
+                </div>
+            </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" id="gameForm">
             {% csrf_token %}
 
             <!-- Basic Information Section -->
@@ -221,36 +423,52 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="form-group">
-              <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
-              {{ form.name }}
+              <label for="{{ form.name.id_for_label }}" class="form-label">
+                <i class="bi bi-controller text-indigo-400"></i> {{ form.name.label }}
+              </label>
+              <div class="relative">
+                {{ form.name }}
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                  <i class="bi bi-pencil-square text-sm"></i>
+                </div>
+              </div>
               {% if form.name.help_text %}
-                <p class="form-help">{{ form.name.help_text }}</p>
+                <p class="form-help"><i class="bi bi-info-circle text-xs"></i> {{ form.name.help_text }}</p>
               {% endif %}
               {% if form.name.errors %}
-                <div class="form-error">{{ form.name.errors.0 }}</div>
+                <div class="form-error"><i class="bi bi-exclamation-circle"></i> {{ form.name.errors.0 }}</div>
               {% endif %}
             </div>
 
             <div class="form-group">
-              <label for="{{ form.capacity.id_for_label }}" class="form-label">{{ form.capacity.label }}</label>
-              {{ form.capacity }}
+              <label for="{{ form.capacity.id_for_label }}" class="form-label">
+                <i class="bi bi-people-fill text-green-400"></i> {{ form.capacity.label }}
+              </label>
+              <div class="relative">
+                {{ form.capacity }}
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                  <i class="bi bi-person-plus text-sm"></i>
+                </div>
+              </div>
               {% if form.capacity.help_text %}
-                <p class="form-help">{{ form.capacity.help_text }}</p>
+                <p class="form-help"><i class="bi bi-info-circle text-xs"></i> {{ form.capacity.help_text }}</p>
               {% endif %}
               {% if form.capacity.errors %}
-                <div class="form-error">{{ form.capacity.errors.0 }}</div>
+                <div class="form-error"><i class="bi bi-exclamation-circle"></i> {{ form.capacity.errors.0 }}</div>
               {% endif %}
             </div>
           </div>
 
           <div class="form-group">
-            <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }}</label>
+            <label for="{{ form.description.id_for_label }}" class="form-label">
+              <i class="bi bi-card-text text-purple-400"></i> {{ form.description.label }}
+            </label>
             {{ form.description }}
             {% if form.description.help_text %}
-              <p class="form-help">{{ form.description.help_text }}</p>
+              <p class="form-help"><i class="bi bi-info-circle text-xs"></i> {{ form.description.help_text }}</p>
             {% endif %}
             {% if form.description.errors %}
-              <div class="form-error">{{ form.description.errors.0 }}</div>
+              <div class="form-error"><i class="bi bi-exclamation-circle"></i> {{ form.description.errors.0 }}</div>
             {% endif %}
           </div>
         </div>
@@ -263,13 +481,20 @@
                 </h2>
 
           <div class="form-group">
-            <label for="{{ form.booking_type.id_for_label }}" class="form-label">{{ form.booking_type.label }}</label>
-            {{ form.booking_type }}
+            <label for="{{ form.booking_type.id_for_label }}" class="form-label">
+              <i class="bi bi-diagram-3 text-green-400"></i> {{ form.booking_type.label }}
+            </label>
+            <div class="relative">
+              {{ form.booking_type }}
+              <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                <i class="bi bi-chevron-down text-sm"></i>
+              </div>
+            </div>
             {% if form.booking_type.help_text %}
-              <p class="form-help">{{ form.booking_type.help_text }}</p>
+              <p class="form-help"><i class="bi bi-info-circle text-xs"></i> {{ form.booking_type.help_text }}</p>
             {% endif %}
             {% if form.booking_type.errors %}
-              <div class="form-error">{{ form.booking_type.errors.0 }}</div>
+              <div class="form-error"><i class="bi bi-exclamation-circle"></i> {{ form.booking_type.errors.0 }}</div>
             {% endif %}
 
                 <div class="info-box">
@@ -295,35 +520,56 @@
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div class="form-group">
-              <label for="{{ form.opening_time.id_for_label }}" class="form-label">{{ form.opening_time.label }}</label>
-              {{ form.opening_time }}
+              <label for="{{ form.opening_time.id_for_label }}" class="form-label">
+                <i class="bi bi-sunrise text-yellow-400"></i> {{ form.opening_time.label }}
+              </label>
+              <div class="relative">
+                {{ form.opening_time }}
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                  <i class="bi bi-clock text-sm"></i>
+                </div>
+              </div>
               {% if form.opening_time.help_text %}
-                <p class="form-help">{{ form.opening_time.help_text }}</p>
+                <p class="form-help"><i class="bi bi-info-circle text-xs"></i> {{ form.opening_time.help_text }}</p>
               {% endif %}
               {% if form.opening_time.errors %}
-                <div class="form-error">{{ form.opening_time.errors.0 }}</div>
+                <div class="form-error"><i class="bi bi-exclamation-circle"></i> {{ form.opening_time.errors.0 }}</div>
               {% endif %}
             </div>
 
             <div class="form-group">
-              <label for="{{ form.closing_time.id_for_label }}" class="form-label">{{ form.closing_time.label }}</label>
-              {{ form.closing_time }}
+              <label for="{{ form.closing_time.id_for_label }}" class="form-label">
+                <i class="bi bi-sunset text-orange-400"></i> {{ form.closing_time.label }}
+              </label>
+              <div class="relative">
+                {{ form.closing_time }}
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                  <i class="bi bi-clock text-sm"></i>
+                </div>
+              </div>
               {% if form.closing_time.help_text %}
-                <p class="form-help">{{ form.closing_time.help_text }}</p>
+                <p class="form-help"><i class="bi bi-info-circle text-xs"></i> {{ form.closing_time.help_text }}</p>
               {% endif %}
               {% if form.closing_time.errors %}
-                <div class="form-error">{{ form.closing_time.errors.0 }}</div>
+                <div class="form-error"><i class="bi bi-exclamation-circle"></i> {{ form.closing_time.errors.0 }}</div>
               {% endif %}
             </div>
 
             <div class="form-group">
-              <label for="{{ form.slot_duration_minutes.id_for_label }}" class="form-label">{{ form.slot_duration_minutes.label }}</label>
-              {{ form.slot_duration_minutes }}
+              <label for="{{ form.slot_duration_minutes.id_for_label }}" class="form-label">
+                <i class="bi bi-hourglass-split text-cyan-400"></i> {{ form.slot_duration_minutes.label }}
+              </label>
+              <div class="relative">
+                {{ form.slot_duration_minutes }}
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                  <i class="bi bi-stopwatch text-sm"></i>
+                </div>
+              </div>
               {% if form.slot_duration_minutes.help_text %}
-                <p class="form-help">{{ form.slot_duration_minutes.help_text }}</p>
+                <p class="form-help"><i class="bi bi-info-circle text-xs"></i> {{ form.slot_duration_minutes.help_text }}</p>
               {% endif %}
               {% if form.slot_duration_minutes.errors %}
-                <div class="form-error">{{ form.slot_duration_minutes.errors.0 }}</div>
+                <div class="form-error"><i class="bi bi-exclamation-circle"></i> {{ form.slot_duration_minutes.errors.0 }}</div>
               {% endif %}
             </div>
           </div>
@@ -376,24 +622,34 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="form-group">
-              <label for="{{ form.private_price.id_for_label }}" class="form-label">{{ form.private_price.label }}</label>
-              {{ form.private_price }}
+              <label for="{{ form.private_price.id_for_label }}" class="form-label">
+                <i class="bi bi-cash-stack text-yellow-400"></i> {{ form.private_price.label }}
+              </label>
+              <div class="relative">
+                <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold pointer-events-none">₹</div>
+                <div style="padding-left: 2rem;">{{ form.private_price }}</div>
+              </div>
               {% if form.private_price.help_text %}
-                <p class="form-help">{{ form.private_price.help_text }}</p>
+                <p class="form-help"><i class="bi bi-info-circle text-xs"></i> {{ form.private_price.help_text }}</p>
               {% endif %}
               {% if form.private_price.errors %}
-                <div class="form-error">{{ form.private_price.errors.0 }}</div>
+                <div class="form-error"><i class="bi bi-exclamation-circle"></i> {{ form.private_price.errors.0 }}</div>
               {% endif %}
             </div>
 
             <div class="form-group" id="sharedPriceGroup">
-              <label for="{{ form.shared_price.id_for_label }}" class="form-label">{{ form.shared_price.label }}</label>
-              {{ form.shared_price }}
+              <label for="{{ form.shared_price.id_for_label }}" class="form-label">
+                <i class="bi bi-currency-rupee text-green-400"></i> {{ form.shared_price.label }}
+              </label>
+              <div class="relative">
+                <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold pointer-events-none">₹</div>
+                <div style="padding-left: 2rem;">{{ form.shared_price }}</div>
+              </div>
               {% if form.shared_price.help_text %}
-                <p class="form-help">{{ form.shared_price.help_text }}</p>
+                <p class="form-help"><i class="bi bi-info-circle text-xs"></i> {{ form.shared_price.help_text }}</p>
               {% endif %}
               {% if form.shared_price.errors %}
-                <div class="form-error">{{ form.shared_price.errors.0 }}</div>
+                <div class="form-error"><i class="bi bi-exclamation-circle"></i> {{ form.shared_price.errors.0 }}</div>
               {% endif %}
             </div>
           </div>
@@ -405,37 +661,157 @@
                 </div>
             </div>
 
-            <!-- Update Options (for existing games) -->
+            <!-- Current Game Info (for existing games) -->
             {% if game %}
             <div class="form-section animate-fade-in-up" style="animation-delay: 0.4s;">
+                <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                    <i class="bi bi-info-circle text-blue-400"></i>
+                    Current Game Information
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="stat-card-mini p-5 rounded-xl" style="background: rgba(59, 130, 246, 0.12); border: 2px solid rgba(59, 130, 246, 0.3); color: #60a5fa;">
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</p>
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(59, 130, 246, 0.2);">
+                                <i class="bi bi-{% if game.is_active %}check-circle{% else %}wrench{% endif %} text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-white">
+                            {% if game.is_active %}
+                                <span class="text-green-400">Active</span>
+                            {% else %}
+                                <span class="text-yellow-400">Maintenance</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="stat-card-mini p-5 rounded-xl" style="background: rgba(16, 185, 129, 0.12); border: 2px solid rgba(16, 185, 129, 0.3); color: #34d399;">
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Bookings</p>
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(16, 185, 129, 0.2);">
+                                <i class="bi bi-calendar-check text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-3xl font-bold text-white">{{ game.bookings.count }}</p>
+                    </div>
+                    
+                    <div class="stat-card-mini p-5 rounded-xl" style="background: rgba(168, 85, 247, 0.12); border: 2px solid rgba(168, 85, 247, 0.3); color: #c084fc;">
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Active Slots</p>
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(168, 85, 247, 0.2);">
+                                <i class="bi bi-clock-history text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-3xl font-bold text-white">{{ active_slots_count|default:0 }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Update Options -->
+            <div class="form-section animate-fade-in-up" style="animation-delay: 0.45s;">
                 <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
                     <i class="bi bi-arrow-repeat text-orange-400"></i>
                     Update Options
                 </h2>
 
-            <div class="form-group">
-              <div class="flex items-center">
-                {{ form.regenerate_slots }}
-                <label for="{{ form.regenerate_slots.id_for_label }}" class="ml-2 text-sm text-gray-700">{{ form.regenerate_slots.label }}</label>
-              </div>
-              {% if form.regenerate_slots.help_text %}
-                <p class="form-help">{{ form.regenerate_slots.help_text }}</p>
-              {% endif %}
-              {% if form.regenerate_slots.errors %}
-                <div class="form-error">{{ form.regenerate_slots.errors.0 }}</div>
-              {% endif %}
-            </div>
+                <div class="p-4 rounded-lg mb-4" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3);">
+                    <div class="flex items-start gap-3">
+                        <i class="bi bi-check-circle text-green-400 text-xl mt-1"></i>
+                        <div>
+                            <h4 class="font-semibold text-green-300 mb-2">Automatic Updates</h4>
+                            <p class="text-sm text-gray-300">
+                                • <strong>Capacity changes:</strong> Automatically updates all future slots<br>
+                                • <strong>Schedule changes:</strong> Automatically regenerates slots when you change opening/closing time, slot duration, or available days<br>
+                                • Existing bookings are always preserved
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="flex items-center p-4 rounded-lg cursor-pointer hover:bg-white/5 transition-all" style="background: rgba(255, 255, 255, 0.03); border: 2px solid rgba(255, 255, 255, 0.1);">
+                        {{ form.regenerate_slots }}
+                        <label for="{{ form.regenerate_slots.id_for_label }}" class="ml-3 cursor-pointer">
+                            <span class="text-base font-semibold text-white">{{ form.regenerate_slots.label }}</span>
+                            {% if form.regenerate_slots.help_text %}
+                                <p class="text-xs text-gray-400 mt-1">{{ form.regenerate_slots.help_text }}</p>
+                            {% endif %}
+                        </label>
+                    </div>
+                    {% if form.regenerate_slots.errors %}
+                        <div class="form-error">{{ form.regenerate_slots.errors.0 }}</div>
+                    {% endif %}
                 </div>
             </div>
             {% endif %}
 
+            <!-- Image Upload Section -->
+            <div class="form-section animate-fade-in-up" style="animation-delay: {% if game %}0.5{% else %}0.4{% endif %}s;">
+                <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                    <i class="bi bi-image text-pink-400"></i>
+                    Game Image
+                </h2>
+                
+                {% if game and game.image %}
+                <div class="mb-4">
+                    <p class="text-sm text-gray-400 mb-2">Current Image:</p>
+                    <div class="relative inline-block">
+                        <img src="{{ game.image.url }}" alt="{{ game.name }}" class="w-48 h-48 object-cover rounded-lg border-2 border-white/10">
+                        <div class="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded text-xs font-bold">
+                            <i class="bi bi-check"></i> Uploaded
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-image-fill text-pink-400"></i> {% if game and game.image %}Change Image{% else %}Upload Image{% endif %} (Optional)
+                    </label>
+                    <div class="relative">
+                        <input type="file" name="image" accept="image/*" id="imageInput" class="hidden">
+                        <label for="imageInput" class="group flex flex-col items-center justify-center gap-4 p-8 rounded-xl border-2 border-dashed border-white/20 hover:border-indigo-500/60 cursor-pointer transition-all duration-300" style="background: rgba(255, 255, 255, 0.03);">
+                            <div class="w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110" style="background: linear-gradient(135deg, #667eea, #a855f7);">
+                                <i class="bi bi-cloud-upload text-3xl text-white"></i>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-white font-semibold text-lg mb-1">Click to upload or drag and drop</p>
+                                <p class="text-sm text-gray-400">PNG, JPG, GIF up to 10MB</p>
+                                <p class="text-xs text-gray-500 mt-2">Recommended: 800x800px or higher</p>
+                            </div>
+                        </label>
+                    </div>
+                    <div id="imagePreview" class="mt-6 hidden">
+                        <p class="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
+                            <i class="bi bi-eye text-indigo-400"></i> New Image Preview:
+                        </p>
+                        <div class="relative inline-block">
+                            <img id="previewImg" class="w-64 h-64 object-cover rounded-xl border-2 border-indigo-500 shadow-lg">
+                            <div class="absolute top-2 right-2 bg-indigo-500 text-white px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
+                                <i class="bi bi-check-circle"></i> Ready
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Form Actions -->
-            <div class="flex justify-end gap-4 animate-fade-in-up" style="animation-delay: 0.5s;">
-                <a href="{% url 'booking:game_management:dashboard' %}" class="btn btn-secondary">
-                    <i class="bi bi-x-circle"></i> Cancel
-                </a>
-                <button type="submit" id="submitBtn" class="btn btn-primary">
-                    <i class="bi bi-check-circle"></i> {{ submit_text }}
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 animate-fade-in-up p-6 rounded-2xl" style="animation-delay: {% if game %}0.6{% else %}0.5{% endif %}s; background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div class="flex flex-wrap gap-3 justify-center sm:justify-start">
+                    <a href="{% if game %}{% url 'authentication:owner_games' %}{% else %}{% url 'booking:game_management:dashboard' %}{% endif %}" class="btn btn-secondary flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all hover:scale-105" style="background: rgba(239, 68, 68, 0.15); border: 2px solid rgba(239, 68, 68, 0.3); color: #fca5a5;">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
+                    {% if game %}
+                    <a href="{% url 'booking:game_management:game_detail' game.id %}" class="btn btn-secondary flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all hover:scale-105" style="background: rgba(59, 130, 246, 0.15); border: 2px solid rgba(59, 130, 246, 0.3); color: #93c5fd;">
+                        <i class="bi bi-eye"></i> View Details
+                    </a>
+                    {% endif %}
+                </div>
+                <button type="submit" id="submitBtn" class="btn btn-primary flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 shadow-lg" style="background: linear-gradient(135deg, #667eea, #a855f7); border: none; color: white;">
+                    <i class="bi bi-check-circle-fill"></i> 
+                    <span id="submitBtnText">{{ submit_text|default:"Save Game" }}</span>
+                    <i class="bi bi-arrow-right ml-1"></i>
                 </button>
             </div>
         </form>
@@ -651,11 +1027,47 @@ function displaySlotPreview(previewSlots, statistics) {
     previewSection.style.display = 'block';
 }
 
+// Image preview functionality
+const imageInput = document.getElementById('imageInput');
+const imagePreview = document.getElementById('imagePreview');
+const previewImg = document.getElementById('previewImg');
+
+if (imageInput) {
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file size (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size must be less than 10MB');
+                imageInput.value = '';
+                return;
+            }
+            
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file');
+                imageInput.value = '';
+                return;
+            }
+            
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                imagePreview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
 // Initialize form
 document.addEventListener('DOMContentLoaded', function() {
     // Set initial state for shared price field
     const bookingTypeSelect = document.getElementById('{{ form.booking_type.id_for_label }}');
-    toggleSharedPriceField(bookingTypeSelect.value);
+    if (bookingTypeSelect) {
+        toggleSharedPriceField(bookingTypeSelect.value);
+    }
     
     // Add event listeners
     bookingTypeSelect.addEventListener('change', function() {
@@ -740,9 +1152,14 @@ document.addEventListener('DOMContentLoaded', function() {
     gameForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
+        // Validate form before submission
+        if (!validateForm()) {
+            return;
+        }
+        
         // Disable submit button
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating Game...';
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split animate-spin mr-2"></i>Creating Game...';
         
         // Submit form via AJAX
         const formData = new FormData(gameForm);
@@ -767,16 +1184,71 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 alert('Error creating game: ' + (data.error || JSON.stringify(data.errors)));
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '{{ submit_text }}';
+                submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> {{ submit_text }}';
             }
         })
         .catch(error => {
             alert('Error: ' + error);
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '{{ submit_text }}';
+            submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> {{ submit_text }}';
         });
     });
+    {% else %}
+    // For updates, show loading state
+    gameForm.addEventListener('submit', function(e) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split animate-spin mr-2"></i>Updating...';
+    });
     {% endif %}
+    
+    // Form validation function
+    function validateForm() {
+        const name = document.getElementById('{{ form.name.id_for_label }}').value.trim();
+        const capacity = document.getElementById('{{ form.capacity.id_for_label }}').value;
+        const openingTime = document.getElementById('{{ form.opening_time.id_for_label }}').value;
+        const closingTime = document.getElementById('{{ form.closing_time.id_for_label }}').value;
+        const privatePrice = document.getElementById('{{ form.private_price.id_for_label }}').value;
+        const bookingType = document.getElementById('{{ form.booking_type.id_for_label }}').value;
+        const sharedPrice = document.getElementById('{{ form.shared_price.id_for_label }}').value;
+        const availableDays = document.querySelectorAll('input[name="{{ form.available_days.html_name }}"]:checked');
+        
+        if (!name) {
+            alert('Please enter a game name');
+            return false;
+        }
+        
+        if (!capacity || capacity < 1) {
+            alert('Please enter a valid capacity (minimum 1)');
+            return false;
+        }
+        
+        if (!openingTime || !closingTime) {
+            alert('Please set opening and closing times');
+            return false;
+        }
+        
+        if (openingTime >= closingTime) {
+            alert('Closing time must be after opening time');
+            return false;
+        }
+        
+        if (!privatePrice || privatePrice <= 0) {
+            alert('Please enter a valid private booking price');
+            return false;
+        }
+        
+        if (bookingType === 'HYBRID' && (!sharedPrice || sharedPrice <= 0)) {
+            alert('Hybrid games require a shared booking price');
+            return false;
+        }
+        
+        if (availableDays.length === 0) {
+            alert('Please select at least one available day');
+            return false;
+        }
+        
+        return true;
+    }
     
     // Cancel button click
     cancelBtn.addEventListener('click', function() {
@@ -888,6 +1360,89 @@ document.addEventListener('DOMContentLoaded', function() {
                 submitBtn.innerHTML = '{{ submit_text }}';
             }, 3000);
         };
+    }
+});
+
+// Progress Tracker
+function updateProgress() {
+    const fields = {
+        step1: ['{{ form.name.id_for_label }}', '{{ form.capacity.id_for_label }}'],
+        step2: ['{{ form.booking_type.id_for_label }}'],
+        step3: ['{{ form.opening_time.id_for_label }}', '{{ form.closing_time.id_for_label }}', '{{ form.slot_duration_minutes.id_for_label }}'],
+        step4: ['{{ form.private_price.id_for_label }}'],
+        step5: ['imageInput']
+    };
+    
+    let totalSteps = 5;
+    let completedSteps = 0;
+    
+    Object.keys(fields).forEach(step => {
+        const stepElement = document.getElementById(step);
+        const checkIcon = stepElement.querySelector('i');
+        const isComplete = fields[step].every(fieldId => {
+            const field = document.getElementById(fieldId);
+            return field && field.value && field.value.trim() !== '';
+        });
+        
+        if (isComplete) {
+            completedSteps++;
+            stepElement.style.background = 'linear-gradient(135deg, #667eea, #a855f7)';
+            stepElement.style.borderColor = '#667eea';
+            checkIcon.classList.remove('hidden');
+            checkIcon.style.color = 'white';
+        } else {
+            stepElement.style.background = 'transparent';
+            stepElement.style.borderColor = '#6b7280';
+            checkIcon.classList.add('hidden');
+        }
+    });
+    
+    const percentage = Math.round((completedSteps / totalSteps) * 100);
+    document.getElementById('progressBarFill').style.width = percentage + '%';
+    document.getElementById('progressText').textContent = percentage + '% Complete';
+    
+    // Update submit button state
+    const submitBtn = document.getElementById('submitBtn');
+    if (percentage === 100) {
+        submitBtn.classList.add('pulse-animation');
+    } else {
+        submitBtn.classList.remove('pulse-animation');
+    }
+}
+
+// Add pulse animation CSS
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.5); }
+        50% { box-shadow: 0 0 40px rgba(168, 85, 247, 0.8); }
+    }
+    .pulse-animation {
+        animation: pulse-glow 2s ease-in-out infinite;
+    }
+`;
+document.head.appendChild(style);
+
+// Listen to all form inputs
+document.querySelectorAll('#gameForm input, #gameForm select, #gameForm textarea').forEach(input => {
+    input.addEventListener('input', updateProgress);
+    input.addEventListener('change', updateProgress);
+});
+
+// Initial progress check
+updateProgress();
+
+// Image preview enhancement
+document.getElementById('imageInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('imagePreview').classList.remove('hidden');
+            updateProgress();
+        };
+        reader.readAsDataURL(file);
     }
 });
 </script>

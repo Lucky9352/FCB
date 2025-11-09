@@ -5,8 +5,33 @@
 {% block page_title %}Games & Stations{% endblock %}
 {% block page_subtitle %}Manage gaming resources and equipment{% endblock %}
 
+{% block header_actions %}
+<button id="refreshBtn" class="flex w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-indigo-600 hover:bg-indigo-700 items-center justify-center text-white transition-all flex-shrink-0">
+    <i class="bi bi-arrow-clockwise text-sm"></i>
+</button>
+{% endblock %}
+
 {% block extra_css %}
 <style>
+    /* Ensure refresh button matches profile badge exactly */
+    #refreshBtn {
+        width: 2.25rem !important;
+        height: 2.25rem !important;
+        min-width: 2.25rem !important;
+        min-height: 2.25rem !important;
+        padding: 0 !important;
+        border: none !important;
+    }
+    
+    @media (min-width: 640px) {
+        #refreshBtn {
+            width: 2.5rem !important;
+            height: 2.5rem !important;
+            min-width: 2.5rem !important;
+            min-height: 2.5rem !important;
+        }
+    }
+    
     .hero-bg {
         position: absolute;
         inset: 0;
@@ -81,12 +106,19 @@
 {% endblock %}
 
 {% block content %}
+{% csrf_token %}
 <div class="relative">
     <!-- Background Elements -->
     <div class="hero-bg">
         <div class="gradient-orb orb-1"></div>
         <div class="gradient-orb orb-2"></div>
         <div class="grid-pattern"></div>
+    </div>
+    
+    <!-- Debug Info (can be removed in production) -->
+    <div class="mb-4 relative z-10 text-xs text-gray-500">
+        <span>🕐 IST Time: {{ now|date:"d M Y, h:i A" }}</span>
+        <span class="ml-4">📅 Today: {{ today }}</span>
     </div>
     
     <!-- Stats -->
@@ -133,11 +165,19 @@
         </div>
     </div>
 
-    <!-- Add Game Button -->
-    <div class="mb-6 relative z-10 animate-fade-in-up" style="animation-delay: 0.5s;">
+    <!-- Add Game Button & Quick Actions -->
+    <div class="mb-6 relative z-10 animate-fade-in-up flex flex-wrap gap-3" style="animation-delay: 0.5s;">
         <a href="{% url 'booking:game_management:game_create' %}" class="btn btn-primary inline-flex items-center gap-2">
             <i class="bi bi-plus-circle"></i>
             <span>Add New Game</span>
+        </a>
+        <a href="{% url 'booking:game_management:dashboard' %}" class="btn btn-secondary inline-flex items-center gap-2">
+            <i class="bi bi-speedometer2"></i>
+            <span>Game Management Dashboard</span>
+        </a>
+        <a href="{% url 'booking:game_management:schedule_management' %}" class="btn btn-secondary inline-flex items-center gap-2">
+            <i class="bi bi-calendar3"></i>
+            <span>Schedule Management</span>
         </a>
     </div>
 
@@ -301,16 +341,142 @@
 {% endblock %}
 
 {% block extra_js %}
+<style>
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .pulse-update {
+        animation: pulseGlow 0.5s ease-in-out;
+    }
+    
+    @keyframes pulseGlow {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; transform: scale(1.02); }
+    }
+</style>
+
 <script>
-    function toggleGameStatus(gameId, isActive) {
+document.addEventListener('DOMContentLoaded', function() {
+    // Helper function to get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // Toggle game status function
+    window.toggleGameStatus = function(gameId, isActive) {
         const action = isActive ? 'maintenance' : 'activate';
         const message = isActive ? 
             'Mark this game as under maintenance? It will be unavailable for bookings.' :
             'Activate this game? It will be available for bookings.';
         
         if (confirm(message)) {
-            alert(`Game ${action} feature will be implemented soon!`);
+            // Get CSRF token
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                             getCookie('csrftoken');
+            
+            console.log('Toggling game status:', gameId, 'Current:', isActive, 'CSRF:', csrftoken);
+            
+            // Make AJAX request to toggle status
+            const url = `/booking/games/manage/${gameId}/toggle-status/`;
+            console.log('Request URL:', url);
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    is_active: !isActive
+                })
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.success) {
+                    // Show success message
+                    const successMsg = document.createElement('div');
+                    successMsg.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-up';
+                    successMsg.innerHTML = `<i class="bi bi-check-circle mr-2"></i>${data.message}`;
+                    document.body.appendChild(successMsg);
+                    
+                    // Remove message after 3 seconds
+                    setTimeout(() => {
+                        successMsg.remove();
+                    }, 3000);
+                    
+                    // Reload page to show updated status
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    console.error('Toggle failed:', data.error);
+                    alert('Error: ' + (data.error || 'Failed to update game status'));
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                alert('Failed to update game status. Error: ' + error.message);
+            });
         }
+    };
+    
+    // Refresh button functionality
+    const refreshButton = document.getElementById('refreshBtn');
+    if (refreshButton) {
+        refreshButton.onclick = function() {
+            const icon = this.querySelector('i');
+            icon.style.animation = 'spin 1s linear infinite';
+            
+            // Reload page
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
+        };
     }
+    
+    // Auto-refresh every 30 seconds for real-time updates
+    let autoRefreshInterval = setInterval(function() {
+        // Only refresh if user is not interacting and page is visible
+        if (!document.hidden) {
+            console.log('Auto-refreshing games page at ' + new Date().toLocaleTimeString());
+            window.location.reload();
+        }
+    }, 30000);
+    
+    // Refresh when page becomes visible again
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            window.location.reload();
+        }
+    });
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() {
+        if (autoRefreshInterval) {
+            clearInterval(autoRefreshInterval);
+        }
+    });
+});
 </script>
 {% endblock %}

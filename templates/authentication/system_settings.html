@@ -22,13 +22,30 @@
         <!-- Commission Settings -->
         <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-8 mb-6">
             <h2 class="text-2xl font-bold text-white mb-6">Commission Settings</h2>
+            
+            <!-- Razorpay Limit Warning -->
+            <div class="bg-yellow-900/30 border border-yellow-600 rounded-lg p-4 mb-6" id="razorpayWarning" style="display: none;">
+                <div class="flex items-start">
+                    <svg class="w-6 h-6 text-yellow-400 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    <div class="flex-1">
+                        <h3 class="text-yellow-300 font-semibold mb-2">⚠️ Razorpay Transfer Limit Warning</h3>
+                        <div id="warningMessages" class="text-yellow-200 text-sm space-y-1"></div>
+                        <p class="text-yellow-200 text-xs mt-2">
+                            Razorpay requires minimum ₹1.00 for transfers. High commission rates may cause transfer failures for low-value bookings.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
             <form method="post">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="update_commission">
                 <div class="grid grid-cols-3 gap-6 mb-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Commission Rate (%)</label>
-                        <input type="number" step="0.01" name="commission_rate" value="{{ tapnex_user.commission_rate }}" class="w-full px-4 py-2 bg-gaming-primary border border-gaming-accent rounded-lg text-white">
+                        <input type="number" step="0.01" name="commission_rate" id="commissionRateInput" value="{{ tapnex_user.commission_rate }}" class="w-full px-4 py-2 bg-gaming-primary border border-gaming-accent rounded-lg text-white">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Platform Fee Type</label>
@@ -53,6 +70,38 @@
             const feeUnit = document.getElementById('fee-unit');
             feeUnit.textContent = this.value === 'PERCENT' ? '(%)' : '(₹)';
         });
+        
+        // Check Razorpay limits in real-time
+        function checkRazorpayLimits() {
+            const commissionRate = parseFloat(document.getElementById('commissionRateInput').value) || 0;
+            const testAmounts = [10, 40, 100]; // Test with common booking amounts
+            const warnings = [];
+            
+            testAmounts.forEach(amount => {
+                const commission = (amount * commissionRate) / 100;
+                const ownerPayout = amount - commission;
+                
+                if (ownerPayout < 1.00) {
+                    warnings.push(
+                        `For ₹${amount.toFixed(2)} bookings, owner receives ₹${ownerPayout.toFixed(2)} (below ₹1.00 minimum)`
+                    );
+                }
+            });
+            
+            const warningDiv = document.getElementById('razorpayWarning');
+            const messagesDiv = document.getElementById('warningMessages');
+            
+            if (warnings.length > 0) {
+                messagesDiv.innerHTML = warnings.map(w => `<p>• ${w}</p>`).join('');
+                warningDiv.style.display = 'block';
+            } else {
+                warningDiv.style.display = 'none';
+            }
+        }
+        
+        // Check on page load and when commission rate changes
+        document.addEventListener('DOMContentLoaded', checkRazorpayLimits);
+        document.getElementById('commissionRateInput').addEventListener('input', checkRazorpayLimits);
         </script>
 
         <!-- Telegram Notification Settings -->
@@ -227,45 +276,97 @@
                         <div class="space-y-3 text-sm">
                             <div class="flex justify-between items-center py-2 border-b border-gaming-accent">
                                 <span class="text-gray-300">Commission Rate:</span>
-                                <span class="text-gaming-highlight font-bold text-lg">7%</span>
+                                <span class="text-gaming-highlight font-bold text-lg">{{ tapnex_user.commission_rate }}%</span>
                             </div>
                             <div class="flex justify-between items-center py-2 border-b border-gaming-accent">
                                 <span class="text-gray-300">Platform Fee:</span>
                                 <span class="text-gaming-highlight font-bold text-lg">{{ tapnex_user.platform_fee }}{% if tapnex_user.platform_fee_type == 'PERCENT' %}%{% else %} ₹{% endif %}</span>
                             </div>
                             
-                            <div class="bg-gaming-secondary rounded-lg p-4 mt-4">
+                            <div class="bg-gaming-secondary rounded-lg p-4 mt-4" id="exampleCalculation">
                                 <p class="text-gray-300 font-semibold mb-3">💡 Example Calculation:</p>
                                 <div class="space-y-2 text-xs">
                                     <div class="flex justify-between text-gray-400">
                                         <span>Booking Amount:</span>
-                                        <span class="text-white font-mono">₹100.00</span>
+                                        <span class="text-white font-mono">₹<span id="baseAmount">100.00</span></span>
                                     </div>
                                     <div class="flex justify-between text-gray-400">
-                                        <span>Platform Fee (2%):</span>
-                                        <span class="text-yellow-400 font-mono">+ ₹2.00</span>
+                                        <span>Platform Fee (<span id="platformFeeRateDisplay">{{ tapnex_user.platform_fee }}</span><span id="platformFeeUnit">{% if tapnex_user.platform_fee_type == 'PERCENT' %}%{% else %} ₹{% endif %}</span>):</span>
+                                        <span class="text-yellow-400 font-mono">+ ₹<span id="platformFeeAmount">0.00</span></span>
                                     </div>
                                     <div class="flex justify-between font-semibold border-t border-gaming-accent pt-2">
                                         <span class="text-blue-400">User Pays:</span>
-                                        <span class="text-blue-400 font-mono">₹102.00</span>
+                                        <span class="text-blue-400 font-mono">₹<span id="totalPays">0.00</span></span>
                                     </div>
                                     
                                     <div class="border-t border-gaming-accent mt-3 pt-3">
                                         <div class="flex justify-between text-gray-400">
                                             <span>Booking Amount:</span>
-                                            <span class="text-white font-mono">₹100.00</span>
+                                            <span class="text-white font-mono">₹<span id="baseAmount2">100.00</span></span>
                                         </div>
                                         <div class="flex justify-between text-gray-400">
-                                            <span>Commission (7%):</span>
-                                            <span class="text-red-400 font-mono">- ₹7.00</span>
+                                            <span>Commission (<span id="commissionRateDisplay">{{ tapnex_user.commission_rate }}</span>%):</span>
+                                            <span class="text-red-400 font-mono">- ₹<span id="commissionAmount">0.00</span></span>
                                         </div>
                                         <div class="flex justify-between font-semibold border-t border-gaming-accent pt-2 mt-2">
                                             <span class="text-green-400">Owner Receives:</span>
-                                            <span class="text-green-400 font-mono text-lg">₹93.00</span>
+                                            <span class="text-green-400 font-mono text-lg">₹<span id="ownerReceives">0.00</span></span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            
+                            <script>
+                            // Real-time calculation update
+                            function updateExampleCalculation() {
+                                const commissionRateInput = document.querySelector('input[name="commission_rate"]');
+                                const platformFeeInput = document.querySelector('input[name="platform_fee"]');
+                                const platformFeeTypeSelect = document.querySelector('select[name="platform_fee_type"]');
+                                
+                                if (!commissionRateInput || !platformFeeInput || !platformFeeTypeSelect) {
+                                    return; // Elements not ready yet
+                                }
+                                
+                                const commissionRate = parseFloat(commissionRateInput.value) || 0;
+                                const platformFee = parseFloat(platformFeeInput.value) || 0;
+                                const platformFeeType = platformFeeTypeSelect.value;
+                                const baseAmount = 100;
+                                
+                                // Calculate platform fee
+                                const platformFeeAmount = platformFeeType === 'PERCENT' ? (baseAmount * platformFee / 100) : platformFee;
+                                const totalPays = baseAmount + platformFeeAmount;
+                                
+                                // Calculate commission (from base amount, not total)
+                                const commissionAmount = baseAmount * commissionRate / 100;
+                                const ownerReceives = baseAmount - commissionAmount;
+                                
+                                // Update display
+                                document.getElementById('platformFeeRateDisplay').textContent = platformFee.toFixed(2);
+                                document.getElementById('platformFeeUnit').textContent = platformFeeType === 'PERCENT' ? '%' : ' ₹';
+                                document.getElementById('platformFeeAmount').textContent = platformFeeAmount.toFixed(2);
+                                document.getElementById('totalPays').textContent = totalPays.toFixed(2);
+                                document.getElementById('commissionRateDisplay').textContent = commissionRate.toFixed(2);
+                                document.getElementById('commissionAmount').textContent = commissionAmount.toFixed(2);
+                                document.getElementById('ownerReceives').textContent = ownerReceives.toFixed(2);
+                            }
+                            
+                            // Wait for DOM to be ready
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const commissionRateInput = document.querySelector('input[name="commission_rate"]');
+                                const platformFeeInput = document.querySelector('input[name="platform_fee"]');
+                                const platformFeeTypeSelect = document.querySelector('select[name="platform_fee_type"]');
+                                
+                                if (commissionRateInput && platformFeeInput && platformFeeTypeSelect) {
+                                    // Add event listeners
+                                    commissionRateInput.addEventListener('input', updateExampleCalculation);
+                                    platformFeeInput.addEventListener('input', updateExampleCalculation);
+                                    platformFeeTypeSelect.addEventListener('change', updateExampleCalculation);
+                                    
+                                    // Initial calculation
+                                    updateExampleCalculation();
+                                }
+                            });
+                            </script>
                         </div>
                     </div>
                     

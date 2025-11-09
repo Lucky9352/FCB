@@ -244,7 +244,7 @@ class RazorpayService:
             logger.error(f"Failed to fetch payment {payment_id}: {str(e)}")
             return None
     
-    def calculate_payment_split(self, booking_amount, commission_rate=7, platform_fee_rate=2):
+    def calculate_payment_split(self, booking_amount, commission_rate, platform_fee_rate, platform_fee_type='PERCENT'):
         """
         Calculate payment split with commission and platform fee
         
@@ -253,18 +253,21 @@ class RazorpayService:
         - Platform keeps: commission + platform_fee
         - Owner receives: booking_amount - commission
         
+        IMPORTANT: Commission is deducted from BASE booking_amount, NOT after adding platform fee
+        
         Args:
-            booking_amount: Base booking amount (Decimal)
-            commission_rate: Commission percentage (default 7%)
-            platform_fee_rate: Platform fee percentage (default 2%)
+            booking_amount: Base booking amount (Decimal) - the subtotal before any fees
+            commission_rate: Commission percentage (must be set by superuser, no default)
+            platform_fee_rate: Platform fee percentage or fixed amount (must be set by superuser)
+            platform_fee_type: 'PERCENT' or 'FIXED' (default: 'PERCENT')
             
         Returns:
             dict: {
                 'booking_amount': Decimal - Base booking amount
                 'platform_fee': Decimal - Platform fee (paid by user)
                 'total_charged': Decimal - Total amount user pays
-                'commission': Decimal - Commission deducted from owner
-                'owner_payout': Decimal - Amount owner receives
+                'commission': Decimal - Commission deducted from owner (from base amount)
+                'owner_payout': Decimal - Amount owner receives (base - commission)
             }
         """
         booking_amount = Decimal(str(booking_amount))
@@ -272,19 +275,23 @@ class RazorpayService:
         platform_fee_rate = Decimal(str(platform_fee_rate))
         
         # Calculate platform fee (paid by user, added to total)
-        platform_fee = (booking_amount * platform_fee_rate / 100).quantize(Decimal('0.01'))
+        if platform_fee_type == 'PERCENT':
+            platform_fee = (booking_amount * platform_fee_rate / 100).quantize(Decimal('0.01'))
+        else:  # FIXED
+            platform_fee = platform_fee_rate.quantize(Decimal('0.01'))
         
-        # Calculate commission (deducted from owner's share)
+        # Calculate commission (deducted from BASE booking_amount, NOT from total with platform fee)
         commission = (booking_amount * commission_rate / 100).quantize(Decimal('0.01'))
         
-        # Total amount user pays
+        # Total amount user pays (base + platform fee)
         total_charged = booking_amount + platform_fee
         
-        # Amount owner receives (booking_amount - commission)
+        # Amount owner receives (base - commission)
+        # Platform fee is NOT deducted from owner, it's paid by customer
         owner_payout = booking_amount - commission
         
-        logger.info(f"Payment Split - Booking: ₹{booking_amount}, Platform Fee: ₹{platform_fee}, "
-                   f"Commission: ₹{commission}, Total Charged: ₹{total_charged}, Owner Payout: ₹{owner_payout}")
+        logger.info(f"Payment Split - Base: ₹{booking_amount}, Platform Fee ({platform_fee_type}): ₹{platform_fee}, "
+                   f"Commission ({commission_rate}%): ₹{commission}, Total Charged: ₹{total_charged}, Owner Payout: ₹{owner_payout}")
         
         return {
             'booking_amount': booking_amount,

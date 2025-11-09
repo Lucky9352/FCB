@@ -124,25 +124,33 @@ def owner_overview(request):
     auto_update_bookings_status(bookings_to_check)
     
     # Real-time stats with single aggregate query (NO CACHE)
+    # Note: owner_payout is the net amount owner receives after commission deduction
+    # Formula: owner_payout = subtotal - commission_amount
+    # User pays: subtotal + platform_fee = total_amount
     todays_stats = Booking.objects.filter(
         game_slot__date=today
     ).aggregate(
         revenue=Sum('owner_payout', filter=Q(payment_status='PAID')),
-        total_bookings=Count('id'),
-        active_sessions=Count('id', filter=Q(
-            start_time__lte=now,
-            end_time__gte=now,
-            status='IN_PROGRESS'
-        )),
-        pending_payments=Count('id', filter=Q(payment_status='PENDING')),
-        customers_today=Count('customer', distinct=True),
+        total_bookings=Count('id', filter=Q(payment_status='PAID')),
+        customers_today=Count('customer', distinct=True, filter=Q(payment_status='PAID')),
         cancelled_today=Count('id', filter=Q(status='CANCELLED'))
     )
     
+    # Calculate pending payments separately (exclude expired reservations)
+    pending_payments = Booking.objects.filter(
+        game_slot__date=today,
+        payment_status='PENDING',
+        reservation_expires_at__gt=now  # Only count non-expired pending payments
+    ).count()
+    
+    # Calculate active sessions separately (can't use aggregate with game_slot datetime comparison)
+    active_sessions = Booking.objects.filter(
+        game_slot__date=today,
+        status='IN_PROGRESS'
+    ).select_related('game_slot').count()
+    
     todays_revenue = todays_stats['revenue'] or Decimal('0.00')
     total_bookings_today = todays_stats['total_bookings'] or 0
-    active_sessions = todays_stats['active_sessions'] or 0
-    pending_payments = todays_stats['pending_payments'] or 0
     customers_today = todays_stats['customers_today'] or 0
     cancelled_today = todays_stats['cancelled_today'] or 0
     
@@ -155,6 +163,7 @@ def owner_overview(request):
     available_stations = all_games_count - occupied_games_count
     
     # Yesterday's revenue for comparison (single query)
+    # Using owner_payout which is the net amount after commission deduction
     yesterdays_revenue = Booking.objects.filter(
         game_slot__date=yesterday,
         payment_status='PAID'
@@ -167,6 +176,7 @@ def owner_overview(request):
         revenue_change = 100 if todays_revenue > 0 else 0
     
     # Today's Timeline (optimized - single query with grouping)
+    # Show ALL bookings for today with ALL statuses (no limit)
     hourly_bookings = Booking.objects.filter(
         game_slot__date=today
     ).select_related('game', 'customer__user', 'game_slot').order_by('game_slot__start_time')
@@ -185,6 +195,7 @@ def owner_overview(request):
                 'customer__user__first_name': booking.customer.user.first_name,
                 'customer__user__last_name': booking.customer.user.last_name,
                 'status': booking.status,
+                'payment_status': booking.payment_status,
                 'start_time': booking.game_slot.start_datetime,
                 'end_time': booking.game_slot.end_datetime
             })
@@ -197,11 +208,19 @@ def owner_overview(request):
             'bookings': bookings_by_hour.get(hour, [])
         })
     
-    # Upcoming bookings (real-time with select_related)
+    # Upcoming bookings (next 10 future bookings with PAID status starting from now)
+    # Only show bookings that are PAID and start time is in the future
     upcoming_bookings = Booking.objects.filter(
         game_slot__date__gte=today,
-        status__in=['CONFIRMED', 'PENDING']
-    ).select_related('game', 'customer__user', 'game_slot').order_by('game_slot__date', 'game_slot__start_time')[:3]
+        payment_status='PAID',
+        status__in=['CONFIRMED', 'IN_PROGRESS']
+    ).select_related('game', 'customer__user', 'game_slot').order_by('game_slot__date', 'game_slot__start_time')
+    
+    # Filter to only show bookings starting from current time onwards
+    upcoming_bookings = [
+        booking for booking in upcoming_bookings 
+        if booking.game_slot.start_datetime > now
+    ][:10]
     
     # Recent alerts (real-time)
     alerts = []
@@ -272,8 +291,9 @@ def owner_bookings(request):
     # Get filter parameters
     status_filter = request.GET.get('status', 'all')
     game_filter = request.GET.get('game', 'all')
-    date_filter = request.GET.get('date', 'all')
+    date_filter = request.GET.get('date', 'month')  # Default to current month
     search_query = request.GET.get('search', '')
+    page = int(request.GET.get('page', 1))
     
     # Auto-update booking statuses only for relevant bookings (performance optimization)
     from booking.booking_service import auto_update_bookings_status
@@ -289,18 +309,22 @@ def owner_bookings(request):
     
     # Apply filters
     if status_filter != 'all':
-        bookings = bookings.filter(status=status_filter.upper())
+        # Special case: 'pending' filters by payment_status, not booking status
+        if status_filter == 'pending':
+            bookings = bookings.filter(payment_status='PENDING')
+        else:
+            bookings = bookings.filter(status=status_filter.upper())
     
     if game_filter != 'all':
         bookings = bookings.filter(game_id=game_filter)
     
     if date_filter == 'today':
-        bookings = bookings.filter(start_time__date=now.date())
+        bookings = bookings.filter(game_slot__date=now.date())
     elif date_filter == 'week':
         week_start = now.date() - timedelta(days=now.weekday())
-        bookings = bookings.filter(start_time__date__gte=week_start)
+        bookings = bookings.filter(game_slot__date__gte=week_start)
     elif date_filter == 'month':
-        bookings = bookings.filter(start_time__year=now.year, start_time__month=now.month)
+        bookings = bookings.filter(game_slot__date__year=now.year, game_slot__date__month=now.month)
     
     if search_query:
         bookings = bookings.filter(
@@ -310,17 +334,43 @@ def owner_bookings(request):
             Q(customer__user__email__icontains=search_query)
         )
     
-    # Order by start time (newest first)
-    bookings = bookings.order_by('-start_time')
+    # Order by game slot date and time (newest first)
+    bookings = bookings.order_by('-game_slot__date', '-game_slot__start_time')
     
-    # Use single aggregate query for counts (real-time stats)
-    stats = bookings.aggregate(
-        confirmed=Count('id', filter=Q(status='CONFIRMED', start_time__gt=now)),
-        in_progress=Count('id', filter=Q(status='IN_PROGRESS')),
-        completed=Count('id', filter=Q(status='COMPLETED')),
+    # Get total count before pagination
+    total_bookings = bookings.count()
+    
+    # Pagination
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    paginator = Paginator(bookings, 25)  # 25 bookings per page
+    
+    try:
+        bookings_page = paginator.page(page)
+    except PageNotAnInteger:
+        bookings_page = paginator.page(1)
+    except EmptyPage:
+        bookings_page = paginator.page(paginator.num_pages)
+    
+    # Use single aggregate query for counts (real-time stats) - BEFORE applying filters
+    # All status counts require payment_status='PAID' except pending_payment
+    all_bookings = Booking.objects.select_related('game_slot')
+    
+    # For confirmed, we need to filter by future bookings (can't use property in aggregate)
+    # So we'll calculate it separately
+    today = now.date()
+    current_time = now.time()
+    
+    stats = all_bookings.aggregate(
+        confirmed=Count('id', filter=Q(
+            status='CONFIRMED', 
+            payment_status='PAID',
+            game_slot__date__gte=today
+        )),
+        in_progress=Count('id', filter=Q(status='IN_PROGRESS', payment_status='PAID')),
+        completed=Count('id', filter=Q(status='COMPLETED', payment_status='PAID')),
         cancelled=Count('id', filter=Q(status='CANCELLED')),
         pending_payment=Count('id', filter=Q(payment_status='PENDING')),
-        no_shows=Count('id', filter=Q(status='NO_SHOW'))
+        no_shows=Count('id', filter=Q(status='NO_SHOW', payment_status='PAID'))
     )
     
     # Get games list (real-time, optimized query)
@@ -345,7 +395,8 @@ def owner_bookings(request):
     
     context = {
         'cafe_owner': cafe_owner,
-        'bookings': bookings[:50],  # Limit to 50 for performance
+        'bookings': bookings_page,
+        'total_bookings': total_bookings,
         'confirmed_bookings': stats['confirmed'] or 0,
         'in_progress_bookings': stats['in_progress'] or 0,
         'completed_bookings': stats['completed'] or 0,
@@ -374,29 +425,33 @@ def owner_bookings(request):
 
 @cafe_owner_required
 def owner_games(request):
-    """Games and stations management section - OPTIMIZED"""
+    """Games and stations management section - OPTIMIZED with IST timezone"""
     cafe_owner = request.user.cafe_owner_profile
+    
+    # Get current time in IST (timezone.now() returns timezone-aware datetime in IST)
     now = timezone.now()
-    today = now.date()
+    today = timezone.localdate()  # Get today's date in IST
     
     # Get all games with optimized query
     games = Game.objects.all().order_by('name')
     
-    # Get all today's bookings in one query
+    # Get all today's bookings in one query (using game_slot)
+    # Only count PAID bookings for accurate revenue tracking
     todays_bookings = Booking.objects.filter(
-        start_time__date=today
-    ).values('game_id', 'status', 'payment_status').annotate(
+        game_slot__date=today,
+        payment_status='PAID'
+    ).values('game_id').annotate(
         count=Count('id'),
-        revenue=Sum('total_amount', filter=Q(payment_status='PAID'))
+        revenue=Sum('owner_payout')
     )
     
     # Create lookup dictionaries for O(1) access
     bookings_by_game = {b['game_id']: b for b in todays_bookings}
     
-    # Get currently occupied games in one query
+    # Get currently occupied games in one query (using game_slot)
+    # IN_PROGRESS status means game is currently being used
     occupied_game_ids = set(Booking.objects.filter(
-        start_time__lte=now,
-        end_time__gte=now,
+        game_slot__date=today,
         status='IN_PROGRESS'
     ).values_list('game_id', flat=True))
     
@@ -411,9 +466,11 @@ def owner_games(request):
     active_games_count = sum(1 for g in games if g.is_active)
     inactive_games_count = len(games) - active_games_count
     
-    # Game analytics (single query)
+    # Game analytics (single query) - using game_slot
+    # Only count PAID bookings for most popular calculation
     most_popular_game = Booking.objects.filter(
-        start_time__date=today
+        game_slot__date=today,
+        payment_status='PAID'
     ).values('game__name').annotate(
         count=Count('id')
     ).order_by('-count').first()
@@ -426,6 +483,7 @@ def owner_games(request):
         'total_games': len(games),
         'most_popular_game': most_popular_game,
         'now': now,
+        'today': today,  # Pass today's date for debugging
     }
     response = render(request, 'authentication/owner_games.html', context)
     # Disable all caching for real-time updates
@@ -604,8 +662,13 @@ def owner_revenue(request):
         payment_status='FAILED'
     ).select_related('game', 'customer').order_by('-created_at')[:20]
     
-    # Commission tracking - Fixed 7% commission rate
-    commission_rate = Decimal('7.00')
+    # Get commission rate from TapNex superuser settings (dynamic, not hardcoded)
+    from authentication.models import TapNexSuperuser
+    try:
+        tapnex_user = TapNexSuperuser.objects.first()
+        commission_rate = tapnex_user.commission_rate if tapnex_user and tapnex_user.commission_rate else Decimal('0.00')
+    except TapNexSuperuser.DoesNotExist:
+        commission_rate = Decimal('0.00')
     
     context = {
         'cafe_owner': cafe_owner,

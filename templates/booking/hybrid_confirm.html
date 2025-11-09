@@ -604,7 +604,7 @@ function fetchSlotAvailability() {
 function updateMaxSpotsAvailable(availableSpots) {
     // Calculate truly available spots (excluding current booking)
     const trulyAvailable = availableSpots;
-    const maxTotal = Math.min(originalSpots + trulyAvailable, 4);
+    const maxTotal = Math.min(originalSpots + trulyAvailable, gameCapacity);
     
     // Update spot selector buttons
     const buttons = document.querySelectorAll('.spot-select-btn');

@@ -226,7 +226,7 @@ def simulate_payment(request, booking_id):
             # Simulate payment processing
             booking.status = 'CONFIRMED'
             booking.payment_id = f'pay_{timezone.now().strftime("%Y%m%d%H%M%S")}'
-            booking.payment_status = 'completed'
+            booking.payment_status = 'PAID'
             booking.save()
             
             # Send confirmation email
@@ -555,10 +555,11 @@ def hybrid_booking_confirm(request, booking_id):
         # Add back the current booking's spots since we're modifying it
         truly_available += booking.spots_booked
         
-        # Max spots = current spots + truly available (capped at 4 total per booking)
+        # Max spots = current spots + truly available (capped at game capacity)
+        game_capacity = booking.game.capacity
         max_additional_spots = min(
             truly_available - booking.spots_booked,
-            4 - booking.spots_booked  # Cap at 4 total spots per booking
+            game_capacity - booking.spots_booked  # Cap at game capacity
         )
     
     context = {
@@ -567,7 +568,7 @@ def hybrid_booking_confirm(request, booking_id):
         'is_hybrid': booking.game.booking_type == 'HYBRID',
         'is_private': booking.booking_type == 'PRIVATE',
         'is_shared': booking.booking_type == 'SHARED',
-        'max_total_spots': min(booking.spots_booked + max_additional_spots, 4) if booking.booking_type == 'SHARED' else booking.spots_booked,
+        'max_total_spots': min(booking.spots_booked + max_additional_spots, game_capacity) if booking.booking_type == 'SHARED' else booking.spots_booked,
         'can_modify_spots': booking.booking_type == 'SHARED' and max_additional_spots > 0,
     }
     
@@ -610,10 +611,11 @@ def update_booking_spots(request, booking_id):
                 'error': 'Must book at least 1 spot'
             }, status=400)
         
-        if new_spots > 4:
+        game_capacity = booking.game.capacity
+        if new_spots > game_capacity:
             return JsonResponse({
                 'success': False,
-                'error': 'Cannot book more than 4 spots per booking'
+                'error': f'Cannot book more than {game_capacity} spots per booking'
             }, status=400)
         
         # Check if spots are available

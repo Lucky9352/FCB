@@ -50,19 +50,27 @@ def create_razorpay_order(request, booking_id):
         # Get TapNex settings for commission/platform fee rates
         tapnex_user = TapNexSuperuser.objects.first()
         if not tapnex_user:
-            logger.error("TapNex superuser not found")
+            logger.error("TapNex superuser not found - commission and platform fee must be configured")
             return JsonResponse({
                 'success': False,
-                'error': 'System configuration error'
+                'error': 'System configuration error: Commission rates not configured. Please contact administrator.'
             }, status=500)
         
+        # Get commission and platform fee rates from superuser settings
+        commission_rate = float(tapnex_user.commission_rate)
+        
+        if tapnex_user.platform_fee_type == 'PERCENT':
+            platform_fee_rate = float(tapnex_user.platform_fee)
+        else:
+            # For FIXED type, pass the fixed amount directly
+            platform_fee_rate = float(tapnex_user.platform_fee)
+        
         # Calculate payment split
-        # Commission is fixed at 7%, platform fee from settings
-        platform_fee_rate = float(tapnex_user.platform_fee) if tapnex_user.platform_fee_type == 'PERCENT' else 2
         split = razorpay_service.calculate_payment_split(
             booking.subtotal,  # Base booking amount
-            commission_rate=7,  # Fixed 7% commission
-            platform_fee_rate=platform_fee_rate
+            commission_rate=commission_rate,  # From superuser settings
+            platform_fee_rate=platform_fee_rate,  # From superuser settings
+            platform_fee_type=tapnex_user.platform_fee_type
         )
         
         # Update booking with calculated amounts
@@ -353,7 +361,7 @@ def handle_payment_authorized(payment_entity):
         
         # Update booking - payment authorized but not captured yet
         booking.razorpay_payment_id = payment_id
-        booking.payment_status = 'AUTHORIZED'
+        booking.payment_status = 'PENDING'  # Keep as PENDING until captured
         booking.notes = f"{booking.notes}\nPayment authorized: ₹{amount/100}"
         booking.save(update_fields=['razorpay_payment_id', 'payment_status', 'notes'])
         

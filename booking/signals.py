@@ -71,10 +71,14 @@ def auto_update_booking_status(sender, instance, created, **kwargs):
                 new_status = 'IN_PROGRESS'
                 status_changed = True
             
-            # 3. Auto-complete in-progress bookings
+            # 3. Auto-complete in-progress bookings (check if verified)
             elif (instance.status == 'IN_PROGRESS' and 
                   now >= end_dt):
-                new_status = 'COMPLETED'
+                # Only mark as COMPLETED if QR was scanned (verified)
+                if instance.is_verified:
+                    new_status = 'COMPLETED'
+                else:
+                    new_status = 'NO_SHOW'
                 status_changed = True
             
             # 4. Mark as NO_SHOW if confirmed but time passed and not verified

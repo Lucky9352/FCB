@@ -40,8 +40,7 @@ class GameCreationForm(forms.ModelForm):
             'capacity': forms.NumberInput(attrs={
                 'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
                 'placeholder': 'Maximum number of players (e.g., 1 for PC, 4 for pool table)',
-                'min': 1,
-                'max': 20
+                'min': 1
             }),
             'booking_type': forms.Select(attrs={
                 'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
@@ -60,9 +59,8 @@ class GameCreationForm(forms.ModelForm):
             'slot_duration_minutes': forms.NumberInput(attrs={
                 'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
                 'placeholder': 'Duration in minutes (e.g., 60 for 1 hour)',
-                'min': 15,
-                'max': 480,
-                'step': 15
+                'min': 1,
+                'step': 1
             }),
             'private_price': forms.NumberInput(attrs={
                 'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
@@ -208,7 +206,8 @@ class GameUpdateForm(GameCreationForm):
         widget=forms.CheckboxInput(attrs={
             'class': 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'
         }),
-        help_text="Check this to regenerate time slots based on new schedule settings. "
+        help_text="Check this to manually regenerate time slots. "
+                  "Slots will auto-regenerate if schedule settings change. "
                   "Existing bookings will be preserved."
     )
     
@@ -216,19 +215,81 @@ class GameUpdateForm(GameCreationForm):
         super().__init__(*args, **kwargs)
         
         # Add regenerate_slots field to the form
-        self.fields['regenerate_slots'].label = 'Regenerate Time Slots'
+        self.fields['regenerate_slots'].label = 'Manually Regenerate Time Slots'
+        
+        # Store original values to detect changes
+        if self.instance and self.instance.pk:
+            self._original_opening_time = self.instance.opening_time
+            self._original_closing_time = self.instance.closing_time
+            self._original_slot_duration = self.instance.slot_duration_minutes
+            self._original_available_days = self.instance.available_days.copy() if self.instance.available_days else []
+            self._original_capacity = self.instance.capacity
+    
+    def _schedule_changed(self):
+        """Check if schedule-related fields have changed"""
+        if not self.instance or not self.instance.pk:
+            return False
+        
+        schedule_changed = (
+            self.cleaned_data.get('opening_time') != self._original_opening_time or
+            self.cleaned_data.get('closing_time') != self._original_closing_time or
+            self.cleaned_data.get('slot_duration_minutes') != self._original_slot_duration or
+            set(self.cleaned_data.get('available_days', [])) != set(self._original_available_days)
+        )
+        
+        return schedule_changed
     
     def save(self, commit=True):
-        """Override save to handle slot regeneration"""
+        """Override save to handle slot regeneration and capacity updates"""
         instance = super(GameCreationForm, self).save(commit=commit)  # Skip GameCreationForm's save
         
         if commit:
-            regenerate = self.cleaned_data.get('regenerate_slots', False)
-            if regenerate:
+            # Check if capacity changed
+            capacity_changed = (
+                hasattr(self, '_original_capacity') and 
+                self.cleaned_data.get('capacity') != self._original_capacity
+            )
+            
+            # Auto-regenerate if schedule changed OR if manually requested
+            regenerate_manual = self.cleaned_data.get('regenerate_slots', False)
+            regenerate_auto = self._schedule_changed()
+            
+            if regenerate_manual or regenerate_auto:
                 # Regenerate slots while preserving existing bookings
                 instance.generate_slots()
+            elif capacity_changed:
+                # If only capacity changed, update existing slot availabilities
+                self._update_slot_capacities(instance)
         
         return instance
+    
+    def _update_slot_capacities(self, game):
+        """Update total_capacity for all existing slot availabilities"""
+        from .models import SlotAvailability
+        from django.utils import timezone
+        
+        # Get all future active slots for this game
+        future_slots = game.slots.filter(
+            date__gte=timezone.now().date(),
+            is_active=True
+        )
+        
+        # Update capacity for each slot's availability
+        updated_count = 0
+        for slot in future_slots:
+            availability, created = SlotAvailability.objects.get_or_create(
+                game_slot=slot,
+                defaults={'total_capacity': game.capacity}
+            )
+            
+            if not created and availability.total_capacity != game.capacity:
+                # Only update if not fully booked as private
+                if not availability.is_private_booked:
+                    availability.total_capacity = game.capacity
+                    availability.save(update_fields=['total_capacity'])
+                    updated_count += 1
+        
+        return updated_count
 
 
 class CustomSlotForm(forms.ModelForm):

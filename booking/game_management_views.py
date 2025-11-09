@@ -244,9 +244,13 @@ def game_update(request, game_id):
     else:
         form = GameUpdateForm(instance=game)
     
+    # Calculate active slots count
+    active_slots_count = game.slots.filter(is_active=True).count()
+    
     context = {
         'form': form,
         'game': game,
+        'active_slots_count': active_slots_count,
         'title': f'Update {game.name}',
         'submit_text': 'Update Game',
     }

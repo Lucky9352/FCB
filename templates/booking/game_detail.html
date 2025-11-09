@@ -1472,7 +1472,7 @@
                 <i class="bi bi-people-fill text-purple-300 text-lg"></i>
                 <span>Or select individual spots</span>
             </div>
-            <div id="spotSelectionGrid" class="grid grid-cols-4 gap-3 mb-6">
+            <div id="spotSelectionGrid" class="grid gap-3 mb-6" style="grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); max-width: 400px;">
                 <!-- Dynamically filled -->
             </div>
         </div>
@@ -1731,7 +1731,7 @@ function createSlotCard(slot) {
     let privatePrice = 0;
     let canBookPrivate = false;
     let canBookShared = false;
-    let maxSpotsPerBooking = 4;
+    let maxSpotsPerBooking = availability.total_capacity || 4;
     
     bookingOptions.forEach(option => {
         if (option.type === 'PRIVATE') {
@@ -1739,7 +1739,7 @@ function createSlotCard(slot) {
             canBookPrivate = option.available;
         } else if (option.type === 'SHARED') {
             sharedPrice = option.price_per_spot || option.price || 0;
-            maxSpotsPerBooking = option.max_spots_per_booking || 4;
+            maxSpotsPerBooking = option.max_spots_per_booking || availability.total_capacity || 4;
             canBookShared = option.available;
         }
     });
@@ -2702,7 +2702,7 @@ function checkModalSlotAvailability(slots) {
     // If available spots decreased below selected spots
     if (selectedSpots > 0 && !isFullTable && availability.available_spots < selectedSpots && availability.available_spots < prev.available_spots) {
         // Update the modal with new availability
-        const newMaxSpots = Math.min(availability.available_spots, 4);
+        const newMaxSpots = Math.min(availability.available_spots, availability.total_capacity || 4);
         maxSpots = newMaxSpots;
         
         // Reset selection

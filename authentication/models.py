@@ -70,18 +70,20 @@ class TapNexSuperuser(models.Model):
     """TapNex Technologies superuser for SaaS management"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='tapnex_superuser_profile')
     
-    # Commission Settings
+    # Commission Settings - MUST be configured by superuser, no defaults
     commission_rate = models.DecimalField(
         max_digits=5, 
         decimal_places=2, 
-        default=10.00,
-        help_text="Commission percentage (e.g., 10.00 for 10%)"
+        null=True,
+        blank=True,
+        help_text="Commission percentage deducted from owner's share (e.g., 7.00 for 7%) - REQUIRED"
     )
     platform_fee = models.DecimalField(
         max_digits=8, 
         decimal_places=2, 
-        default=0.00,
-        help_text="Platform fee - can be fixed amount or percentage based on platform_fee_type"
+        null=True,
+        blank=True,
+        help_text="Platform fee charged to customer - can be fixed amount or percentage based on platform_fee_type - REQUIRED"
     )
     platform_fee_type = models.CharField(
         max_length=10,

@@ -213,7 +213,42 @@ class CommissionSettingsForm(forms.ModelForm):
             if fee < 0:
                 raise ValidationError("Platform fee cannot be negative")
         return fee
-
+    
+    def clean(self):
+        """Validate commission settings against Razorpay limits"""
+        cleaned_data = super().clean()
+        commission_rate = cleaned_data.get('commission_rate')
+        platform_fee = cleaned_data.get('platform_fee')
+        platform_fee_type = cleaned_data.get('platform_fee_type')
+        
+        if commission_rate is not None:
+            from decimal import Decimal
+            
+            # Test with common booking amounts to check if owner_payout will be >= ₹1.00
+            test_amounts = [Decimal('10.00'), Decimal('40.00'), Decimal('100.00')]
+            warnings = []
+            
+            for amount in test_amounts:
+                # Calculate owner payout
+                commission = (amount * Decimal(str(commission_rate))) / Decimal('100')
+                owner_payout = amount - commission
+                
+                if owner_payout < Decimal('1.00'):
+                    warnings.append(
+                        f"⚠️ For ₹{amount} bookings, owner will receive ₹{owner_payout:.2f} "
+                        f"(below Razorpay's ₹1.00 minimum transfer limit)"
+                    )
+            
+            if warnings:
+                warning_msg = (
+                    "WARNING: High commission rate may cause Razorpay transfer failures!\n\n" +
+                    "\n".join(warnings) +
+                    "\n\nRazorpay requires minimum ₹1.00 for transfers. "
+                    "Consider lowering commission rate or increasing minimum booking prices."
+                )
+                raise ValidationError(warning_msg)
+        
+        return cleaned_data
 
 class CafeOwnerManagementForm(forms.ModelForm):
     """Form for TapNex superuser to manage cafe owner account"""

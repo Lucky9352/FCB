@@ -61,7 +61,7 @@ class BookingService:
                 'price': float(game.shared_price),
                 'price_per_spot': float(game.shared_price),
                 'available_spots': restrictions['available_spots'],
-                'max_spots_per_booking': min(restrictions['available_spots'], 4),
+                'max_spots_per_booking': min(restrictions['available_spots'], game.capacity),
                 'description': f'Book individual spot(s) - {restrictions["available_spots"]} remaining',
                 'available': restrictions['can_book_shared'],
                 'icon': '👥',
@@ -157,7 +157,7 @@ class BookingService:
                 'price': float(game.shared_price),
                 'price_per_spot': float(game.shared_price),
                 'available_spots': restrictions['available_spots'],
-                'max_spots_per_booking': min(restrictions['available_spots'], 4),  # Limit to 4 spots per booking
+                'max_spots_per_booking': min(restrictions['available_spots'], game.capacity),
                 'description': f'Book individual spot(s) - {restrictions["available_spots"]} remaining',
                 'available': restrictions['can_book_shared'],
                 'icon': '👥',
@@ -453,7 +453,7 @@ class BookingService:
                 booking.payment_status = 'PAID'
             elif payment_id:
                 booking.payment_id = payment_id
-                booking.payment_status = 'COMPLETED'
+                booking.payment_status = 'PAID'
             
             if razorpay_order_id:
                 booking.razorpay_order_id = razorpay_order_id
@@ -829,9 +829,13 @@ def auto_update_booking_status(booking):
             booking.save(update_fields=['status'])
             status_changed = True
         
-        # 3. Auto-complete in-progress bookings (IN_PROGRESS → COMPLETED)
+        # 3. Auto-complete in-progress bookings (IN_PROGRESS → COMPLETED or NO_SHOW)
         elif booking.status == 'IN_PROGRESS' and now >= end_dt:
-            booking.status = 'COMPLETED'
+            # Only mark as COMPLETED if QR was scanned (verified)
+            if booking.is_verified:
+                booking.status = 'COMPLETED'
+            else:
+                booking.status = 'NO_SHOW'
             booking.save(update_fields=['status'])
             status_changed = True
         

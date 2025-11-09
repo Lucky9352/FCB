@@ -259,11 +259,8 @@ class SlotGenerator:
         end_datetime = datetime.combine(target_date, end_time)
         duration_minutes = (end_datetime - start_datetime).total_seconds() / 60
         
-        if duration_minutes < 15:  # Minimum 15 minutes
-            errors.append("Slot duration must be at least 15 minutes")
-        
-        if duration_minutes > 720:  # Maximum 12 hours
-            errors.append("Slot duration cannot exceed 12 hours")
+        if duration_minutes <= 0:
+            errors.append("Slot duration must be greater than 0 minutes")
         
         return {
             'valid': len(errors) == 0,
